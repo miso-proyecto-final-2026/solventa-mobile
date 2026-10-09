@@ -15,19 +15,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Mientras el repo no tenga el proyecto Android (gradlew), los pasos se omiten con un aviso.
+      - name: Detectar proyecto Android
+        id: android
+        run: |
+          if [ -f ./gradlew ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Aún no hay proyecto Android (falta ./gradlew). Se omiten lint, pruebas y build."
+          fi
+
       - uses: actions/setup-java@v4
+        if: steps.android.outputs.exists == 'true'
         with:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
+        if: steps.android.outputs.exists == 'true'
+      - name: Permiso de ejecución para gradlew
+        if: steps.android.outputs.exists == 'true'
+        run: chmod +x ./gradlew
       - name: Lint
+        if: steps.android.outputs.exists == 'true'
         run: ./gradlew lintDebug
       - name: Pruebas unitarias (JUnit + MockK)
+        if: steps.android.outputs.exists == 'true'
         run: ./gradlew testDebugUnitTest
       - name: Build debug APK
+        if: steps.android.outputs.exists == 'true'
         run: ./gradlew assembleDebug
       - name: Publicar reportes
-        if: always()
+        if: always() && steps.android.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: android-reports
@@ -49,6 +69,8 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
+      - name: Permiso de ejecución para gradlew
+        run: chmod +x ./gradlew
       - name: Habilitar KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules

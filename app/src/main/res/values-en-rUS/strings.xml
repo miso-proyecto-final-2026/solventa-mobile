@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Solventa</string>
+
+    <string name="registro_titulo">Create your account</string>
+    <string name="registro_nombre">First name</string>
+    <string name="registro_apellido">Last name</string>
+    <string name="registro_tipo_documento">Document type</string>
+    <string name="registro_numero_documento">Document number</string>
+    <string name="registro_email">Email address</string>
+    <string name="registro_celular">Mobile phone</string>
+    <string name="registro_password">Password</string>
+    <string name="registro_terminos">I accept the data processing policy</string>
+    <string name="registro_boton">Sign up</string>
+    <string name="registro_reintentar">Retry</string>
+    <string name="registro_cargando">Creating your account…</string>
+
+    <string name="verificacion_titulo">Identity verification</string>
+    <string name="verificacion_mensaje">Account created! Let\'s continue with your identity verification.</string>
+</resources>

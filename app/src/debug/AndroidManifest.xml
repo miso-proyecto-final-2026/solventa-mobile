@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+        Solo en debug: BuildConfig.BASE_URL usa http://10.0.2.2 (backend local en WSL,
+        sin TLS). Desde Android 9 (API 28) el tráfico sin cifrar se bloquea por defecto,
+        lo que aparecía como "sin conexión" en la app. Release sigue restringido porque
+        su BASE_URL ya es https.
+    -->
+    <application android:usesCleartextTraffic="true" />
+</manifest>

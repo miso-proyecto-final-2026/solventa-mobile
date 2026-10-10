@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Solventa</string>
+
+    <string name="registro_titulo">Crea tu cuenta</string>
+    <string name="registro_nombre">Nombres</string>
+    <string name="registro_apellido">Apellidos</string>
+    <string name="registro_tipo_documento">Tipo de documento</string>
+    <string name="registro_numero_documento">Número de documento</string>
+    <string name="registro_email">Correo electrónico</string>
+    <string name="registro_celular">Celular</string>
+    <string name="registro_password">Contraseña</string>
+    <string name="registro_terminos">Acepto la política de tratamiento de datos</string>
+    <string name="registro_boton">Registrarme</string>
+    <string name="registro_reintentar">Reintentar</string>
+    <string name="registro_cargando">Creando tu cuenta…</string>
+
+    <string name="verificacion_titulo">Verificación de identidad</string>
+    <string name="verificacion_mensaje">¡Cuenta creada! Continuemos con la verificación de tu identidad.</string>
+</resources>

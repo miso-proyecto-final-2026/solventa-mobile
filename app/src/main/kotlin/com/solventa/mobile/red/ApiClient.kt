@@ -23,12 +23,15 @@ object ApiClient {
         )
         .build()
 
-    val clienteApi: ClienteApi by lazy {
+    private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
-            .create(ClienteApi::class.java)
     }
+
+    val clienteApi: ClienteApi by lazy { retrofit.create(ClienteApi::class.java) }
+
+    val consentimientoApi: ConsentimientoApi by lazy { retrofit.create(ConsentimientoApi::class.java) }
 }

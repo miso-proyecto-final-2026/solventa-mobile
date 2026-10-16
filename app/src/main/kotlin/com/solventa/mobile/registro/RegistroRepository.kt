@@ -5,6 +5,7 @@ import com.solventa.mobile.red.ClienteApi
 import com.solventa.mobile.red.ErrorResponse
 import com.solventa.mobile.red.RegistroRequest
 import com.solventa.mobile.red.RegistroResponse
+import com.solventa.mobile.sesion.SesionActual
 import java.io.IOException
 import java.util.UUID
 import kotlinx.serialization.json.Json
@@ -14,7 +15,10 @@ import retrofit2.Response
  * Reintenta una sola vez ante un corte de conexión (EOF/reset), reenviando la misma
  * Idempotency-Key para que el backend no cree dos cuentas (lección del idle timeout del NLB, HA01).
  */
-class RegistroRepository(private val api: ClienteApi = ApiClient.clienteApi) {
+class RegistroRepository(
+    private val api: ClienteApi = ApiClient.clienteApi,
+    private val sesion: SesionActual = SesionActual,
+) {
 
     sealed interface Resultado {
         data class Exito(val respuesta: RegistroResponse) : Resultado
@@ -45,8 +49,11 @@ class RegistroRepository(private val api: ClienteApi = ApiClient.clienteApi) {
 
     private fun interpretar(respuesta: Response<RegistroResponse>): Resultado =
         when (respuesta.code()) {
-            201 -> respuesta.body()?.let { Resultado.Exito(it) }
-                ?: Resultado.ErrorRed("Respuesta inesperada del servidor")
+            201 -> respuesta.body()?.let {
+                // El token de la cuenta recién creada abre la sesión para los pasos siguientes (HU06).
+                sesion.iniciar(it.id, it.accessToken)
+                Resultado.Exito(it)
+            } ?: Resultado.ErrorRed("Respuesta inesperada del servidor")
             409 -> Resultado.Duplicado(leerDetalle(respuesta) ?: "No fue posible completar el registro")
             422 -> Resultado.ErrorValidacion(leerDetalle(respuesta) ?: "Revisa los datos ingresados")
             else -> Resultado.ErrorRed("Ocurrió un error inesperado (${respuesta.code()})")

@@ -16,4 +16,29 @@
 
     <string name="verificacion_titulo">Identity verification</string>
     <string name="verificacion_mensaje">Account created! Let\'s continue with your identity verification.</string>
+
+    <string name="consentimiento_titulo">Your permission to use your data</string>
+    <string name="consentimiento_finalidad_titulo">What we use it for</string>
+    <string name="consentimiento_finalidad_v1">To personalize your insurance offers and quotes with your financial and public information.</string>
+    <string name="consentimiento_datos_titulo">What data we look up</string>
+    <string name="consentimiento_datos_v1">Information from your financial profile (income, products and payment behavior) and open data linked to your ID.</string>
+    <string name="consentimiento_fuentes_titulo">Where it comes from</string>
+    <string name="consentimiento_fuentes_v1">Open Finance and Open Data providers, always with your permission.</string>
+    <string name="consentimiento_vigencia_titulo">How long it lasts</string>
+    <string name="consentimiento_vigencia_v1">Until you revoke it. You can keep using Solventa if you do not grant it.</string>
+    <string name="consentimiento_revocar_titulo">Your right to revoke</string>
+    <string name="consentimiento_revocar_v1">You can revoke your permission at any time and we will stop looking up your data.</string>
+    <string name="consentimiento_ver_detalle">View full legal text</string>
+    <string name="consentimiento_ocultar_detalle">Hide legal text</string>
+    <string name="consentimiento_detalle_legal_v1">Provisional legal text (version v1). I authorize Solventa to look up my Open Finance and Open Data information in order to personalize my insurance offers and quotes, in accordance with the personal data processing policy. The authorization remains valid until I revoke it, and I may do so at any time.</string>
+    <string name="consentimiento_aceptar">I agree</string>
+    <string name="consentimiento_aceptar_descripcion">Agree to the use of my Open Finance and Open Data information</string>
+    <string name="consentimiento_rechazar">Not now</string>
+    <string name="consentimiento_cargando">Saving your permission…</string>
+    <string name="consentimiento_otorgado_titulo">Permission saved</string>
+    <string name="consentimiento_otorgado_mensaje">Thank you. We will use your data to personalize your offers.</string>
+    <string name="consentimiento_otorgado_detalle">Text version: %1$s · Date: %2$s</string>
+    <string name="consentimiento_rechazado_titulo">You will continue without sharing data</string>
+    <string name="consentimiento_rechazado_mensaje">Your quotes will use a default profile. You can change this later.</string>
+    <string name="consentimiento_continuar">Continue</string>
 </resources>

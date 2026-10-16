@@ -1,6 +1,8 @@
 package com.solventa.mobile.verificacion
 
 import android.content.Context
+import android.util.Log
+import androidx.camera.core.CameraInfoUnavailableException
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -15,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,20 +60,46 @@ fun CamaraX(
             .build()
     }
     var fallo by remember { mutableStateOf(false) }
+    var proveedor by remember { mutableStateOf<ProcessCameraProvider?>(null) }
 
     LaunchedEffect(frontal) {
         try {
-            val proveedor = proveedorDeCamara(contexto)
+            val camaras = proveedorDeCamara(contexto).also { proveedor = it }
+            val lente = resolverLente(
+                preferida = if (frontal) LenteCamara.FRONTAL else LenteCamara.TRASERA,
+                hayFrontal = camaras.tiene(CameraSelector.DEFAULT_FRONT_CAMERA),
+                hayTrasera = camaras.tiene(CameraSelector.DEFAULT_BACK_CAMERA),
+            )
+            if (lente == null) {
+                Log.w(ETIQUETA, "El dispositivo no tiene ninguna cámara disponible")
+                fallo = true
+                return@LaunchedEffect
+            }
+            if ((lente == LenteCamara.FRONTAL) != frontal) {
+                Log.w(ETIQUETA, "Falta la cámara ${if (frontal) "frontal" else "trasera"}: se usa la otra")
+            }
+            val selector = if (lente == LenteCamara.FRONTAL) {
+                CameraSelector.DEFAULT_FRONT_CAMERA
+            } else {
+                CameraSelector.DEFAULT_BACK_CAMERA
+            }
             val vistaPrevia = Preview.Builder().build().also { it.setSurfaceProvider(vista.surfaceProvider) }
-            val selector = if (frontal) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
-            proveedor.unbindAll()
-            proveedor.bindToLifecycle(ciclo, selector, vistaPrevia, captura)
+            camaras.unbindAll()
+            camaras.bindToLifecycle(ciclo, selector, vistaPrevia, captura)
             fallo = false
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            // Sin esto el error de pantalla no dice nada: la causa queda en el Logcat (sin datos personales).
+            Log.e(ETIQUETA, "No se pudo enlazar la cámara", e)
             fallo = true
         }
+    }
+
+    // Al salir de la pantalla se libera la cámara, para que el siguiente paso pueda abrirla
+    // (las webcams del emulador no admiten dos usos seguidos sin liberarse).
+    DisposableEffect(Unit) {
+        onDispose { proveedor?.unbindAll() }
     }
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -96,6 +125,7 @@ fun CamaraX(
                         }
 
                         override fun onError(excepcion: ImageCaptureException) {
+                            Log.e(ETIQUETA, "No se pudo tomar la foto", excepcion)
                             archivo.delete()
                             fallo = true
                         }
@@ -109,6 +139,15 @@ fun CamaraX(
         }
     }
 }
+
+private const val ETIQUETA = "CamaraX"
+
+private fun ProcessCameraProvider.tiene(selector: CameraSelector): Boolean =
+    try {
+        hasCamera(selector)
+    } catch (e: CameraInfoUnavailableException) {
+        false
+    }
 
 private suspend fun proveedorDeCamara(contexto: Context): ProcessCameraProvider =
     suspendCancellableCoroutine { continuacion ->

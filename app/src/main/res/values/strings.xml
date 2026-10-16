@@ -16,4 +16,29 @@
 
     <string name="verificacion_titulo">Verificación de identidad</string>
     <string name="verificacion_mensaje">¡Cuenta creada! Continuemos con la verificación de tu identidad.</string>
+
+    <string name="consentimiento_titulo">Tu autorización sobre tus datos</string>
+    <string name="consentimiento_finalidad_titulo">Para qué los usamos</string>
+    <string name="consentimiento_finalidad_v1">Personalizar tus ofertas y cotizaciones de seguros con tu información financiera y pública.</string>
+    <string name="consentimiento_datos_titulo">Qué datos consultamos</string>
+    <string name="consentimiento_datos_v1">Información de tu perfil financiero (ingresos, productos y comportamiento de pago) y datos abiertos asociados a tu documento.</string>
+    <string name="consentimiento_fuentes_titulo">De dónde provienen</string>
+    <string name="consentimiento_fuentes_v1">Proveedores de Open Finance y de Open Data, siempre con tu autorización.</string>
+    <string name="consentimiento_vigencia_titulo">Cuánto tiempo dura</string>
+    <string name="consentimiento_vigencia_v1">Hasta que lo revoques. Puedes seguir usando Solventa si no lo otorgas.</string>
+    <string name="consentimiento_revocar_titulo">Tu derecho a revocar</string>
+    <string name="consentimiento_revocar_v1">Puedes revocar tu autorización en cualquier momento y dejaremos de consultar tus datos.</string>
+    <string name="consentimiento_ver_detalle">Ver texto legal completo</string>
+    <string name="consentimiento_ocultar_detalle">Ocultar texto legal</string>
+    <string name="consentimiento_detalle_legal_v1">Texto legal provisional (versión v1). Autorizo a Solventa a consultar mis datos de Open Finance y Open Data con la finalidad de personalizar mis ofertas y cotizaciones de seguros, de acuerdo con la política de tratamiento de datos personales. La autorización permanece vigente hasta que la revoque y puedo hacerlo en cualquier momento.</string>
+    <string name="consentimiento_aceptar">Acepto</string>
+    <string name="consentimiento_aceptar_descripcion">Aceptar el uso de mis datos de Open Finance y Open Data</string>
+    <string name="consentimiento_rechazar">No por ahora</string>
+    <string name="consentimiento_cargando">Registrando tu autorización…</string>
+    <string name="consentimiento_otorgado_titulo">Autorización registrada</string>
+    <string name="consentimiento_otorgado_mensaje">Gracias. Usaremos tus datos para personalizar tus ofertas.</string>
+    <string name="consentimiento_otorgado_detalle">Versión del texto: %1$s · Fecha: %2$s</string>
+    <string name="consentimiento_rechazado_titulo">Continuarás sin compartir datos</string>
+    <string name="consentimiento_rechazado_mensaje">Tus cotizaciones usarán un perfil por defecto. Podrás cambiarlo más adelante.</string>
+    <string name="consentimiento_continuar">Continuar</string>
 </resources>

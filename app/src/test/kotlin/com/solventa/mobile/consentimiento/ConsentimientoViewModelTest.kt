@@ -43,7 +43,7 @@ class ConsentimientoViewModelTest {
     )
 
     @Test
-    fun `al iniciar no hay decision: la aceptacion nunca es implicita`() {
+    fun `al iniciar no hay decision y la aceptacion nunca es implicita`() {
         val estado = ConsentimientoViewModel(repository).uiState.value
 
         assertNull(estado.decision)

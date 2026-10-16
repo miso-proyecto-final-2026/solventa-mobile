@@ -14,9 +14,6 @@
     <string name="registro_reintentar">Reintentar</string>
     <string name="registro_cargando">Creando tu cuenta…</string>
 
-    <string name="verificacion_titulo">Verificación de identidad</string>
-    <string name="verificacion_mensaje">¡Cuenta creada! Continuemos con la verificación de tu identidad.</string>
-
     <string name="consentimiento_titulo">Tu autorización sobre tus datos</string>
     <string name="consentimiento_finalidad_titulo">Para qué los usamos</string>
     <string name="consentimiento_finalidad_v1">Personalizar tus ofertas y cotizaciones de seguros con tu información financiera y pública.</string>
@@ -41,4 +38,57 @@
     <string name="consentimiento_rechazado_titulo">Continuarás sin compartir datos</string>
     <string name="consentimiento_rechazado_mensaje">Tus cotizaciones usarán un perfil por defecto. Podrás cambiarlo más adelante.</string>
     <string name="consentimiento_continuar">Continuar</string>
+
+    <string name="verificacion_titulo">Verificación de identidad</string>
+    <string name="verificacion_progreso">Paso %1$d de %2$d</string>
+    <string name="verificacion_permiso_explicacion">Usamos la cámara para fotografiar tu documento de identidad y tomarte una selfie. Con ellas confirmamos que eres quien dices ser. Las imágenes se envían cifradas y no se guardan en tu galería.</string>
+    <string name="verificacion_permiso_denegado">Sin acceso a la cámara no podemos verificar tu identidad. Habilítalo en Ajustes > Permisos > Cámara y vuelve a esta pantalla.</string>
+    <string name="verificacion_permitir_camara">Permitir cámara</string>
+    <string name="verificacion_abrir_ajustes">Abrir ajustes</string>
+    <string name="verificacion_anverso_titulo">Frente de tu documento</string>
+    <string name="verificacion_anverso_instruccion">Coloca el frente del documento dentro del cuadro, con buena luz y sin reflejos.</string>
+    <string name="verificacion_anverso_camara">Vista de la cámara para el frente del documento</string>
+    <string name="verificacion_reverso_titulo">Reverso de tu documento</string>
+    <string name="verificacion_reverso_instruccion">Ahora fotografía el reverso del documento, con buena luz y sin reflejos.</string>
+    <string name="verificacion_reverso_camara">Vista de la cámara para el reverso del documento</string>
+    <string name="verificacion_selfie_titulo">Selfie con prueba de vida</string>
+    <string name="verificacion_selfie_instruccion">Mira a la cámara con el rostro descubierto y bien iluminado.</string>
+    <string name="verificacion_selfie_camara">Vista de la cámara frontal para tu selfie</string>
+    <string name="verificacion_reto_vida">Gira la cabeza hacia la izquierda y toma la foto.</string>
+    <string name="verificacion_tomar_foto">Tomar foto</string>
+    <string name="verificacion_analizando">Revisando la calidad de la foto…</string>
+    <string name="verificacion_vista_previa">Foto que acabas de tomar</string>
+    <string name="verificacion_usar_foto">Usar esta foto</string>
+    <string name="verificacion_repetir">Repetir foto</string>
+    <string name="verificacion_camara_error">No pudimos usar la cámara. Cierra otras apps que la usen e intenta de nuevo.</string>
+    <string name="verificacion_problema_oscura">La foto está muy oscura. Busca un lugar con más luz y repítela.</string>
+    <string name="verificacion_problema_sobreexpuesta">La foto tiene demasiada luz o reflejos. Evita la luz directa y repítela.</string>
+    <string name="verificacion_problema_borrosa">La foto salió borrosa. Mantén el teléfono firme y repítela.</string>
+    <string name="verificacion_problema_ilegible">No pudimos leer la foto. Intenta tomarla de nuevo.</string>
+    <string name="verificacion_revision_titulo">Revisa tu documento</string>
+    <string name="verificacion_revision_instruccion">Comprueba que se lea bien. Puedes repetir cualquiera de las dos fotos.</string>
+    <string name="verificacion_anverso_revision">Foto del frente del documento</string>
+    <string name="verificacion_reverso_revision">Foto del reverso del documento</string>
+    <string name="verificacion_repetir_anverso">Repetir frente</string>
+    <string name="verificacion_repetir_reverso">Repetir reverso</string>
+    <string name="verificacion_continuar">Continuar</string>
+    <string name="verificacion_enviando">Verificando tu identidad…</string>
+    <string name="verificacion_error_titulo">No pudimos completar el envío</string>
+    <string name="verificacion_reintentar_envio">Reintentar envío</string>
+    <string name="verificacion_error_conexion">No hay conexión. Tus fotos siguen guardadas en este teléfono; revisa tu red y reintenta.</string>
+    <string name="verificacion_error_sesion">Tu sesión no es válida. Vuelve a iniciar el registro.</string>
+    <string name="verificacion_error_imagen">Alguna de las fotos no es válida. Tómalas de nuevo.</string>
+    <string name="verificacion_error_ya_procesada">Tu identidad ya fue verificada o está en revisión.</string>
+    <string name="verificacion_error_inesperado">Ocurrió un error inesperado. Intenta de nuevo.</string>
+    <string name="verificacion_ok_titulo">Identidad verificada</string>
+    <string name="verificacion_ok_mensaje">Listo, ya puedes continuar.</string>
+    <string name="verificacion_rechazo_titulo">No pudimos verificar tu identidad</string>
+    <string name="verificacion_rechazo_mensaje">Los datos no coinciden. Puedes intentarlo de nuevo. Intentos restantes: %1$d.</string>
+    <string name="verificacion_reintentar">Intentar de nuevo</string>
+    <string name="verificacion_revision_caso_titulo">Tu verificación está en revisión</string>
+    <string name="verificacion_revision_caso_mensaje">Estamos tardando más de lo normal. No tienes que hacer nada: te avisaremos cuando tengamos el resultado.</string>
+    <string name="verificacion_bloqueado_titulo">Alcanzaste el máximo de intentos</string>
+    <string name="verificacion_bloqueado_mensaje">Por seguridad, espera unos %1$d minutos antes de intentarlo de nuevo.</string>
+    <string name="inicio_titulo">Todo listo</string>
+    <string name="inicio_mensaje">Tu cuenta está configurada.</string>
 </resources>

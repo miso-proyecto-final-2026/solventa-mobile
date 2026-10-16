@@ -14,9 +14,6 @@
     <string name="registro_reintentar">Retry</string>
     <string name="registro_cargando">Creating your account…</string>
 
-    <string name="verificacion_titulo">Identity verification</string>
-    <string name="verificacion_mensaje">Account created! Let\'s continue with your identity verification.</string>
-
     <string name="consentimiento_titulo">Your permission to use your data</string>
     <string name="consentimiento_finalidad_titulo">What we use it for</string>
     <string name="consentimiento_finalidad_v1">To personalize your insurance offers and quotes with your financial and public information.</string>
@@ -41,4 +38,57 @@
     <string name="consentimiento_rechazado_titulo">You will continue without sharing data</string>
     <string name="consentimiento_rechazado_mensaje">Your quotes will use a default profile. You can change this later.</string>
     <string name="consentimiento_continuar">Continue</string>
+
+    <string name="verificacion_titulo">Identity verification</string>
+    <string name="verificacion_progreso">Step %1$d of %2$d</string>
+    <string name="verificacion_permiso_explicacion">We use the camera to photograph your ID document and take a selfie. This confirms you are who you say you are. Images are sent encrypted and are not saved to your gallery.</string>
+    <string name="verificacion_permiso_denegado">Without camera access we cannot verify your identity. Enable it in Settings > Permissions > Camera and come back to this screen.</string>
+    <string name="verificacion_permitir_camara">Allow camera</string>
+    <string name="verificacion_abrir_ajustes">Open settings</string>
+    <string name="verificacion_anverso_titulo">Front of your document</string>
+    <string name="verificacion_anverso_instruccion">Place the front of the document inside the frame, with good light and no glare.</string>
+    <string name="verificacion_anverso_camara">Camera view for the front of the document</string>
+    <string name="verificacion_reverso_titulo">Back of your document</string>
+    <string name="verificacion_reverso_instruccion">Now photograph the back of the document, with good light and no glare.</string>
+    <string name="verificacion_reverso_camara">Camera view for the back of the document</string>
+    <string name="verificacion_selfie_titulo">Selfie with liveness check</string>
+    <string name="verificacion_selfie_instruccion">Look at the camera with your face uncovered and well lit.</string>
+    <string name="verificacion_selfie_camara">Front camera view for your selfie</string>
+    <string name="verificacion_reto_vida">Turn your head to the left and take the photo.</string>
+    <string name="verificacion_tomar_foto">Take photo</string>
+    <string name="verificacion_analizando">Checking the photo quality…</string>
+    <string name="verificacion_vista_previa">The photo you just took</string>
+    <string name="verificacion_usar_foto">Use this photo</string>
+    <string name="verificacion_repetir">Retake photo</string>
+    <string name="verificacion_camara_error">We could not use the camera. Close other apps that use it and try again.</string>
+    <string name="verificacion_problema_oscura">The photo is too dark. Find a brighter place and retake it.</string>
+    <string name="verificacion_problema_sobreexpuesta">The photo has too much light or glare. Avoid direct light and retake it.</string>
+    <string name="verificacion_problema_borrosa">The photo is blurry. Hold the phone steady and retake it.</string>
+    <string name="verificacion_problema_ilegible">We could not read the photo. Try taking it again.</string>
+    <string name="verificacion_revision_titulo">Review your document</string>
+    <string name="verificacion_revision_instruccion">Make sure it is readable. You can retake either photo.</string>
+    <string name="verificacion_anverso_revision">Photo of the front of the document</string>
+    <string name="verificacion_reverso_revision">Photo of the back of the document</string>
+    <string name="verificacion_repetir_anverso">Retake front</string>
+    <string name="verificacion_repetir_reverso">Retake back</string>
+    <string name="verificacion_continuar">Continue</string>
+    <string name="verificacion_enviando">Verifying your identity…</string>
+    <string name="verificacion_error_titulo">We could not complete the submission</string>
+    <string name="verificacion_reintentar_envio">Retry submission</string>
+    <string name="verificacion_error_conexion">No connection. Your photos are still saved on this phone; check your network and retry.</string>
+    <string name="verificacion_error_sesion">Your session is not valid. Please start the registration again.</string>
+    <string name="verificacion_error_imagen">One of the photos is not valid. Please take them again.</string>
+    <string name="verificacion_error_ya_procesada">Your identity has already been verified or is under review.</string>
+    <string name="verificacion_error_inesperado">An unexpected error occurred. Please try again.</string>
+    <string name="verificacion_ok_titulo">Identity verified</string>
+    <string name="verificacion_ok_mensaje">All set, you can continue.</string>
+    <string name="verificacion_rechazo_titulo">We could not verify your identity</string>
+    <string name="verificacion_rechazo_mensaje">The data does not match. You can try again. Attempts left: %1$d.</string>
+    <string name="verificacion_reintentar">Try again</string>
+    <string name="verificacion_revision_caso_titulo">Your verification is under review</string>
+    <string name="verificacion_revision_caso_mensaje">This is taking longer than usual. You do not need to do anything: we will notify you when we have the result.</string>
+    <string name="verificacion_bloqueado_titulo">You reached the maximum number of attempts</string>
+    <string name="verificacion_bloqueado_mensaje">For security, please wait about %1$d minutes before trying again.</string>
+    <string name="inicio_titulo">All set</string>
+    <string name="inicio_mensaje">Your account is set up.</string>
 </resources>

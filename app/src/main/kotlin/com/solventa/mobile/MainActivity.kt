@@ -14,7 +14,8 @@ import com.solventa.mobile.consentimiento.ConsentimientoScreen
 import com.solventa.mobile.consentimiento.ConsentimientoViewModel
 import com.solventa.mobile.registro.RegistroScreen
 import com.solventa.mobile.registro.RegistroViewModel
-import com.solventa.mobile.verificacion.VerificacionPendienteScreen
+import com.solventa.mobile.verificacion.VerificacionRoute
+import com.solventa.mobile.verificacion.VerificacionViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +42,15 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        Paso.VERIFICACION -> VerificacionPendienteScreen()
+                        Paso.VERIFICACION -> {
+                            val viewModel: VerificacionViewModel = viewModel()
+                            VerificacionRoute(
+                                viewModel = viewModel,
+                                onFinalizar = { paso = Paso.INICIO },
+                            )
+                        }
+
+                        Paso.INICIO -> InicioScreen()
                     }
                 }
             }
@@ -49,4 +58,4 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Paso { REGISTRO, CONSENTIMIENTO, VERIFICACION }
+private enum class Paso { REGISTRO, CONSENTIMIENTO, VERIFICACION, INICIO }

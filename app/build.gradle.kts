@@ -4,6 +4,21 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// URL base del backend. Por defecto: debug usa el backend local (10.0.2.2 es el localhost de la máquina vista desde
+// el emulador) y release un dominio de ejemplo. Para apuntar al borde público desplegado en AWS (la URL de CloudFront
+// cambia cada vez que se recrea staging), sobrescríbela sin tocar el código:
+//   ./gradlew installDebug -PsolventaBaseUrl=https://dxxxxxxxxxxxxx.cloudfront.net
+// o fija `solventaBaseUrl=...` en ~/.gradle/gradle.properties.
+fun baseUrl(porDefecto: String): String {
+    val url = providers.gradleProperty("solventaBaseUrl").orNull?.trim().takeUnless { it.isNullOrEmpty() }
+        ?: return porDefecto
+    require(url.startsWith("http://") || url.startsWith("https://")) {
+        "solventaBaseUrl debe empezar por http:// o https:// (recibido: $url)"
+    }
+    require('"' !in url && '\\' !in url) { "solventaBaseUrl contiene caracteres no permitidos" }
+    return if (url.endsWith("/")) url else "$url/" // Retrofit exige la barra final
+}
+
 android {
     namespace = "com.solventa.mobile"
     compileSdk = 34
@@ -20,11 +35,11 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/\"")
+            buildConfigField("String", "BASE_URL", "\"${baseUrl("http://10.0.2.2:8000/")}\"")
         }
         release {
             isMinifyEnabled = false
-            buildConfigField("String", "BASE_URL", "\"https://api.solventa.example.com/\"")
+            buildConfigField("String", "BASE_URL", "\"${baseUrl("https://api.solventa.example.com/")}\"")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

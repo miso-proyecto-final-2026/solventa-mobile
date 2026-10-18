@@ -80,15 +80,32 @@
     <string name="verificacion_error_imagen">Alguna de las fotos no es válida. Tómalas de nuevo.</string>
     <string name="verificacion_error_ya_procesada">Tu identidad ya fue verificada o está en revisión.</string>
     <string name="verificacion_error_inesperado">Ocurrió un error inesperado. Intenta de nuevo.</string>
-    <string name="verificacion_ok_titulo">Identidad verificada</string>
-    <string name="verificacion_ok_mensaje">Listo, ya puedes continuar.</string>
-    <string name="verificacion_rechazo_titulo">No pudimos verificar tu identidad</string>
-    <string name="verificacion_rechazo_mensaje">Los datos no coinciden. Puedes intentarlo de nuevo. Intentos restantes: %1$d.</string>
-    <string name="verificacion_reintentar">Intentar de nuevo</string>
-    <string name="verificacion_revision_caso_titulo">Tu verificación está en revisión</string>
-    <string name="verificacion_revision_caso_mensaje">Estamos tardando más de lo normal. No tienes que hacer nada: te avisaremos cuando tengamos el resultado.</string>
     <string name="verificacion_bloqueado_titulo">Alcanzaste el máximo de intentos</string>
-    <string name="verificacion_bloqueado_mensaje">Por seguridad, espera unos %1$d minutos antes de intentarlo de nuevo.</string>
     <string name="inicio_titulo">Todo listo</string>
     <string name="inicio_mensaje">Tu cuenta está configurada.</string>
+    <!-- Resultado de la verificación (HU03) -->
+    <string name="resultado_cargando">Consultando el resultado de tu verificación…</string>
+    <string name="resultado_error_titulo">No pudimos consultar el resultado</string>
+    <string name="resultado_error_conexion">No hay conexión. Revisa tu red e intenta de nuevo.</string>
+    <string name="resultado_error_inesperado">Ocurrió un problema al consultar el resultado. Intenta de nuevo en unos minutos.</string>
+    <string name="resultado_reintentar_consulta">Intentar de nuevo</string>
+    <string name="resultado_aprobada_titulo">¡Listo! Verificamos tu identidad</string>
+    <string name="resultado_aprobada_mensaje">Tu identidad quedó confirmada. Ya puedes seguir con el siguiente paso.</string>
+    <string name="resultado_aprobada_accion">Continuar</string>
+    <string name="resultado_rechazada_titulo">No pudimos verificar tu identidad</string>
+    <string name="resultado_rechazada_guia">Vuelve a tomar las fotos y revisa que tu documento se lea completo y sin reflejos, que haya buena luz y que tu rostro se vea de frente y sin accesorios.</string>
+    <plurals name="resultado_intentos_restantes">
+        <item quantity="one">Te queda %1$d intento.</item>
+        <item quantity="other">Te quedan %1$d intentos.</item>
+    </plurals>
+    <string name="resultado_rechazada_accion">Reintentar</string>
+    <string name="resultado_bloqueada_titulo">No es posible continuar en línea</string>
+    <string name="resultado_bloqueada_mensaje">Alcanzaste el máximo de intentos de verificación.</string>
+    <string name="resultado_bloqueada_canal">Para continuar, comunícate con nuestro canal de atención: %1$s.</string>
+    <!-- A CONFIRMAR con el equipo: canal de atención real (teléfono, correo u horario). -->
+    <string name="resultado_canal_atencion">canal de atención por confirmar</string>
+    <string name="resultado_bloqueada_hora">También podrás intentarlo de nuevo en línea a partir de las %1$s.</string>
+    <string name="resultado_revision_titulo">Estamos revisando tu verificación</string>
+    <string name="resultado_revision_mensaje">Tu verificación está en proceso y no tienes que hacer nada más: te avisaremos cuando tengamos el resultado. Puedes salir de la app; al volver verás el estado actualizado.</string>
+    <string name="resultado_entendido">Entendido</string>
 </resources>

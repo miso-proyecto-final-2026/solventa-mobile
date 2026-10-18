@@ -348,4 +348,43 @@ class VerificacionViewModelTest {
 
         assertTrue(vm.uiState.value.finalizado)
     }
+
+    // -- HU03: el resultado se muestra en su propia pantalla -------------------------------
+
+    @Test
+    fun `con resultado del servidor el flujo termina para mostrar la pantalla de resultado`() = runTest {
+        for (estado in listOf("VERIFICADO", "RECHAZADO", "EN_REVISION")) {
+            coEvery { repository.enviar(any(), any(), any(), any()) } returns respuesta(estado)
+            val vm = viewModel()
+            hastaElEnvio(vm)
+            advanceUntilIdle()
+
+            assertTrue(estado, vm.uiState.value.terminado)
+        }
+    }
+
+    @Test
+    fun `un caso ya decidido o bloqueado tambien termina el flujo`() = runTest {
+        for (error in listOf(ErrorEnvio.YA_PROCESADA, ErrorEnvio.BLOQUEADO)) {
+            coEvery { repository.enviar(any(), any(), any(), any()) } returns
+                VerificacionRepository.Resultado.Fallo(error, reintentarEnSegundos = 60)
+            val vm = viewModel()
+            hastaElEnvio(vm)
+            advanceUntilIdle()
+
+            assertTrue(error.name, vm.uiState.value.terminado)
+        }
+    }
+
+    @Test
+    fun `sin sesion o sin conexion no termina el flujo`() = runTest {
+        for (error in listOf(ErrorEnvio.SIN_SESION, ErrorEnvio.SIN_CONEXION)) {
+            coEvery { repository.enviar(any(), any(), any(), any()) } returns VerificacionRepository.Resultado.Fallo(error)
+            val vm = viewModel()
+            hastaElEnvio(vm)
+            advanceUntilIdle()
+
+            assertFalse(error.name, vm.uiState.value.terminado)
+        }
+    }
 }

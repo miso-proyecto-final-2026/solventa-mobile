@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -20,6 +21,17 @@ data class VerificacionResponse(
     @SerialName("creado_en") val creadoEn: String,
 )
 
+/** Estado vigente de la verificación (HU03); el cliente no calcula el resultado, solo lo muestra. */
+@Serializable
+data class EstadoKycResponse(
+    @SerialName("cliente_id") val clienteId: String,
+    @SerialName("estado_kyc") val estadoKyc: String,
+    val motivo: String? = null,
+    @SerialName("intentos_restantes") val intentosRestantes: Int,
+    @SerialName("bloqueado_hasta") val bloqueadoHasta: String? = null,
+    @SerialName("ultima_verificacion_id") val ultimaVerificacionId: String? = null,
+)
+
 interface VerificacionApi {
     // 201 la primera vez, 200 si es una repetición de la misma Idempotency-Key.
     @Multipart
@@ -33,4 +45,10 @@ interface VerificacionApi {
         @Part reverso: MultipartBody.Part,
         @Part selfie: MultipartBody.Part,
     ): Response<VerificacionResponse>
+
+    @GET("v1/clientes/{clienteId}/verificacion")
+    suspend fun consultarEstado(
+        @Path("clienteId") clienteId: String,
+        @Header("Authorization") autorizacion: String,
+    ): Response<EstadoKycResponse>
 }

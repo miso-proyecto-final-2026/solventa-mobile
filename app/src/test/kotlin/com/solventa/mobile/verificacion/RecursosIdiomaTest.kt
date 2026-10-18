@@ -44,4 +44,22 @@ class RecursosIdiomaTest {
             assertTrue("$clave está vacía", texto.isNotBlank())
         }
     }
+
+    private val regexPlural = Regex("""<plurals name="([^"]+)">(.*?)</plurals>""", RegexOption.DOT_MATCHES_ALL)
+    private val regexCantidad = Regex("""<item quantity="([^"]+)">""")
+
+    private fun cargarPlurales(carpeta: String): Map<String, Set<String>> =
+        regexPlural.findAll(File("src/main/res/$carpeta/strings.xml").readText())
+            .associate { p -> p.groupValues[1] to regexCantidad.findAll(p.groupValues[2]).map { it.groupValues[1] }.toSet() }
+
+    @Test
+    fun `los plurales existen en ambos idiomas con one y other`() {
+        val base = cargarPlurales("values")
+        val ingles = cargarPlurales("values-en-rUS")
+
+        assertEquals(base.keys, ingles.keys)
+        (base + ingles).forEach { (clave, cantidades) ->
+            assertTrue("$clave sin one/other", cantidades.containsAll(setOf("one", "other")))
+        }
+    }
 }

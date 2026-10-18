@@ -1,0 +1,8 @@
+{
+  "cliente_id": "b3d327ba-4056-4f51-8a85-9dea5c780e21",
+  "estado_kyc": "EN_REVISION",
+  "motivo": "PROVEEDOR_NO_DISPONIBLE",
+  "intentos_restantes": 3,
+  "bloqueado_hasta": null,
+  "ultima_verificacion_id": "de92b852-a82b-4c36-87de-52b2bc92cc0a"
+}

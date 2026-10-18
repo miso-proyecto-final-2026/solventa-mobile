@@ -1,0 +1,8 @@
+{
+  "cliente_id": "c199456e-f200-444b-9608-532a679be31f",
+  "estado_kyc": "PENDIENTE",
+  "motivo": null,
+  "intentos_restantes": 3,
+  "bloqueado_hasta": null,
+  "ultima_verificacion_id": null
+}

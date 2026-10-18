@@ -1,0 +1,8 @@
+{
+  "cliente_id": "15ea669b-893e-47c9-a81d-088bf732cfbc",
+  "estado_kyc": "VERIFICADO",
+  "motivo": null,
+  "intentos_restantes": 3,
+  "bloqueado_hasta": null,
+  "ultima_verificacion_id": "845010d4-25e7-47a8-9b96-a7f1e8face97"
+}

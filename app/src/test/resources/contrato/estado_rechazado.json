@@ -1,0 +1,8 @@
+{
+  "cliente_id": "a25348c2-841d-4e9a-a993-fbb04b137c1c",
+  "estado_kyc": "RECHAZADO",
+  "motivo": "VERIFICACION_NO_SUPERADA",
+  "intentos_restantes": 2,
+  "bloqueado_hasta": null,
+  "ultima_verificacion_id": "e66f7b08-4e8b-4689-8279-67cf9f18604c"
+}

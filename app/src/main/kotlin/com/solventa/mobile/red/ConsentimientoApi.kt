@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -31,5 +32,13 @@ interface ConsentimientoApi {
         @Path("clienteId") clienteId: String,
         @Header("Authorization") autorizacion: String,
         @Body solicitud: ConsentimientoRequest,
+    ): Response<ConsentimientoResponse>
+
+    // Consentimiento vigente del tipo: OTORGADO, NO_OTORGADO o REVOCADO.
+    @GET("v1/clientes/{clienteId}/consentimientos/{tipo}")
+    suspend fun consultar(
+        @Path("clienteId") clienteId: String,
+        @Path("tipo") tipo: String,
+        @Header("Authorization") autorizacion: String,
     ): Response<ConsentimientoResponse>
 }

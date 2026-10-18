@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.solventa.mobile.R
+import com.solventa.mobile.red.EstadoKycResponse
 import com.solventa.mobile.red.VerificacionApi
 import com.solventa.mobile.red.VerificacionResponse
 import java.io.File
@@ -52,6 +53,9 @@ class VerificacionScreenTest {
             selfie: MultipartBody.Part,
         ): Response<VerificacionResponse> =
             Response.success(201, VerificacionResponse("v1", estado, null, 2, "2026-10-16T12:00:00Z"))
+
+        override suspend fun consultarEstado(clienteId: String, autorizacion: String): Response<EstadoKycResponse> =
+            error("la pantalla de resultado (HU03) es la que consulta el estado")
     }
 
     private fun viewModel(estado: String = "VERIFICADO", calidad: ProblemaImagen? = null): VerificacionViewModel {
@@ -63,6 +67,8 @@ class VerificacionScreenTest {
         )
     }
 
+    private var finalizaciones = 0
+
     private fun mostrar(
         vm: VerificacionViewModel,
         permiso: Boolean = true,
@@ -73,7 +79,7 @@ class VerificacionScreenTest {
             permisoCamaraConcedido = permiso,
             onSolicitarPermiso = onSolicitarPermiso,
             onAbrirAjustes = {},
-            onFinalizar = {},
+            onFinalizar = { finalizaciones++ },
             // Cámara simulada: un botón que "toma" siempre la misma foto.
             camara = { _, _, onCaptura ->
                 Button(onClick = { onCaptura(foto) }) { Text("Capturar simulada") }
@@ -106,7 +112,7 @@ class VerificacionScreenTest {
     }
 
     @Test
-    fun recorridoCompletoHastaIdentidadVerificada() {
+    fun recorridoCompletoHastaQueElServidorDecide() {
         mostrar(viewModel("VERIFICADO"))
 
         composeTestRule.onNodeWithText(texto(R.string.verificacion_anverso_titulo)).assertIsDisplayed()
@@ -119,10 +125,8 @@ class VerificacionScreenTest {
         composeTestRule.onNodeWithText(texto(R.string.verificacion_reto_vida)).assertIsDisplayed()
         capturarYUsar()
 
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule.onAllNodesWithTextCompat(texto(R.string.verificacion_ok_titulo))
-        }
-        composeTestRule.onNodeWithText(texto(R.string.verificacion_ok_titulo)).assertIsDisplayed()
+        // El resultado lo muestra la pantalla de HU03 (ver ResultadoScreenTest).
+        composeTestRule.waitUntil(5_000) { finalizaciones == 1 }
     }
 
     @Test
@@ -137,33 +141,19 @@ class VerificacionScreenTest {
         composeTestRule.onNodeWithText(texto(R.string.verificacion_anverso_titulo)).assertIsDisplayed()
     }
 
-    @Test
-    fun unRechazoPermiteReintentarDesdeElPrincipio() {
-        mostrar(viewModel("RECHAZADO"))
+    private fun enviarYEsperarResultado(estado: String) {
+        mostrar(viewModel(estado))
         capturarYUsar()
         capturarYUsar()
         composeTestRule.onNodeWithText(texto(R.string.verificacion_continuar)).performClick()
         capturarYUsar()
 
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule.onAllNodesWithTextCompat(texto(R.string.verificacion_rechazo_titulo))
-        }
-        composeTestRule.onNodeWithText(texto(R.string.verificacion_reintentar)).performClick()
-
-        composeTestRule.onNodeWithText(texto(R.string.verificacion_anverso_titulo)).assertIsDisplayed()
+        composeTestRule.waitUntil(5_000) { finalizaciones == 1 }
     }
 
     @Test
-    fun unCasoEnRevisionInformaQueSeLeAvisara() {
-        mostrar(viewModel("EN_REVISION"))
-        capturarYUsar()
-        capturarYUsar()
-        composeTestRule.onNodeWithText(texto(R.string.verificacion_continuar)).performClick()
-        capturarYUsar()
+    fun unRechazoPasaALaPantallaDeResultado() = enviarYEsperarResultado("RECHAZADO")
 
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule.onAllNodesWithTextCompat(texto(R.string.verificacion_revision_caso_titulo))
-        }
-        composeTestRule.onNodeWithText(texto(R.string.verificacion_revision_caso_mensaje)).assertIsDisplayed()
-    }
+    @Test
+    fun unCasoEnRevisionPasaALaPantallaDeResultado() = enviarYEsperarResultado("EN_REVISION")
 }

@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.solventa.mobile.consentimiento.ConsentimientoScreen
 import com.solventa.mobile.consentimiento.ConsentimientoViewModel
+import com.solventa.mobile.cotizacion.CotizacionRoute
+import com.solventa.mobile.cotizacion.CotizacionViewModel
 import com.solventa.mobile.registro.RegistroScreen
 import com.solventa.mobile.registro.RegistroViewModel
 import com.solventa.mobile.resultado.Destino
@@ -39,7 +41,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface {
-                    // Registro (HU01) → consentimiento (HU06) → verificación (HU02) → resultado (HU03).
+                    // Registro (HU01) → consentimiento (HU06) → verificación (HU02) → resultado (HU03) → cotización (HU37).
                     var paso by rememberSaveable { mutableStateOf(Paso.ARRANQUE) }
                     var pasoTrasConsentimiento by rememberSaveable { mutableStateOf(Paso.VERIFICACION) }
                     // Cada visita a verificación o resultado empieza con un ViewModel nuevo.
@@ -126,7 +128,22 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        Paso.INICIO -> InicioScreen()
+                        Paso.INICIO -> {
+                            val viewModel: CotizacionViewModel = viewModel(key = "cotizacion-$visita")
+                            CotizacionRoute(
+                                viewModel = viewModel,
+                                // Compartir los datos lleva al consentimiento y vuelve a cotizar con el perfil del cliente.
+                                onCompartirDatos = {
+                                    pasoTrasConsentimiento = Paso.INICIO
+                                    navegar(Paso.CONSENTIMIENTO)
+                                },
+                                onSesionVencida = {
+                                    SesionActual.cerrar()
+                                    alcance.launch { almacen.borrar() }
+                                    navegar(Paso.REGISTRO)
+                                },
+                            )
+                        }
                     }
                 }
             }

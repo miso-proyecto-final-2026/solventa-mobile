@@ -31,6 +31,9 @@ android {
         versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Límite de espera de una cotización en el cliente, en segundos (HU37; el valor se afina con HA01).
+        buildConfigField("int", "COTIZACION_TIMEOUT_S", "10")
     }
 
     buildTypes {

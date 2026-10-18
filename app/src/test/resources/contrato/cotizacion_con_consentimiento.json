@@ -1,0 +1,48 @@
+{
+  "id": "051fc31b-02a4-4f83-bdf6-35281b959068",
+  "cliente_id": "66a9e27f-6aba-4b49-9dff-c8027cd3f863",
+  "producto": "microseguro_vida",
+  "estado": "EMITIDA",
+  "moneda": "COP",
+  "prima_anual": 175000,
+  "prima_mensual": 14583,
+  "coberturas": [
+    {
+      "tipo": "muerte",
+      "monto": 50000000,
+      "deducible": 0
+    },
+    {
+      "tipo": "incapacidad_total",
+      "monto": 25000000,
+      "deducible": 0
+    }
+  ],
+  "vigente_hasta": "2026-11-17T23:49:58.235442Z",
+  "version_reglas": "2026.10.1-prototipo",
+  "degradado": false,
+  "aproximada": false,
+  "aviso": null,
+  "componentes": [
+    {
+      "concepto": "prima_base",
+      "monto": 175000
+    },
+    {
+      "concepto": "ajuste_datos",
+      "monto": 0
+    },
+    {
+      "concepto": "ajuste_riesgo",
+      "monto": 0
+    },
+    {
+      "concepto": "recargo_degradado",
+      "monto": 0
+    }
+  ],
+  "metadata": {
+    "hit_cache": false,
+    "latencia_interna_ms": 78.95
+  }
+}

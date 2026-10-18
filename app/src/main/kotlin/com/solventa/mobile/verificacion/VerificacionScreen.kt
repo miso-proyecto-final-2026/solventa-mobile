@@ -53,8 +53,8 @@ fun VerificacionScreen(
     LaunchedEffect(permisoCamaraConcedido) {
         if (permisoCamaraConcedido) viewModel.onPermiso(true)
     }
-    LaunchedEffect(estado.finalizado) {
-        if (estado.finalizado) onFinalizar()
+    LaunchedEffect(estado.finalizado, estado.terminado) {
+        if (estado.finalizado || estado.terminado) onFinalizar()
     }
 
     Column(
@@ -231,34 +231,14 @@ private fun PasoEnviando(estado: VerificacionUiState, viewModel: VerificacionVie
 
 @Composable
 private fun PasoResultado(estado: VerificacionUiState, viewModel: VerificacionViewModel) {
-    // Mensajes mínimos: las pantallas de resultado completas son de HU03.
-    val (titulo, mensaje) = when (estado.resultado) {
-        EstadoResultado.VERIFICADO ->
-            R.string.verificacion_ok_titulo to stringResource(R.string.verificacion_ok_mensaje)
-        EstadoResultado.RECHAZADO ->
-            R.string.verificacion_rechazo_titulo to stringResource(
-                R.string.verificacion_rechazo_mensaje,
-                estado.intentosRestantes ?: 0,
-            )
-        EstadoResultado.EN_REVISION ->
-            R.string.verificacion_revision_caso_titulo to stringResource(R.string.verificacion_revision_caso_mensaje)
-        EstadoResultado.BLOQUEADO ->
-            R.string.verificacion_bloqueado_titulo to stringResource(
-                R.string.verificacion_bloqueado_mensaje,
-                ((estado.reintentarEnSegundos ?: 0L) + 59L) / 60L,
-            )
-        null ->
-            R.string.verificacion_error_titulo to stringResource(textoError(estado.error ?: ErrorEnvio.INESPERADO))
+    val error = estado.error
+    // Con resultado la navegación pasa a la pantalla de HU03; aquí solo quedan los errores sin resultado.
+    if (estado.terminado || error == null) {
+        CircularProgressIndicator()
+        return
     }
-    Titulo(stringResource(titulo))
-    Text(mensaje)
-    val puedeReintentar = estado.resultado == EstadoResultado.RECHAZADO && (estado.intentosRestantes ?: 0) > 0
-    if (puedeReintentar) {
-        Button(
-            onClick = viewModel::reintentarVerificacion,
-            modifier = Modifier.fillMaxWidth().heightIn(min = ObjetivoTactil),
-        ) { Text(stringResource(R.string.verificacion_reintentar)) }
-    }
+    Titulo(stringResource(R.string.verificacion_error_titulo))
+    Text(stringResource(textoError(error)))
     OutlinedButton(
         onClick = viewModel::finalizar,
         modifier = Modifier.fillMaxWidth().heightIn(min = ObjetivoTactil),

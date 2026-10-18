@@ -30,4 +30,11 @@ data class VerificacionUiState(
     val reintentarEnSegundos: Long? = null,
     val error: ErrorEnvio? = null,
     val finalizado: Boolean = false,
-)
+) {
+    /**
+     * El servidor ya decidió (o el caso ya estaba decidido: 409). La pantalla de resultado de HU03
+     * consulta y muestra el estado vigente; este flujo no lo interpreta.
+     */
+    val terminado: Boolean
+        get() = paso == PasoVerificacion.RESULTADO && (resultado != null || error == ErrorEnvio.YA_PROCESADA)
+}

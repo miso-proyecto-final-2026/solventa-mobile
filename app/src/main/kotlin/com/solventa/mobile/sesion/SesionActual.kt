@@ -1,8 +1,8 @@
 package com.solventa.mobile.sesion
 
 /**
- * Sesión del cliente en memoria, creada al registrarse (HU01). Solo vive mientras el proceso;
- * el almacenamiento seguro y el inicio de sesión biométrico llegan con HU04/HU05.
+ * Sesión del cliente en memoria, creada al registrarse (HU01). Al reabrir la app se restaura desde
+ * [AlmacenSesion] (HU03); el inicio de sesión biométrico llega con HU04/HU05.
  */
 object SesionActual {
     @Volatile
@@ -24,4 +24,10 @@ object SesionActual {
     }
 
     val activa: Boolean get() = clienteId != null && accessToken != null
+
+    fun credenciales(): Credenciales? {
+        val id = clienteId ?: return null
+        val token = accessToken ?: return null
+        return Credenciales(id, token)
+    }
 }

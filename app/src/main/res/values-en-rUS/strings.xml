@@ -80,15 +80,32 @@
     <string name="verificacion_error_imagen">One of the photos is not valid. Please take them again.</string>
     <string name="verificacion_error_ya_procesada">Your identity has already been verified or is under review.</string>
     <string name="verificacion_error_inesperado">An unexpected error occurred. Please try again.</string>
-    <string name="verificacion_ok_titulo">Identity verified</string>
-    <string name="verificacion_ok_mensaje">All set, you can continue.</string>
-    <string name="verificacion_rechazo_titulo">We could not verify your identity</string>
-    <string name="verificacion_rechazo_mensaje">The data does not match. You can try again. Attempts left: %1$d.</string>
-    <string name="verificacion_reintentar">Try again</string>
-    <string name="verificacion_revision_caso_titulo">Your verification is under review</string>
-    <string name="verificacion_revision_caso_mensaje">This is taking longer than usual. You do not need to do anything: we will notify you when we have the result.</string>
     <string name="verificacion_bloqueado_titulo">You reached the maximum number of attempts</string>
-    <string name="verificacion_bloqueado_mensaje">For security, please wait about %1$d minutes before trying again.</string>
     <string name="inicio_titulo">All set</string>
     <string name="inicio_mensaje">Your account is set up.</string>
+    <!-- Verification result (HU03) -->
+    <string name="resultado_cargando">Checking the result of your verification…</string>
+    <string name="resultado_error_titulo">We could not check the result</string>
+    <string name="resultado_error_conexion">No connection. Check your network and try again.</string>
+    <string name="resultado_error_inesperado">Something went wrong while checking the result. Please try again in a few minutes.</string>
+    <string name="resultado_reintentar_consulta">Try again</string>
+    <string name="resultado_aprobada_titulo">All set! We verified your identity</string>
+    <string name="resultado_aprobada_mensaje">Your identity is confirmed. You can now move on to the next step.</string>
+    <string name="resultado_aprobada_accion">Continue</string>
+    <string name="resultado_rechazada_titulo">We could not verify your identity</string>
+    <string name="resultado_rechazada_guia">Take the photos again and make sure your whole document is readable without glare, the lighting is good, and your face is seen from the front without accessories.</string>
+    <plurals name="resultado_intentos_restantes">
+        <item quantity="one">You have %1$d attempt left.</item>
+        <item quantity="other">You have %1$d attempts left.</item>
+    </plurals>
+    <string name="resultado_rechazada_accion">Retry</string>
+    <string name="resultado_bloqueada_titulo">You cannot continue online</string>
+    <string name="resultado_bloqueada_mensaje">You reached the maximum number of verification attempts.</string>
+    <string name="resultado_bloqueada_canal">To continue, contact our customer support channel: %1$s.</string>
+    <!-- TO BE CONFIRMED with the team: actual support channel (phone, email or hours). -->
+    <string name="resultado_canal_atencion">support channel to be confirmed</string>
+    <string name="resultado_bloqueada_hora">You can also try again online starting at %1$s.</string>
+    <string name="resultado_revision_titulo">We are reviewing your verification</string>
+    <string name="resultado_revision_mensaje">Your verification is in progress and you do not need to do anything else: we will notify you when we have the result. You can leave the app; when you come back you will see the updated status.</string>
+    <string name="resultado_entendido">Got it</string>
 </resources>

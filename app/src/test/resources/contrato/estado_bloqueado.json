@@ -1,0 +1,8 @@
+{
+  "cliente_id": "a6e0de27-d152-4946-a940-c038594f112f",
+  "estado_kyc": "RECHAZADO",
+  "motivo": "VERIFICACION_NO_SUPERADA",
+  "intentos_restantes": 0,
+  "bloqueado_hasta": "2026-10-16T12:30:00Z",
+  "ultima_verificacion_id": "e467de73-32e2-4609-a8d7-219bd4ed6003"
+}

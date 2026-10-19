@@ -1,0 +1,48 @@
+{
+  "id": "ae7d07fe-29e4-46ef-b051-be7461484e9c",
+  "cliente_id": "93ca42c5-c30a-4e60-a0e4-a3bc47a822f4",
+  "producto": "proteccion_dispositivos",
+  "estado": "EMITIDA",
+  "moneda": "COP",
+  "prima_anual": 135844,
+  "prima_mensual": 11320,
+  "coberturas": [
+    {
+      "tipo": "dano_accidental",
+      "monto": 2500000,
+      "deducible": 250000
+    },
+    {
+      "tipo": "robo",
+      "monto": 2500000,
+      "deducible": 500000
+    }
+  ],
+  "vigente_hasta": "2026-11-17T23:49:58.556989Z",
+  "version_reglas": "2026.10.1-prototipo",
+  "degradado": false,
+  "aproximada": true,
+  "aviso": "Este valor es aproximado y puede cambiar al momento de la compra.",
+  "componentes": [
+    {
+      "concepto": "prima_base",
+      "monto": 112500
+    },
+    {
+      "concepto": "ajuste_datos",
+      "monto": 16875
+    },
+    {
+      "concepto": "ajuste_riesgo",
+      "monto": 6469
+    },
+    {
+      "concepto": "recargo_degradado",
+      "monto": 0
+    }
+  ],
+  "metadata": {
+    "hit_cache": false,
+    "latencia_interna_ms": 19.84
+  }
+}

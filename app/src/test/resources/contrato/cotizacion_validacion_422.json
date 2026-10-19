@@ -1,0 +1,17 @@
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "La solicitud no es válida.",
+    "details": [
+      {
+        "campo": "datos.edad",
+        "motivo": "debe ser mayor o igual a 18"
+      },
+      {
+        "campo": "datos.suma_asegurada",
+        "motivo": "es requerido"
+      }
+    ],
+    "trace_id": "80274f62-c34a-4f09-95f0-cf667ad59239"
+  }
+}

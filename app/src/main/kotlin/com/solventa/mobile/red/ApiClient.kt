@@ -34,6 +34,11 @@ object ApiClient {
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
 
+    // El límite de espera del cliente (HU37, criterio 6) abarca toda la llamada, incluida la conexión.
+    private val okHttpClientCotizacion = okHttpClient.newBuilder()
+        .callTimeout(BuildConfig.COTIZACION_TIMEOUT_S.toLong(), TimeUnit.SECONDS)
+        .build()
+
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
@@ -45,6 +50,12 @@ object ApiClient {
     private val retrofitVerificacion: Retrofit by lazy {
         retrofit.newBuilder().client(okHttpClientVerificacion).build()
     }
+
+    private val retrofitCotizacion: Retrofit by lazy {
+        retrofit.newBuilder().client(okHttpClientCotizacion).build()
+    }
+
+    val cotizacionApi: CotizacionApi by lazy { retrofitCotizacion.create(CotizacionApi::class.java) }
 
     val verificacionApi: VerificacionApi by lazy {
         retrofitVerificacion.create(VerificacionApi::class.java)

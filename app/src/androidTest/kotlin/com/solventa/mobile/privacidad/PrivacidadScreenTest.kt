@@ -129,11 +129,9 @@ class PrivacidadScreenTest(private val idioma: String) {
         try { // TEMPORAL: diagnóstico del diálogo en es-CO
             composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_titulo)).assertIsDisplayed()
         } catch (e: AssertionError) {
-            val raices = composeTestRule.onAllNodes(isRoot()).fetchSemanticsNodes().map { "raíz ${it.boundsInWindow} tamaño ${it.size}" }
-            throw AssertionError(
-                "Raíces: $raices\nTítulo: " + composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_titulo)).printToString(),
-                e,
-            )
+            val raices = composeTestRule.onAllNodes(isRoot()).fetchSemanticsNodes().size
+            val arboles = (0 until raices).joinToString("\n--- ventana ---\n") { composeTestRule.onAllNodes(isRoot())[it].printToString() }
+            throw AssertionError("ORIGINAL: ${e.message}\nVentanas: $raices\n$arboles", e)
         }
         composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_texto)).assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_no)).assertHeightIsAtLeast(48.dp).performClick()

@@ -48,7 +48,7 @@ class PrivacidadScreenTest(private val idioma: String) {
     private val locale: Locale = Locale.forLanguageTag(idioma)
 
     private val configuracion: Configuration by lazy {
-        Configuration(composeTestRule.activity.resources.configuration).apply { setLocale(locale) }
+        Configuration(composeTestRule.activity.resources.configuration).apply { setLocale(Locale.forLanguageTag(idioma)) }
     }
 
     private val contexto: Context by lazy { composeTestRule.activity.createConfigurationContext(configuracion) }

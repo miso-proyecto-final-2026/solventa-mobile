@@ -155,32 +155,29 @@ class PrivacidadScreenTest(private val idioma: String) {
         composeTestRule.onNodeWithText(texto(R.string.privacidad_revocado_ok)).assertIsDisplayed()
     }
 
-    @Test
-    fun cada_falla_tiene_su_mensaje_y_su_accion() {
-        val casos = listOf(
-            ErrorPrivacidad.TIEMPO_AGOTADO to R.string.privacidad_error_tiempo,
-            ErrorPrivacidad.SIN_CONEXION to R.string.privacidad_error_sin_conexion,
-            ErrorPrivacidad.SERVICIO to R.string.privacidad_error_servicio,
+    private fun verificarFalla(error: ErrorPrivacidad, mensaje: Int) {
+        var reintentos = 0
+        mostrar(
+            estado().copy(error = error, pendiente = AccionPrivacidad.REVOCAR),
+            PrivacidadAcciones(reintentar = { reintentos++ }),
         )
-        casos.forEach { (error, mensaje) ->
-            var reintentos = 0
-            composeTestRule.setContent {
-                CompositionLocalProvider(LocalContext provides contexto, LocalConfiguration provides configuracion) {
-                    MaterialTheme {
-                        PrivacidadScreen(
-                            estado().copy(error = error, pendiente = AccionPrivacidad.REVOCAR),
-                            PrivacidadAcciones(reintentar = { reintentos++ }),
-                        )
-                    }
-                }
-            }
-            composeTestRule.waitForIdle()
 
-            composeTestRule.onNodeWithText(texto(mensaje)).assertIsDisplayed()
-            composeTestRule.onNodeWithText(texto(R.string.privacidad_reintentar)).performClick()
-            assertEquals(1, reintentos)
-        }
+        composeTestRule.onNodeWithText(texto(mensaje)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.privacidad_reintentar)).performClick()
+        assertEquals(1, reintentos)
     }
+
+    @Test
+    fun el_tiempo_agotado_tiene_su_mensaje_y_reintentar() =
+        verificarFalla(ErrorPrivacidad.TIEMPO_AGOTADO, R.string.privacidad_error_tiempo)
+
+    @Test
+    fun la_falta_de_conexion_tiene_su_mensaje_y_reintentar() =
+        verificarFalla(ErrorPrivacidad.SIN_CONEXION, R.string.privacidad_error_sin_conexion)
+
+    @Test
+    fun el_error_del_servicio_tiene_su_mensaje_y_reintentar() =
+        verificarFalla(ErrorPrivacidad.SERVICIO, R.string.privacidad_error_servicio)
 
     @Test
     fun si_no_hubo_confirmacion_el_consentimiento_sigue_mostrandose_vigente_con_aviso() {

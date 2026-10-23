@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.solventa.mobile.setContentEnEspanol
 import org.junit.Rule
 import org.junit.Test
 
@@ -20,7 +21,7 @@ class RegistroScreenTest {
 
     @Test
     fun registroConDatosValidosHabilitaElEnvio() {
-        composeTestRule.setContent {
+        composeTestRule.setContentEnEspanol {
             RegistroScreen(viewModel = RegistroViewModel(), onRegistroExitoso = {})
         }
 

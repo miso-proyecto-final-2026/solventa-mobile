@@ -14,6 +14,8 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.printToString
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -124,7 +126,15 @@ class PrivacidadScreenTest(private val idioma: String) {
             PrivacidadAcciones(confirmarRevocar = { confirmado++ }, cancelar = { cancelado++ }),
         )
 
-        composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_titulo)).assertIsDisplayed()
+        try { // TEMPORAL: diagnóstico del diálogo en es-CO
+            composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_titulo)).assertIsDisplayed()
+        } catch (e: AssertionError) {
+            val raices = composeTestRule.onAllNodes(isRoot()).fetchSemanticsNodes().map { "raíz ${it.boundsInWindow} tamaño ${it.size}" }
+            throw AssertionError(
+                "Raíces: $raices\nTítulo: " + composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_titulo)).printToString(),
+                e,
+            )
+        }
         composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_texto)).assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_no)).assertHeightIsAtLeast(48.dp).performClick()
         composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_si)).assertHeightIsAtLeast(48.dp).performClick()

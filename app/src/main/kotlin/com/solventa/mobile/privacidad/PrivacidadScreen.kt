@@ -192,7 +192,8 @@ private fun Confirmacion(acciones: PrivacidadAcciones) {
     AlertDialog(
         onDismissRequest = acciones.cancelar,
         title = { Text(stringResource(R.string.privacidad_confirmar_titulo)) },
-        text = { Text(stringResource(R.string.privacidad_confirmar_texto)) },
+        // Desplazable: en una pantalla pequeña o con fuente grande el texto largo no debe tapar el título ni los botones.
+        text = { Text(stringResource(R.string.privacidad_confirmar_texto), modifier = Modifier.verticalScroll(rememberScrollState())) },
         confirmButton = {
             TextButton(onClick = acciones.confirmarRevocar, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.privacidad_confirmar_si))

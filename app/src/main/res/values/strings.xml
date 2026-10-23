@@ -158,8 +158,8 @@
     <string name="privacidad_titulo">Privacidad</string>
     <string name="privacidad_consentimiento_titulo">Consentimiento Open Finance</string>
     <string name="privacidad_finalidad">Finalidad: personalizar tus cotizaciones y perfilar tu riesgo con tus datos de Open Finance y Open Data.</string>
-    <string name="privacidad_estado_otorgado">Compartes tus datos desde el %1$s.</string>
-    <string name="privacidad_estado_revocado">Revocaste el consentimiento el %1$s. Tus cotizaciones usan un perfil por defecto.</string>
+    <string name="privacidad_estado_otorgado">Compartes tus datos desde el %1$s</string>
+    <string name="privacidad_estado_revocado">Revocaste el consentimiento (%1$s). Tus cotizaciones usan un perfil por defecto.</string>
     <string name="privacidad_estado_no_otorgado">Aún no compartes tus datos. Tus cotizaciones usan un perfil por defecto.</string>
     <string name="privacidad_revocar">Revocar consentimiento</string>
     <string name="privacidad_compartir">Compartir mis datos</string>

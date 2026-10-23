@@ -14,8 +14,6 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
-import androidx.compose.ui.test.isRoot
-import androidx.compose.ui.test.printToString
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -25,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.solventa.mobile.R
 import com.solventa.mobile.red.ConsentimientoResponse
 import java.util.Locale
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -57,7 +56,29 @@ class PrivacidadScreenTest(private val idioma: String) {
 
     private fun texto(id: Int, vararg argumentos: Any) = contexto.getString(id, *argumentos)
 
+    private var configuracionOriginal: Configuration? = null
+
+    /**
+     * El diálogo de confirmación es otra ventana y no hereda el contexto que se sobrescribe abajo: usa los recursos de la
+     * actividad, que comparten todas las ventanas. Se fija el idioma ahí y se restaura al terminar.
+     */
+    @Suppress("DEPRECATION")
+    private fun fijarIdiomaDeLaActividad() {
+        val recursos = composeTestRule.activity.resources
+        if (configuracionOriginal == null) configuracionOriginal = Configuration(recursos.configuration)
+        recursos.updateConfiguration(configuracion, recursos.displayMetrics)
+    }
+
+    @After
+    @Suppress("DEPRECATION")
+    fun restaurarIdioma() {
+        val original = configuracionOriginal ?: return
+        val recursos = composeTestRule.activity.resources
+        recursos.updateConfiguration(original, recursos.displayMetrics)
+    }
+
     private fun mostrar(estado: PrivacidadUiState, acciones: PrivacidadAcciones = PrivacidadAcciones()) {
+        fijarIdiomaDeLaActividad()
         composeTestRule.setContent {
             CompositionLocalProvider(LocalContext provides contexto, LocalConfiguration provides configuracion) {
                 MaterialTheme { PrivacidadScreen(estado, acciones) }
@@ -126,13 +147,7 @@ class PrivacidadScreenTest(private val idioma: String) {
             PrivacidadAcciones(confirmarRevocar = { confirmado++ }, cancelar = { cancelado++ }),
         )
 
-        try { // TEMPORAL: diagnóstico del diálogo en es-CO
-            composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_titulo)).assertIsDisplayed()
-        } catch (e: AssertionError) {
-            val raices = composeTestRule.onAllNodes(isRoot()).fetchSemanticsNodes().size
-            val arboles = (0 until raices).joinToString("\n--- ventana ---\n") { composeTestRule.onAllNodes(isRoot())[it].printToString() }
-            throw AssertionError("ORIGINAL: ${e.message}\nVentanas: $raices\n$arboles", e)
-        }
+        composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_titulo)).assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_texto)).assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_no)).assertHeightIsAtLeast(48.dp).performClick()
         composeTestRule.onNodeWithText(texto(R.string.privacidad_confirmar_si)).assertHeightIsAtLeast(48.dp).performClick()

@@ -178,4 +178,8 @@
     <string name="privacidad_sigue_vigente">No recibimos la confirmación: tu consentimiento sigue vigente.</string>
     <string name="privacidad_reintentar">Reintentar</string>
     <string name="privacidad_iniciar_sesion">Iniciar sesión</string>
+    <string name="nav_seguros">Seguros</string>
+    <string name="nav_configuracion">Configuración</string>
+    <string name="configuracion_titulo">Configuración</string>
+    <string name="configuracion_privacidad_detalle">Consulta o revoca tu consentimiento Open Finance.</string>
 </resources>

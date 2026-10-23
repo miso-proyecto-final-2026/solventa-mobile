@@ -51,7 +51,6 @@ data class CotizacionAcciones(
     val nuevaCotizacion: () -> Unit = {},
     val compartirDatos: () -> Unit = {},
     val sesionVencida: () -> Unit = {},
-    val abrirPrivacidad: () -> Unit = {},
 )
 
 @Composable
@@ -59,7 +58,6 @@ fun CotizacionRoute(
     viewModel: CotizacionViewModel,
     onCompartirDatos: () -> Unit,
     onSesionVencida: () -> Unit,
-    onPrivacidad: () -> Unit,
 ) {
     val estado by viewModel.uiState.collectAsState()
     CotizacionScreen(
@@ -73,7 +71,6 @@ fun CotizacionRoute(
             nuevaCotizacion = viewModel::nuevaCotizacion,
             compartirDatos = onCompartirDatos,
             sesionVencida = onSesionVencida,
-            abrirPrivacidad = onPrivacidad,
         ),
     )
 }
@@ -109,9 +106,6 @@ private fun ElegirProducto(acciones: CotizacionAcciones) = Pantalla {
             onClick = { acciones.elegirProducto(producto.id) },
             modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
         ) { Text(stringResource(R.string.cotizacion_producto_accion, stringResource(producto.nombre))) }
-    }
-    OutlinedButton(onClick = acciones.abrirPrivacidad, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-        Text(stringResource(R.string.privacidad_abrir))
     }
 }
 

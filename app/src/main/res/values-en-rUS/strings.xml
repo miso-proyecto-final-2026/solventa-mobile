@@ -178,4 +178,8 @@
     <string name="privacidad_sigue_vigente">We did not get a confirmation: your consent is still in effect.</string>
     <string name="privacidad_reintentar">Try again</string>
     <string name="privacidad_iniciar_sesion">Sign in</string>
+    <string name="nav_seguros">Insurance</string>
+    <string name="nav_configuracion">Settings</string>
+    <string name="configuracion_titulo">Settings</string>
+    <string name="configuracion_privacidad_detalle">View or revoke your Open Finance consent.</string>
 </resources>

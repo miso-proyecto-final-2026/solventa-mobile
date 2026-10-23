@@ -46,7 +46,7 @@ class CotizacionScreenTest(private val idioma: String) {
     private val locale: Locale = Locale.forLanguageTag(idioma)
 
     private val configuracion: Configuration by lazy {
-        Configuration(composeTestRule.activity.resources.configuration).apply { setLocale(locale) }
+        Configuration(composeTestRule.activity.resources.configuration).apply { setLocale(Locale.forLanguageTag(idioma)) }
     }
 
     private val contexto: Context by lazy { composeTestRule.activity.createConfigurationContext(configuracion) }
@@ -163,7 +163,9 @@ class CotizacionScreenTest(private val idioma: String) {
         mostrar(resultado())
 
         composeTestRule.onNode(hasText(texto(R.string.cotizacion_resultado_titulo)) and isHeading()).assertIsDisplayed()
-        composeTestRule.onNodeWithText(com.solventa.mobile.cotizacion.FormatoCotizacion.moneda(175_000, "COP", locale)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(com.solventa.mobile.cotizacion.FormatoCotizacion.moneda(175_000, "COP", locale))
+            .performScrollTo()
+            .assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.cotizacion_cobertura_muerte)).performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.cotizacion_cobertura_incapacidad_total)).performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.cotizacion_aviso_titulo)).assertDoesNotExist()

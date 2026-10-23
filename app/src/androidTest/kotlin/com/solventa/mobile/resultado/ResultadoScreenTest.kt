@@ -96,6 +96,13 @@ class ResultadoScreenTest(private val idioma: String) {
             autorizacion: String,
             solicitud: ConsentimientoRequest,
         ): Response<ConsentimientoResponse> = error("no se usa")
+
+        override suspend fun revocar(
+            clienteId: String,
+            tipo: String,
+            autorizacion: String,
+            canal: String,
+        ): Response<ConsentimientoResponse> = error("no se usa")
     }
 
     private val servidor = Servidor()

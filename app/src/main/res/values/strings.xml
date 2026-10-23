@@ -152,4 +152,34 @@
     <string name="cotizacion_aviso_degradado">Este valor es una estimación: no pudimos consultar toda tu información en este momento.</string>
     <string name="cotizacion_compartir_datos">Compartir mis datos</string>
     <string name="cotizacion_nueva">Cotizar otro seguro</string>
+
+    <!-- Privacidad y consentimiento (HU07) -->
+    <string name="privacidad_abrir">Privacidad y consentimiento</string>
+    <string name="privacidad_titulo">Privacidad</string>
+    <string name="privacidad_consentimiento_titulo">Consentimiento Open Finance</string>
+    <string name="privacidad_finalidad">Finalidad: personalizar tus cotizaciones y perfilar tu riesgo con tus datos de Open Finance y Open Data.</string>
+    <string name="privacidad_estado_otorgado">Compartes tus datos desde el %1$s</string>
+    <string name="privacidad_estado_revocado">Revocaste el consentimiento (%1$s). Tus cotizaciones usan un perfil por defecto.</string>
+    <string name="privacidad_estado_no_otorgado">Aún no compartes tus datos. Tus cotizaciones usan un perfil por defecto.</string>
+    <string name="privacidad_revocar">Revocar consentimiento</string>
+    <string name="privacidad_compartir">Compartir mis datos</string>
+    <string name="privacidad_volver">Volver</string>
+    <string name="privacidad_confirmar_titulo">¿Revocar el consentimiento?</string>
+    <string name="privacidad_confirmar_texto">Dejaremos de usar tus datos de Open Finance y Open Data. Tus próximas cotizaciones usarán un perfil por defecto y su precio será aproximado. Puedes volver a compartirlos cuando quieras.</string>
+    <string name="privacidad_confirmar_si">Sí, revocar</string>
+    <string name="privacidad_confirmar_no">Cancelar</string>
+    <string name="privacidad_cargando">Consultando tu consentimiento…</string>
+    <string name="privacidad_revocando">Revocando tu consentimiento…</string>
+    <string name="privacidad_revocado_ok">Listo: revocaste el consentimiento y dejamos de usar tus datos.</string>
+    <string name="privacidad_error_tiempo">La respuesta está tardando más de lo normal.</string>
+    <string name="privacidad_error_sin_conexion">No hay conexión. Verifica tu red e intenta de nuevo.</string>
+    <string name="privacidad_error_servicio">No pudimos completar la operación en este momento. Intenta de nuevo en unos minutos.</string>
+    <string name="privacidad_error_sesion">Tu sesión venció. Vuelve a iniciar para gestionar tu consentimiento.</string>
+    <string name="privacidad_sigue_vigente">No recibimos la confirmación: tu consentimiento sigue vigente.</string>
+    <string name="privacidad_reintentar">Reintentar</string>
+    <string name="privacidad_iniciar_sesion">Iniciar sesión</string>
+    <string name="nav_seguros">Seguros</string>
+    <string name="nav_configuracion">Configuración</string>
+    <string name="configuracion_titulo">Configuración</string>
+    <string name="configuracion_privacidad_detalle">Consulta o revoca tu consentimiento Open Finance.</string>
 </resources>

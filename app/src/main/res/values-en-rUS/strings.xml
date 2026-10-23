@@ -152,4 +152,34 @@
     <string name="cotizacion_aviso_degradado">This amount is an estimate: we could not look up all your information right now.</string>
     <string name="cotizacion_compartir_datos">Share my data</string>
     <string name="cotizacion_nueva">Quote another insurance</string>
+
+    <!-- Privacy and consent (HU07) -->
+    <string name="privacidad_abrir">Privacy and consent</string>
+    <string name="privacidad_titulo">Privacy</string>
+    <string name="privacidad_consentimiento_titulo">Open Finance consent</string>
+    <string name="privacidad_finalidad">Purpose: to personalize your quotes and profile your risk using your Open Finance and Open Data information.</string>
+    <string name="privacidad_estado_otorgado">You have been sharing your data since %1$s.</string>
+    <string name="privacidad_estado_revocado">You revoked your consent on %1$s. Your quotes use a default profile.</string>
+    <string name="privacidad_estado_no_otorgado">You are not sharing your data yet. Your quotes use a default profile.</string>
+    <string name="privacidad_revocar">Revoke consent</string>
+    <string name="privacidad_compartir">Share my data</string>
+    <string name="privacidad_volver">Back</string>
+    <string name="privacidad_confirmar_titulo">Revoke your consent?</string>
+    <string name="privacidad_confirmar_texto">We will stop using your Open Finance and Open Data information. Your next quotes will use a default profile and their price will be approximate. You can share your data again whenever you want.</string>
+    <string name="privacidad_confirmar_si">Yes, revoke</string>
+    <string name="privacidad_confirmar_no">Cancel</string>
+    <string name="privacidad_cargando">Checking your consent…</string>
+    <string name="privacidad_revocando">Revoking your consent…</string>
+    <string name="privacidad_revocado_ok">Done: you revoked your consent and we stopped using your data.</string>
+    <string name="privacidad_error_tiempo">The response is taking longer than usual.</string>
+    <string name="privacidad_error_sin_conexion">No connection. Check your network and try again.</string>
+    <string name="privacidad_error_servicio">We could not complete the operation right now. Try again in a few minutes.</string>
+    <string name="privacidad_error_sesion">Your session expired. Sign in again to manage your consent.</string>
+    <string name="privacidad_sigue_vigente">We did not get a confirmation: your consent is still in effect.</string>
+    <string name="privacidad_reintentar">Try again</string>
+    <string name="privacidad_iniciar_sesion">Sign in</string>
+    <string name="nav_seguros">Insurance</string>
+    <string name="nav_configuracion">Settings</string>
+    <string name="configuracion_titulo">Settings</string>
+    <string name="configuracion_privacidad_detalle">View or revoke your Open Finance consent.</string>
 </resources>

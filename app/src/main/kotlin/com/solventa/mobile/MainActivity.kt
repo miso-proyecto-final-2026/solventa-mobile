@@ -23,6 +23,8 @@ import com.solventa.mobile.consentimiento.ConsentimientoScreen
 import com.solventa.mobile.consentimiento.ConsentimientoViewModel
 import com.solventa.mobile.cotizacion.CotizacionRoute
 import com.solventa.mobile.cotizacion.CotizacionViewModel
+import com.solventa.mobile.privacidad.PrivacidadRoute
+import com.solventa.mobile.privacidad.PrivacidadViewModel
 import com.solventa.mobile.registro.RegistroScreen
 import com.solventa.mobile.registro.RegistroViewModel
 import com.solventa.mobile.resultado.Destino
@@ -41,7 +43,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface {
-                    // Registro (HU01) → consentimiento (HU06) → verificación (HU02) → resultado (HU03) → cotización (HU37).
+                    // Registro (HU01) → consentimiento (HU06) → verificación (HU02) → resultado (HU03) → cotización (HU37) ⇄ privacidad (HU07).
                     var paso by rememberSaveable { mutableStateOf(Paso.ARRANQUE) }
                     var pasoTrasConsentimiento by rememberSaveable { mutableStateOf(Paso.VERIFICACION) }
                     // Cada visita a verificación o resultado empieza con un ViewModel nuevo.
@@ -142,6 +144,25 @@ class MainActivity : ComponentActivity() {
                                     alcance.launch { almacen.borrar() }
                                     navegar(Paso.REGISTRO)
                                 },
+                                onPrivacidad = { navegar(Paso.PRIVACIDAD) },
+                            )
+                        }
+
+                        Paso.PRIVACIDAD -> {
+                            val viewModel: PrivacidadViewModel = viewModel(key = "privacidad-$visita")
+                            PrivacidadRoute(
+                                viewModel = viewModel,
+                                // Volver a compartir reutiliza el consentimiento de HU06 y regresa aquí.
+                                onCompartirDatos = {
+                                    pasoTrasConsentimiento = Paso.PRIVACIDAD
+                                    navegar(Paso.CONSENTIMIENTO)
+                                },
+                                onVolver = { navegar(Paso.INICIO) },
+                                onSesionVencida = {
+                                    SesionActual.cerrar()
+                                    alcance.launch { almacen.borrar() }
+                                    navegar(Paso.REGISTRO)
+                                },
                             )
                         }
                     }
@@ -151,4 +172,4 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Paso { ARRANQUE, REGISTRO, CONSENTIMIENTO, VERIFICACION, RESULTADO, INICIO }
+private enum class Paso { ARRANQUE, REGISTRO, CONSENTIMIENTO, VERIFICACION, RESULTADO, INICIO, PRIVACIDAD }

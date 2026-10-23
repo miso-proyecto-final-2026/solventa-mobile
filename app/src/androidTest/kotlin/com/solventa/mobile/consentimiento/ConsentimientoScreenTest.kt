@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.solventa.mobile.setContentEnEspanol
 import org.junit.Rule
 import org.junit.Test
@@ -27,29 +28,29 @@ class ConsentimientoScreenTest {
     fun muestraLaInformacionPreviaYNingunaAceptacionImplicita() {
         mostrar()
 
-        composeTestRule.onNodeWithText("Para qué los usamos").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Tu derecho a revocar").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Para qué los usamos").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("Tu derecho a revocar").performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription(
             "Aceptar el uso de mis datos de Open Finance y Open Data",
         ).assertIsEnabled()
-        composeTestRule.onNodeWithText("No por ahora").assertIsDisplayed()
+        composeTestRule.onNodeWithText("No por ahora").performScrollTo().assertIsDisplayed()
     }
 
     @Test
     fun elDetalleLegalSeExpandeYSeOculta() {
         mostrar()
 
-        composeTestRule.onNodeWithText("Ver texto legal completo").performClick()
-        composeTestRule.onNodeWithText("Ocultar texto legal").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Ver texto legal completo").performScrollTo().performClick()
+        composeTestRule.onNodeWithText("Ocultar texto legal").performScrollTo().assertIsDisplayed()
     }
 
     @Test
     fun rechazarMuestraLaConfirmacionSinCompartirDatos() {
         mostrar()
 
-        composeTestRule.onNodeWithText("No por ahora").performClick()
+        composeTestRule.onNodeWithText("No por ahora").performScrollTo().performClick()
 
-        composeTestRule.onNodeWithText("Continuarás sin compartir datos").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Continuar").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Continuarás sin compartir datos").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("Continuar").performScrollTo().assertIsDisplayed()
     }
 }

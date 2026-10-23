@@ -14,6 +14,8 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.printToString
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.dp
@@ -163,9 +165,12 @@ class CotizacionScreenTest(private val idioma: String) {
         mostrar(resultado())
 
         composeTestRule.onNode(hasText(texto(R.string.cotizacion_resultado_titulo)) and isHeading()).assertIsDisplayed()
-        composeTestRule.onNodeWithText(com.solventa.mobile.cotizacion.FormatoCotizacion.moneda(175_000, "COP", locale))
-            .performScrollTo()
-            .assertIsDisplayed()
+        val precio = com.solventa.mobile.cotizacion.FormatoCotizacion.moneda(175_000, "COP", locale)
+        try {
+            composeTestRule.onNodeWithText(precio).performScrollTo().assertIsDisplayed()
+        } catch (e: AssertionError) { // TEMPORAL: diagnóstico del fallo en es-CO
+            throw AssertionError("Buscando '$precio' ${precio.map { it.code }}:\n" + composeTestRule.onRoot().printToString(), e)
+        }
         composeTestRule.onNodeWithText(texto(R.string.cotizacion_cobertura_muerte)).performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.cotizacion_cobertura_incapacidad_total)).performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.cotizacion_aviso_titulo)).assertDoesNotExist()

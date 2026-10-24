@@ -236,4 +236,8 @@
     <string name="compra_verificar">Check status</string>
     <string name="compra_consultar">Check again</string>
     <string name="compra_iniciar_sesion">Sign in again</string>
+
+    <!-- Shared components (Material 3 design) -->
+    <string name="ui_volver">Back</string>
+    <string name="ui_paso_de">Step %1$d of %2$d · %3$s</string>
 </resources>

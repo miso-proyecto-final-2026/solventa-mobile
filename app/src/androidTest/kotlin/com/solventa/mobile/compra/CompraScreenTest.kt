@@ -68,7 +68,7 @@ class CompraScreenTest(private val idioma: String) {
         CompraUiState(fase = fase, cotizacion = cotizacion).ajuste()
 
     @Test
-    fun `la oferta pide aceptar los terminos y avisa si faltan`() {
+    fun laOfertaPideAceptarLosTerminosYAvisaSiFaltan() {
         var terminos: Boolean? = null
         var continuo = false
         mostrar(estado(FaseCompra.OFERTA), CompraAcciones(aceptarTerminos = { terminos = it }, continuarAPago = { continuo = true }))
@@ -82,14 +82,14 @@ class CompraScreenTest(private val idioma: String) {
     }
 
     @Test
-    fun `sin aceptar los terminos se muestra el aviso`() {
+    fun sinAceptarLosTerminosSeMuestraElAviso() {
         mostrar(estado(FaseCompra.OFERTA) { copy(terminosPendientes = true) })
 
         composeTestRule.onNodeWithText(texto(R.string.compra_terminos_pendiente)).performScrollTo().assertIsDisplayed()
     }
 
     @Test
-    fun `el pago muestra los errores de cada campo y el importe a pagar`() {
+    fun elPagoMuestraLosErroresDeCadaCampoYElImporteAPagar() {
         mostrar(
             estado(FaseCompra.PAGO) {
                 copy(erroresTarjeta = setOf(ErrorTarjeta.NUMERO, ErrorTarjeta.VENCIMIENTO, ErrorTarjeta.CVV))
@@ -102,21 +102,21 @@ class CompraScreenTest(private val idioma: String) {
     }
 
     @Test
-    fun `el progreso muestra el paso actual`() {
+    fun elProgresoMuestraElPasoActual() {
         mostrar(estado(FaseCompra.PROGRESO) { copy(paso = "COBRO") })
 
         composeTestRule.onNodeWithText(texto(R.string.compra_progreso_paso, texto(R.string.compra_paso_cobro))).assertIsDisplayed()
     }
 
     @Test
-    fun `un paso desconocido no rompe el progreso`() {
+    fun unPasoDesconocidoNoRompeElProgreso() {
         mostrar(estado(FaseCompra.PROGRESO) { copy(paso = "ANTIFRAUDE") })
 
         composeTestRule.onNodeWithText(texto(R.string.compra_progreso_paso, texto(R.string.compra_paso_otro))).assertIsDisplayed()
     }
 
     @Test
-    fun `la compra exitosa confirma en pantalla`() {
+    fun laCompraExitosaConfirmaEnPantalla() {
         mostrar(estado(FaseCompra.EXITOSA))
 
         composeTestRule.onNodeWithText(texto(R.string.compra_exitosa_titulo)).assertIsDisplayed()
@@ -124,7 +124,7 @@ class CompraScreenTest(private val idioma: String) {
     }
 
     @Test
-    fun `el cobro rechazado ofrece otro medio de pago`() {
+    fun elCobroRechazadoOfreceOtroMedioDePago() {
         var otro = false
         mostrar(estado(FaseCompra.COBRO_RECHAZADO), CompraAcciones(otroMedioDePago = { otro = true }))
 
@@ -135,14 +135,14 @@ class CompraScreenTest(private val idioma: String) {
     }
 
     @Test
-    fun `rechazo y revision tienen mensajes distintos y dicen que no hubo cobro`() {
+    fun rechazoYRevisionTienenMensajesDistintosYDicenQueNoHuboCobro() {
         mostrar(estado(FaseCompra.DECISION_RECHAZADA))
         composeTestRule.onNodeWithText(texto(R.string.compra_rechazada_titulo)).assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.compra_rechazada_mensaje)).assertIsDisplayed()
     }
 
     @Test
-    fun `la revision asistida explica el siguiente paso`() {
+    fun laRevisionAsistidaExplicaElSiguientePaso() {
         mostrar(estado(FaseCompra.EN_REVISION))
 
         composeTestRule.onNodeWithText(texto(R.string.compra_revision_titulo)).assertIsDisplayed()
@@ -150,7 +150,7 @@ class CompraScreenTest(private val idioma: String) {
     }
 
     @Test
-    fun `la oferta vencida ofrece cotizar de nuevo`() {
+    fun laOfertaVencidaOfreceCotizarDeNuevo() {
         var deNuevo = false
         mostrar(estado(FaseCompra.OFERTA_VENCIDA), CompraAcciones(cotizarDeNuevo = { deNuevo = true }))
 
@@ -161,7 +161,7 @@ class CompraScreenTest(private val idioma: String) {
     }
 
     @Test
-    fun `sin red se explica y se puede reintentar`() {
+    fun sinRedSeExplicaYSePuedeReintentar() {
         var reintento = false
         mostrar(estado(FaseCompra.ERROR) { copy(error = ErrorCompra.SIN_CONEXION) }, CompraAcciones(reintentar = { reintento = true }))
 
@@ -172,7 +172,7 @@ class CompraScreenTest(private val idioma: String) {
     }
 
     @Test
-    fun `si no se sabe el resultado se ofrece verificar el estado, no pagar otra vez`() {
+    fun siNoSeSabeElResultadoSeOfreceVerificarElEstadoNoPagarOtraVez() {
         mostrar(estado(FaseCompra.ERROR) { copy(error = ErrorCompra.RESULTADO_DESCONOCIDO) })
 
         composeTestRule.onNodeWithText(texto(R.string.compra_error_desconocido)).assertIsDisplayed()

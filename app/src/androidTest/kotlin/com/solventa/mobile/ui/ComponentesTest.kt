@@ -1,6 +1,7 @@
 package com.solventa.mobile.ui
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.mutableStateOf
@@ -40,9 +41,12 @@ class ComponentesTest {
     @Test
     fun losBotonesMidenAlMenos48dpYRespondenAlToque() {
         var toques = 0
+        // En una columna: sin contenedor Compose apila los botones en el mismo punto y el último recibe todos los toques.
         mostrar {
-            BotonPrimario("Continuar", onClick = { toques++ })
-            BotonSecundario("Ahora no", onClick = { toques += 10 })
+            Column {
+                BotonPrimario("Continuar", onClick = { toques++ })
+                BotonSecundario("Ahora no", onClick = { toques += 10 })
+            }
         }
 
         composeTestRule.onNodeWithText("Continuar").assertHeightIsAtLeast(48.dp).assertHasClickAction().performClick()

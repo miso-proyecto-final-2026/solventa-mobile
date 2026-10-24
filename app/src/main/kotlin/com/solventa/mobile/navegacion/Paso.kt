@@ -2,16 +2,16 @@ package com.solventa.mobile.navegacion
 
 /**
  * Registro (HU01) → consentimiento (HU06) → verificación (HU02) → resultado (HU03) → secciones principales:
- * seguros (cotización, HU37) y configuración, que contiene la privacidad y el consentimiento (HU07).
+ * seguros (cotización, HU37, y compra de la oferta, HU17) y configuración, que contiene la privacidad y el consentimiento (HU07).
  */
-enum class Paso { ARRANQUE, REGISTRO, CONSENTIMIENTO, VERIFICACION, RESULTADO, INICIO, CONFIGURACION, PRIVACIDAD }
+enum class Paso { ARRANQUE, REGISTRO, CONSENTIMIENTO, VERIFICACION, RESULTADO, INICIO, COMPRA, CONFIGURACION, PRIVACIDAD }
 
 /** Pestañas de la barra inferior. */
 enum class Seccion { SEGUROS, CONFIGURACION }
 
 val Paso.seccion: Seccion?
     get() = when (this) {
-        Paso.INICIO -> Seccion.SEGUROS
+        Paso.INICIO, Paso.COMPRA -> Seccion.SEGUROS
         Paso.CONFIGURACION, Paso.PRIVACIDAD -> Seccion.CONFIGURACION
         else -> null
     }
@@ -22,6 +22,7 @@ val Paso.conBarra: Boolean get() = seccion != null
 /** Destino del botón atrás del sistema dentro de las secciones; `null` deja el comportamiento por defecto. */
 val Paso.atras: Paso?
     get() = when (this) {
+        Paso.COMPRA -> Paso.INICIO
         Paso.PRIVACIDAD -> Paso.CONFIGURACION
         Paso.CONFIGURACION -> Paso.INICIO
         else -> null

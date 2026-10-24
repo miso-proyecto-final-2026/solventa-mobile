@@ -22,11 +22,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.solventa.mobile.compra.CompraRoute
+import com.solventa.mobile.compra.CompraViewModel
 import com.solventa.mobile.configuracion.ConfiguracionScreen
 import com.solventa.mobile.consentimiento.ConsentimientoScreen
 import com.solventa.mobile.consentimiento.ConsentimientoViewModel
 import com.solventa.mobile.cotizacion.CotizacionRoute
 import com.solventa.mobile.cotizacion.CotizacionViewModel
+import com.solventa.mobile.red.CotizacionResponse
 import com.solventa.mobile.privacidad.PrivacidadRoute
 import com.solventa.mobile.privacidad.PrivacidadViewModel
 import com.solventa.mobile.navegacion.BarraPrincipal
@@ -62,6 +65,8 @@ class MainActivity : ComponentActivity() {
                     var visita by rememberSaveable { mutableIntStateOf(0) }
                     // La cotización en curso sobrevive a cambiar de pestaña: solo se reinicia al llegar desde fuera de las secciones.
                     var visitaSeguros by rememberSaveable { mutableIntStateOf(0) }
+                    // Oferta que el cliente va a comprar; no sobrevive a que el sistema mate el proceso (se vuelve a cotizar).
+                    var ofertaAComprar by remember { mutableStateOf<CotizacionResponse?>(null) }
                     var sesionRestaurada by remember { mutableStateOf(SesionActual.activa) }
                     val alcance = rememberCoroutineScope()
 
@@ -174,7 +179,32 @@ class MainActivity : ComponentActivity() {
                                             alcance.launch { almacen.borrar() }
                                             navegar(Paso.REGISTRO)
                                         },
+                                        onAceptarOferta = {
+                                            ofertaAComprar = it
+                                            navegar(Paso.COMPRA)
+                                        },
                                     )
+                                }
+
+                                Paso.COMPRA -> {
+                                    val oferta = ofertaAComprar
+                                    if (oferta == null) {
+                                        LaunchedEffect(Unit) { navegar(Paso.INICIO) }
+                                    } else {
+                                        val viewModel: CompraViewModel = viewModel(key = "compra-${oferta.id}")
+                                        LaunchedEffect(oferta.id) { viewModel.iniciar(oferta) }
+                                        CompraRoute(
+                                            viewModel = viewModel,
+                                            // Oferta vencida o rechazada: cotiza de nuevo; terminar también deja un formulario limpio.
+                                            onCotizarDeNuevo = { visitaSeguros++; navegar(Paso.INICIO) },
+                                            onTerminar = { visitaSeguros++; navegar(Paso.INICIO) },
+                                            onSesionVencida = {
+                                                SesionActual.cerrar()
+                                                alcance.launch { almacen.borrar() }
+                                                navegar(Paso.REGISTRO)
+                                            },
+                                        )
+                                    }
                                 }
 
                                 Paso.CONFIGURACION -> ConfiguracionScreen(alAbrirPrivacidad = { navegar(Paso.PRIVACIDAD) })

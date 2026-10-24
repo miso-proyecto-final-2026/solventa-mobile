@@ -1,0 +1,56 @@
+package com.solventa.mobile.compra
+
+import java.time.YearMonth
+import java.util.UUID
+
+/**
+ * Lo que el cliente teclea. Vive solo en memoria y se descarta en cuanto se obtiene el token (HU17, criterio 2).
+ * `toString` no revela nada para que ni un log ni un mensaje de error lo filtren.
+ */
+class DatosTarjeta(val numero: String = "", val vencimiento: String = "", val cvv: String = "") {
+    override fun toString() = "DatosTarjeta(***)"
+}
+
+enum class ErrorTarjeta { NUMERO, VENCIMIENTO, CVV }
+
+object ValidadorTarjeta {
+    /** Validación local y barata para no gastar un intento de cobro: el servidor y la pasarela deciden de verdad. */
+    fun validar(tarjeta: DatosTarjeta, hoy: YearMonth = YearMonth.now()): Set<ErrorTarjeta> = buildSet {
+        if (!numeroValido(tarjeta.numero)) add(ErrorTarjeta.NUMERO)
+        if (!vencimientoValido(tarjeta.vencimiento, hoy)) add(ErrorTarjeta.VENCIMIENTO)
+        if (tarjeta.cvv.length !in 3..4 || !tarjeta.cvv.all(Char::isDigit)) add(ErrorTarjeta.CVV)
+    }
+
+    private fun numeroValido(numero: String): Boolean {
+        if (numero.length !in 13..19 || !numero.all(Char::isDigit)) return false
+        val suma = numero.reversed().mapIndexed { i, c ->
+            val d = c - '0'
+            if (i % 2 == 1) (d * 2).let { if (it > 9) it - 9 else it } else d
+        }.sum()
+        return suma % 10 == 0
+    }
+
+    /** Formato `MM/AA`. */
+    private fun vencimientoValido(texto: String, hoy: YearMonth): Boolean {
+        val partes = texto.split("/")
+        if (partes.size != 2 || partes[0].length != 2 || partes[1].length != 2) return false
+        val mes = partes[0].toIntOrNull() ?: return false
+        val anio = partes[1].toIntOrNull() ?: return false
+        if (mes !in 1..12) return false
+        return !YearMonth.of(2000 + anio, mes).isBefore(hoy)
+    }
+}
+
+/**
+ * Componente que convierte la tarjeta en un token de un solo uso. En producción lo hace el componente seguro de
+ * la pasarela (SAQ-A) y la app nunca ve el número; mientras MS Pagos (HU18) no exista se usa [TokenizadorSimulado].
+ * Cambiar de proveedor es cambiar esta implementación.
+ */
+interface TokenizadorPago {
+    suspend fun tokenizar(tarjeta: DatosTarjeta): String
+}
+
+/** Pasarela simulada (T4): el token no contiene ni deriva nada de la tarjeta. */
+class TokenizadorSimulado(private val generar: () -> String = { UUID.randomUUID().toString() }) : TokenizadorPago {
+    override suspend fun tokenizar(tarjeta: DatosTarjeta): String = "tok_sim_" + generar()
+}

@@ -1,0 +1,1 @@
+{"id":"6f1a2b3c-0000-4000-8000-000000000001","cotizacion_id":"q1","estado_saga":"EN_PROGRESO","paso_actual":"DECISION","pasos":["DECISION","COBRO","FIRMA","EMISION"],"producto":"microseguro_vida","moneda":"COP","monto_asegurado":50000000,"decision":null,"revision_asistida":false,"creada_en":"2026-10-24T12:00:00Z"}

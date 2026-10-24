@@ -1,0 +1,1 @@
+{"id":"6f1a2b3c-0000-4000-8000-000000000003","cotizacion_id":"q3","estado_saga":"EN_ANALISIS_ANTIFRAUDE","paso_actual":"ANTIFRAUDE","pasos":["DECISION","ANTIFRAUDE","COBRO"],"campo_nuevo":{"x":1},"moneda":"COP","creada_en":"2026-10-24T12:00:00Z"}

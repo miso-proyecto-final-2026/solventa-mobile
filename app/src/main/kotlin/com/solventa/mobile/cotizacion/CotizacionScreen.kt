@@ -49,6 +49,7 @@ data class CotizacionAcciones(
     val reintentar: () -> Unit = {},
     val volverAProductos: () -> Unit = {},
     val nuevaCotizacion: () -> Unit = {},
+    val aceptarOferta: (CotizacionResponse) -> Unit = {},
     val compartirDatos: () -> Unit = {},
     val sesionVencida: () -> Unit = {},
 )
@@ -58,6 +59,7 @@ fun CotizacionRoute(
     viewModel: CotizacionViewModel,
     onCompartirDatos: () -> Unit,
     onSesionVencida: () -> Unit,
+    onAceptarOferta: (CotizacionResponse) -> Unit = {},
 ) {
     val estado by viewModel.uiState.collectAsState()
     CotizacionScreen(
@@ -69,6 +71,7 @@ fun CotizacionRoute(
             reintentar = viewModel::reintentar,
             volverAProductos = viewModel::volverAProductos,
             nuevaCotizacion = viewModel::nuevaCotizacion,
+            aceptarOferta = onAceptarOferta,
             compartirDatos = onCompartirDatos,
             sesionVencida = onSesionVencida,
         ),
@@ -242,6 +245,9 @@ private fun Resultado(estado: CotizacionUiState, cotizacion: CotizacionResponse,
     }
     Text(stringResource(R.string.cotizacion_coberturas), style = MaterialTheme.typography.titleMedium)
     cotizacion.coberturas.forEach { Cobertura(it, cotizacion.moneda, locale) }
+    Button(onClick = { acciones.aceptarOferta(cotizacion) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+        Text(stringResource(R.string.cotizacion_aceptar))
+    }
     OutlinedButton(onClick = acciones.nuevaCotizacion, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
         Text(stringResource(R.string.cotizacion_nueva))
     }

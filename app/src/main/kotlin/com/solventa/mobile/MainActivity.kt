@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +45,7 @@ import com.solventa.mobile.resultado.ResultadoRoute
 import com.solventa.mobile.resultado.ResultadoViewModel
 import com.solventa.mobile.sesion.AlmacenSesion
 import com.solventa.mobile.sesion.SesionActual
+import com.solventa.mobile.ui.tema.SolventaTheme
 import com.solventa.mobile.verificacion.VerificacionRoute
 import com.solventa.mobile.verificacion.VerificacionViewModel
 import kotlinx.coroutines.launch
@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val almacen = AlmacenSesion.crear(this)
         setContent {
-            MaterialTheme {
+            SolventaTheme {
                 Surface {
                     // Registro (HU01) → consentimiento (HU06) → verificación (HU02) → resultado (HU03) → secciones: seguros (HU37) y
                     // configuración con privacidad (HU07), unidas por la barra inferior.

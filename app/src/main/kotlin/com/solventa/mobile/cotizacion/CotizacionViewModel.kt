@@ -21,6 +21,11 @@ class CotizacionViewModel @JvmOverloads constructor(
     private val _uiState = MutableStateFlow(CotizacionUiState())
     val uiState: StateFlow<CotizacionUiState> = _uiState.asStateFlow()
 
+    /** «Nueva cotización» de la portada: pasa a elegir el producto. */
+    fun iniciarCotizacion() {
+        _uiState.update { if (it.fase == FaseCotizacion.INICIO) it.copy(fase = FaseCotizacion.ELEGIR_PRODUCTO) else it }
+    }
+
     fun elegirProducto(id: String) {
         val producto = Catalogo.porId(id) ?: return
         _uiState.value = CotizacionUiState(fase = FaseCotizacion.FORMULARIO, producto = producto)
@@ -73,7 +78,17 @@ class CotizacionViewModel @JvmOverloads constructor(
     /** Repite la solicitud con lo que el usuario ya ingresó: ante un error no se pierde nada. */
     fun reintentar() = solicitar()
 
-    fun volverAProductos() = nuevaCotizacion()
+    /** Vuelve al formulario con lo que el usuario ya ingresó, para cambiar un dato y cotizar de nuevo. */
+    fun modificarDatos() {
+        _uiState.update {
+            if (it.producto == null) it else it.copy(fase = FaseCotizacion.FORMULARIO, cotizacion = null, error = null)
+        }
+    }
+
+    /** Descarta lo ingresado y vuelve a elegir producto. */
+    fun volverAProductos() {
+        _uiState.value = CotizacionUiState(fase = FaseCotizacion.ELEGIR_PRODUCTO)
+    }
 
     fun nuevaCotizacion() {
         _uiState.value = CotizacionUiState()

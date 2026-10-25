@@ -120,9 +120,9 @@
     <string name="cotizacion_elegir_ayuda">Elige un producto y obtén tu precio al instante.</string>
     <string name="cotizacion_producto_accion">Cotizar %1$s</string>
     <string name="cotizacion_datos_titulo">Datos de tu seguro</string>
-    <string name="cotizacion_solicitar">Cotizar</string>
+    <string name="cotizacion_solicitar">Calcular precio</string>
     <string name="cotizacion_cambiar_producto">Cambiar de producto</string>
-    <string name="cotizacion_cargando">Calculando tu precio…</string>
+    <string name="cotizacion_cargando">Calculando tu precio</string>
     <string name="cotizacion_error_requerido">Este dato es obligatorio</string>
     <string name="cotizacion_error_entero">Ingresa solo números enteros</string>
     <string name="cotizacion_error_minimo">El valor mínimo es %1$s</string>
@@ -178,7 +178,7 @@
     <string name="nav_seguros">Inicio</string>
 
     <!-- Compra de la oferta (HU17) -->
-    <string name="cotizacion_aceptar">Aceptar y suscribir</string>
+    <string name="cotizacion_aceptar">Contratar</string>
     <string name="compra_oferta_titulo">Revisa antes de pagar</string>
     <string name="compra_producto">Seguro</string>
     <string name="compra_terminos_titulo">Términos</string>
@@ -286,4 +286,17 @@
     <string name="compra_pago_barra">Pago</string>
     <string name="compra_paso_pago">Pago</string>
     <string name="compra_metodo_tarjeta">Tarjeta de crédito o débito</string>
+    <!-- Cotización: diseño Material 3 (HU37) -->
+    <string name="cotizacion_saludo">Hola, %1$s</string>
+    <string name="cotizacion_seguros_disponibles">Seguros disponibles</string>
+    <string name="cotizacion_barra_titulo">Cotizar %1$s</string>
+    <string name="cotizacion_cargando_apoyo">Esto toma unos segundos.</string>
+    <string name="cotizacion_modificar">Modificar datos</string>
+    <string name="cotizacion_precio_personalizado">%1$s · Precio personalizado para ti</string>
+    <string name="cotizacion_precio_estimado">%1$s · Precio estimado</string>
+    <string name="cotizacion_saludo_sin_nombre">Hola</string>
+    <string name="cotizacion_inicio_apoyo">Cotiza en minutos, con un precio hecho a tu medida.</string>
+    <string name="cotizacion_hero_titulo">Cotiza un seguro ahora</string>
+    <string name="cotizacion_hero_apoyo">Dinos qué necesitas y te damos el precio al instante.</string>
+    <string name="cotizacion_nueva_cotizacion">Nueva cotización</string>
 </resources>

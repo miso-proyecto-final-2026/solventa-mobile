@@ -120,9 +120,9 @@
     <string name="cotizacion_elegir_ayuda">Choose a product and get your price instantly.</string>
     <string name="cotizacion_producto_accion">Get a quote for %1$s</string>
     <string name="cotizacion_datos_titulo">Your insurance details</string>
-    <string name="cotizacion_solicitar">Get quote</string>
+    <string name="cotizacion_solicitar">Calculate price</string>
     <string name="cotizacion_cambiar_producto">Change product</string>
-    <string name="cotizacion_cargando">Calculating your price…</string>
+    <string name="cotizacion_cargando">Calculating your price</string>
     <string name="cotizacion_error_requerido">This field is required</string>
     <string name="cotizacion_error_entero">Enter whole numbers only</string>
     <string name="cotizacion_error_minimo">The minimum value is %1$s</string>
@@ -178,7 +178,7 @@
     <string name="nav_seguros">Home</string>
 
     <!-- Offer purchase (HU17) -->
-    <string name="cotizacion_aceptar">Accept and subscribe</string>
+    <string name="cotizacion_aceptar">Buy now</string>
     <string name="compra_oferta_titulo">Review before paying</string>
     <string name="compra_producto">Insurance</string>
     <string name="compra_terminos_titulo">Terms</string>
@@ -286,4 +286,17 @@
     <string name="compra_pago_barra">Payment</string>
     <string name="compra_paso_pago">Payment</string>
     <string name="compra_metodo_tarjeta">Credit or debit card</string>
+    <!-- Quote: Material 3 design (HU37) -->
+    <string name="cotizacion_saludo">Hi, %1$s</string>
+    <string name="cotizacion_seguros_disponibles">Available insurance</string>
+    <string name="cotizacion_barra_titulo">Quote %1$s</string>
+    <string name="cotizacion_cargando_apoyo">This takes a few seconds.</string>
+    <string name="cotizacion_modificar">Edit details</string>
+    <string name="cotizacion_precio_personalizado">%1$s · Price personalized for you</string>
+    <string name="cotizacion_precio_estimado">%1$s · Estimated price</string>
+    <string name="cotizacion_saludo_sin_nombre">Hi</string>
+    <string name="cotizacion_inicio_apoyo">Get a quote in minutes, with a price made for you.</string>
+    <string name="cotizacion_hero_titulo">Get an insurance quote now</string>
+    <string name="cotizacion_hero_apoyo">Tell us what you need and we give you the price instantly.</string>
+    <string name="cotizacion_nueva_cotizacion">New quote</string>
 </resources>

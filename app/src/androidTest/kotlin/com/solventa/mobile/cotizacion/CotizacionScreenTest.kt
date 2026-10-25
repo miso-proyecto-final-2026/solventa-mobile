@@ -3,7 +3,6 @@ package com.solventa.mobile.cotizacion
 import android.content.Context
 import android.content.res.Configuration
 import androidx.activity.ComponentActivity
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -19,6 +18,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.dp
 import com.solventa.mobile.R
 import com.solventa.mobile.red.CoberturaResponse
+import com.solventa.mobile.ui.tema.SolventaTheme
 import com.solventa.mobile.red.CotizacionResponse
 import java.util.Locale
 import org.junit.Assert.assertEquals
@@ -53,10 +53,10 @@ class CotizacionScreenTest(private val idioma: String) {
 
     private fun texto(id: Int, vararg argumentos: Any) = contexto.getString(id, *argumentos)
 
-    private fun mostrar(estado: CotizacionUiState, acciones: CotizacionAcciones = CotizacionAcciones()) {
+    private fun mostrar(estado: CotizacionUiState, acciones: CotizacionAcciones = CotizacionAcciones(), nombre: String? = null) {
         composeTestRule.setContent {
             CompositionLocalProvider(LocalContext provides contexto, LocalConfiguration provides configuracion) {
-                MaterialTheme { CotizacionScreen(estado, acciones) }
+                SolventaTheme { CotizacionScreen(estado, acciones, nombre) }
             }
         }
         composeTestRule.waitForIdle()
@@ -86,14 +86,15 @@ class CotizacionScreenTest(private val idioma: String) {
     @Test
     fun elegirProductoMuestraLosProductosYPermiteElegir() {
         val elegidos = mutableListOf<String>()
-        mostrar(CotizacionUiState(), CotizacionAcciones(elegirProducto = { elegidos += it }))
+        mostrar(CotizacionUiState(fase = FaseCotizacion.ELEGIR_PRODUCTO), CotizacionAcciones(elegirProducto = { elegidos += it }))
 
         composeTestRule.onNode(hasText(texto(R.string.cotizacion_elegir_titulo)) and isHeading()).assertIsDisplayed()
-        val vidaBoton = texto(R.string.cotizacion_producto_accion, texto(R.string.cotizacion_producto_microseguro_vida))
-        composeTestRule.onNodeWithText(vidaBoton).assertHasClickAction().assertHeightIsAtLeast(48.dp).performClick()
-        composeTestRule.onNodeWithText(
-            texto(R.string.cotizacion_producto_accion, texto(R.string.cotizacion_producto_proteccion_dispositivos)),
-        ).assertIsDisplayed()
+        // Cada producto es una fila táctil con su nombre; el lector de pantalla anuncia «Cotizar <producto>».
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_producto_microseguro_vida))
+            .assertHasClickAction()
+            .assertHeightIsAtLeast(48.dp)
+            .performClick()
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_producto_proteccion_dispositivos)).assertIsDisplayed()
 
         assertEquals(listOf("microseguro_vida"), elegidos)
     }
@@ -144,7 +145,8 @@ class CotizacionScreenTest(private val idioma: String) {
             CotizacionAcciones(solicitar = { solicitudes++ }, volverAProductos = { cambios++ }),
         )
 
-        composeTestRule.onNodeWithText(texto(R.string.cotizacion_solicitar)).performScrollTo().performClick()
+        // «Calcular precio» va fijo al pie, fuera del área desplazable.
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_solicitar)).performClick()
         composeTestRule.onNodeWithText(texto(R.string.cotizacion_cambiar_producto)).performScrollTo().performClick()
 
         assertEquals(1, solicitudes)
@@ -156,6 +158,63 @@ class CotizacionScreenTest(private val idioma: String) {
         mostrar(CotizacionUiState(fase = FaseCotizacion.CARGANDO, producto = vida))
 
         composeTestRule.onNodeWithText(texto(R.string.cotizacion_cargando)).assertIsDisplayed()
+    }
+
+    @Test
+    fun laPortadaInvitaACotizarConLaTarjetaYLaAccion() {
+        var iniciadas = 0
+        mostrar(CotizacionUiState(), CotizacionAcciones(iniciarCotizacion = { iniciadas++ }), nombre = "Ana")
+
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_hero_titulo)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_hero_apoyo)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_nueva_cotizacion))
+            .assertHasClickAction()
+            .assertHeightIsAtLeast(48.dp)
+            .performClick()
+
+        assertEquals(1, iniciadas)
+    }
+
+    @Test
+    fun sinNombreLaPortadaSaludaConHola() {
+        mostrar(CotizacionUiState())
+
+        composeTestRule.onNode(hasText(texto(R.string.cotizacion_saludo_sin_nombre)) and isHeading()).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_inicio_apoyo)).assertIsDisplayed()
+    }
+
+    @Test
+    fun desdeLaPortadaSePuedeElegirUnProductoDirectamente() {
+        val elegidos = mutableListOf<String>()
+        mostrar(CotizacionUiState(), CotizacionAcciones(elegirProducto = { elegidos += it }))
+
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_producto_microseguro_vida)).performScrollTo().performClick()
+
+        assertEquals(listOf("microseguro_vida"), elegidos)
+    }
+
+    @Test
+    fun elInicioSaludaPorElPrimerNombreCuandoLoConoce() {
+        mostrar(CotizacionUiState(), nombre = "Ana María")
+
+        composeTestRule.onNode(hasText(texto(R.string.cotizacion_saludo, "Ana")) and isHeading()).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_seguros_disponibles)).assertIsDisplayed()
+    }
+
+    @Test
+    fun contratarYModificarDatosSonAccionesPulsablesDelResultado() {
+        var contratadas = 0
+        var modificadas = 0
+        mostrar(
+            resultado(),
+            CotizacionAcciones(aceptarOferta = { contratadas++ }, modificarDatos = { modificadas++ }),
+        )
+
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_aceptar)).assertHeightIsAtLeast(48.dp).performClick()
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_modificar)).assertHeightIsAtLeast(48.dp).performClick()
+
+        assertEquals(1, contratadas)
+        assertEquals(1, modificadas)
     }
 
     @Test

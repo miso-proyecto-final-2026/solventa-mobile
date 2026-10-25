@@ -145,6 +145,7 @@ class ResultadoScreenTest(private val idioma: String) {
         mostrar(estado("VERIFICADO"))
 
         composeTestRule.onNodeWithText(texto(R.string.resultado_aprobada_mensaje)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.resultado_aprobada_paso)).assertIsDisplayed()
         verificarAccesibilidad(R.string.resultado_aprobada_titulo, R.string.resultado_aprobada_accion)
 
         composeTestRule.onNodeWithText(texto(R.string.resultado_aprobada_accion)).performClick()
@@ -169,6 +170,9 @@ class ResultadoScreenTest(private val idioma: String) {
         mostrar(estado("RECHAZADO", intentos = 2))
 
         composeTestRule.onNodeWithText(texto(R.string.resultado_rechazada_guia)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.resultado_consejos_titulo)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.resultado_consejo_luz)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.resultado_consejo_reflejos)).assertIsDisplayed()
         composeTestRule.onNodeWithText(
             contexto.resources.getQuantityString(R.plurals.resultado_intentos_restantes, 2, 2),
         ).assertIsDisplayed()

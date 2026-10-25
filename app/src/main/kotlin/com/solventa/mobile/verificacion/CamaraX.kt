@@ -9,11 +9,26 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.Alignment
+import com.solventa.mobile.ui.componentes.BotonPrimario
+import com.solventa.mobile.ui.iconos.Iconos
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -103,17 +118,31 @@ fun CamaraX(
     }
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        AndroidView(
-            factory = { vista },
+        // Visor oscuro de 16 dp de radio con el marco guía encima (A2 y A3 del diseño).
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 320.dp, max = 480.dp)
-                .semantics { contentDescription = descripcion },
-        )
+                .heightIn(min = 236.dp)
+                .clip(MaterialTheme.shapes.large)
+                .background(FondoVisor),
+            contentAlignment = Alignment.Center,
+        ) {
+            AndroidView(
+                factory = { vista },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 236.dp, max = 420.dp)
+                    .semantics { contentDescription = descripcion },
+            )
+            MarcoGuia(frontal = frontal)
+        }
         if (fallo) {
             Text(stringResource(R.string.verificacion_camara_error), color = MaterialTheme.colorScheme.error)
         }
-        Button(
+        BotonPrimario(
+            texto = stringResource(R.string.verificacion_tomar_foto),
+            icono = Iconos.Camara,
+            habilitado = !fallo,
             onClick = {
                 val archivo = File.createTempFile("kyc_", ".jpg", contexto.cacheDir)
                 captura.takePicture(
@@ -132,13 +161,37 @@ fun CamaraX(
                     },
                 )
             },
-            enabled = !fallo,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-        ) {
-            Text(stringResource(R.string.verificacion_tomar_foto))
-        }
+        )
     }
 }
+
+/** Marco rectangular para el documento y óvalo punteado para el rostro, con una pista breve. */
+@Composable
+private fun BoxScope.MarcoGuia(frontal: Boolean) {
+    val color = MaterialTheme.colorScheme.primaryContainer
+    if (frontal) {
+        Canvas(modifier = Modifier.size(width = 200.dp, height = 252.dp)) {
+            drawOval(
+                color = color,
+                style = Stroke(width = 3.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 9.dp.toPx()))),
+            )
+        }
+    } else {
+        Box(
+            modifier = Modifier
+                .size(width = 300.dp, height = 188.dp)
+                .border(3.dp, color, RoundedCornerShape(14.dp)),
+        )
+    }
+    Text(
+        stringResource(if (frontal) R.string.verificacion_marco_rostro else R.string.verificacion_marco_documento),
+        style = MaterialTheme.typography.bodyMedium,
+        color = Color(0xFFE3F2F8),
+        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp),
+    )
+}
+
+private val FondoVisor = Color(0xFF1B2328)
 
 private const val ETIQUETA = "CamaraX"
 

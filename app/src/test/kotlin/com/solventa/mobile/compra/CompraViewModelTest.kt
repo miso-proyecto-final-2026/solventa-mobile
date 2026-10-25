@@ -307,6 +307,18 @@ class CompraViewModelTest {
 
         assertEquals(ErrorCompra.SIN_CONEXION, vm.estado().error)
     }
+
+    @Test
+    fun `lo que se teclea en la tarjeta queda acotado y sin letras`() {
+        val vm = viewModel()
+        vm.iniciar(cotizacion)
+        vm.cambiarTarjeta("4111-1111 1111 1111 1111 9999", "5", "12345a")
+
+        val tarjeta = vm.estado().tarjeta
+        assertEquals("4111111111111111111", tarjeta.numero)
+        assertEquals("05", tarjeta.vencimiento)
+        assertEquals("1234", tarjeta.cvv)
+    }
 }
 
 private typealias VM = CompraViewModel

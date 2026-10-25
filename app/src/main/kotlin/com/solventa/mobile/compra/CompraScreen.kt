@@ -299,17 +299,18 @@ private fun Pago(estado: CompraUiState, cotizacion: CotizacionResponse, acciones
             etiqueta = stringResource(R.string.compra_tarjeta_numero),
             error = if (ErrorTarjeta.NUMERO in estado.erroresTarjeta) stringResource(R.string.compra_error_numero) else null,
             teclado = teclado,
+            transformacion = AgrupadorDeTarjeta,
         )
         CampoTexto(
             valor = tarjeta.vencimiento,
-            onValorChange = { acciones.cambiarTarjeta(tarjeta.numero, formatearVencimiento(it), tarjeta.cvv) },
+            onValorChange = { acciones.cambiarTarjeta(tarjeta.numero, it, tarjeta.cvv) },
             etiqueta = stringResource(R.string.compra_tarjeta_vencimiento),
             error = if (ErrorTarjeta.VENCIMIENTO in estado.erroresTarjeta) stringResource(R.string.compra_error_vencimiento) else null,
             teclado = teclado,
         )
         CampoTexto(
             valor = tarjeta.cvv,
-            onValorChange = { acciones.cambiarTarjeta(tarjeta.numero, tarjeta.vencimiento, it.take(4)) },
+            onValorChange = { acciones.cambiarTarjeta(tarjeta.numero, tarjeta.vencimiento, it) },
             etiqueta = stringResource(R.string.compra_tarjeta_cvv),
             error = if (ErrorTarjeta.CVV in estado.erroresTarjeta) stringResource(R.string.compra_error_cvv) else null,
             teclado = teclado,
@@ -330,11 +331,8 @@ private fun PantallaProtegida() {
     }
 }
 
-/** `MM/AA`: inserta la barra sola después del mes. */
-internal fun formatearVencimiento(entrada: String): String {
-    val digitos = entrada.filter(Char::isDigit).take(4)
-    return if (digitos.length <= 2) digitos else digitos.substring(0, 2) + "/" + digitos.substring(2)
-}
+/** `MM/AA` con un mes válido; las reglas viven en [EntradaTarjeta]. */
+internal fun formatearVencimiento(entrada: String): String = EntradaTarjeta.vencimiento(entrada)
 
 @StringRes
 internal fun textoPaso(paso: String): Int = when (paso) {

@@ -1,5 +1,9 @@
 package com.solventa.mobile.compra
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import java.time.YearMonth
 import java.util.UUID
 
@@ -12,6 +16,54 @@ class DatosTarjeta(val numero: String = "", val vencimiento: String = "", val cv
 }
 
 enum class ErrorTarjeta { NUMERO, VENCIMIENTO, CVV }
+
+/**
+ * Qué se puede teclear en cada campo de la tarjeta: solo dígitos y con tope de largo. La validación completa (dígito de
+ * control, vencimiento no pasado) sigue siendo de [ValidadorTarjeta] al pagar.
+ */
+object EntradaTarjeta {
+    /** Las tarjetas van de 13 a 19 dígitos. */
+    const val MAXIMO_NUMERO = 19
+
+    /** 3 dígitos, o 4 en algunas marcas. */
+    const val MAXIMO_CVV = 4
+
+    fun numero(texto: String): String = texto.filter(Char::isDigit).take(MAXIMO_NUMERO)
+
+    fun cvv(texto: String): String = texto.filter(Char::isDigit).take(MAXIMO_CVV)
+
+    /**
+     * `MM/AA` con un mes válido: un primer dígito mayor que 1 completa el mes con cero («5» → «05») y un mes imposible
+     * («13», «00») no se acepta. La barra se agrega sola al pasar del mes.
+     */
+    fun vencimiento(texto: String): String {
+        var digitos = texto.filter(Char::isDigit).take(6)
+        if (digitos.isNotEmpty() && digitos[0] > '1') digitos = "0$digitos"
+        if (digitos.length >= 2) {
+            val mes = digitos.take(2).toInt()
+            if (mes !in 1..12) digitos = digitos.take(1)
+        }
+        digitos = digitos.take(4)
+        return if (digitos.length <= 2) digitos else digitos.substring(0, 2) + "/" + digitos.substring(2)
+    }
+}
+
+/** Muestra el número en grupos de 4 («4111 1111 1111 1111») sin cambiar lo que se guarda. */
+object AgrupadorDeTarjeta : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val original = text.text
+        val agrupado = original.chunked(4).joinToString(" ")
+        val mapa = object : OffsetMapping {
+            // Antes de cada dígito (salvo el primero de un grupo de 4) hay un espacio más.
+            override fun originalToTransformed(offset: Int): Int =
+                if (offset <= 0) 0 else (offset + (offset - 1) / 4).coerceAtMost(agrupado.length)
+
+            override fun transformedToOriginal(offset: Int): Int =
+                (offset - offset / 5).coerceIn(0, original.length)
+        }
+        return TransformedText(AnnotatedString(agrupado), mapa)
+    }
+}
 
 object ValidadorTarjeta {
     /** Validación local y barata para no gastar un intento de cobro: el servidor y la pasarela deciden de verdad. */

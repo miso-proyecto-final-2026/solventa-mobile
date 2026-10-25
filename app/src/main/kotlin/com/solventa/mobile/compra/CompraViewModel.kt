@@ -65,7 +65,10 @@ class CompraViewModel @JvmOverloads constructor(
     fun volverALaOferta() = _uiState.update { if (it.fase == FaseCompra.PAGO) it.copy(fase = FaseCompra.OFERTA) else it }
 
     fun cambiarTarjeta(numero: String, vencimiento: String, cvv: String) = _uiState.update {
-        it.copy(tarjeta = DatosTarjeta(numero.filter(Char::isDigit), vencimiento, cvv.filter(Char::isDigit)), erroresTarjeta = emptySet())
+        it.copy(
+            tarjeta = DatosTarjeta(EntradaTarjeta.numero(numero), EntradaTarjeta.vencimiento(vencimiento), EntradaTarjeta.cvv(cvv)),
+            erroresTarjeta = emptySet(),
+        )
     }
 
     fun pagar() {

@@ -28,12 +28,16 @@ class ConsentimientoScreenTest {
     fun muestraLaInformacionPreviaYNingunaAceptacionImplicita() {
         mostrar()
 
+        composeTestRule.onNodeWithText("Personaliza tus ofertas con tu autorización").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Open Finance").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("Open Data").performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithText("Para qué los usamos").performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithText("Tu derecho a revocar").performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription(
             "Aceptar el uso de mis datos de Open Finance y Open Data",
         ).assertIsEnabled()
-        composeTestRule.onNodeWithText("No por ahora").performScrollTo().assertIsDisplayed()
+        // Los botones de decisión van fijos al pie, fuera del área desplazable.
+        composeTestRule.onNodeWithText("Ahora no").assertIsDisplayed()
     }
 
     @Test
@@ -48,9 +52,9 @@ class ConsentimientoScreenTest {
     fun rechazarMuestraLaConfirmacionSinCompartirDatos() {
         mostrar()
 
-        composeTestRule.onNodeWithText("No por ahora").performScrollTo().performClick()
+        composeTestRule.onNodeWithText("Ahora no").performClick()
 
         composeTestRule.onNodeWithText("Continuarás sin compartir datos").performScrollTo().assertIsDisplayed()
-        composeTestRule.onNodeWithText("Continuar").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("Continuar").assertIsDisplayed()
     }
 }

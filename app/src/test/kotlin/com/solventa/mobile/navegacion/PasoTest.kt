@@ -12,7 +12,7 @@ class PasoTest {
     fun `solo las secciones principales muestran la barra inferior`() {
         val conBarra = Paso.entries.filter { it.conBarra }.toSet()
 
-        assertEquals(setOf(Paso.INICIO, Paso.COMPRA, Paso.CONFIGURACION, Paso.PRIVACIDAD), conBarra)
+        assertEquals(setOf(Paso.INICIO, Paso.COMPRA, Paso.PERFIL), conBarra)
     }
 
     @Test
@@ -22,10 +22,9 @@ class PasoTest {
     }
 
     @Test
-    fun `inicio es seguros y configuracion con privacidad es configuracion`() {
+    fun `inicio es seguros y perfil es perfil`() {
         assertEquals(Seccion.SEGUROS, Paso.INICIO.seccion)
-        assertEquals(Seccion.CONFIGURACION, Paso.CONFIGURACION.seccion)
-        assertEquals(Seccion.CONFIGURACION, Paso.PRIVACIDAD.seccion)
+        assertEquals(Seccion.PERFIL, Paso.PERFIL.seccion)
         assertNull(Paso.REGISTRO.seccion)
     }
 
@@ -39,8 +38,7 @@ class PasoTest {
 
     @Test
     fun `cambiar de pestana no reinicia la cotizacion en curso`() {
-        assertFalse(reiniciaSeguros(desde = Paso.CONFIGURACION, hacia = Paso.INICIO))
-        assertFalse(reiniciaSeguros(desde = Paso.PRIVACIDAD, hacia = Paso.INICIO))
+        assertFalse(reiniciaSeguros(desde = Paso.PERFIL, hacia = Paso.INICIO))
         assertFalse(reiniciaSeguros(desde = Paso.INICIO, hacia = Paso.INICIO))
     }
 
@@ -53,13 +51,12 @@ class PasoTest {
     @Test
     fun `ir a otro destino nunca reinicia seguros`() {
         assertFalse(reiniciaSeguros(desde = Paso.REGISTRO, hacia = Paso.CONSENTIMIENTO))
-        assertFalse(reiniciaSeguros(desde = Paso.INICIO, hacia = Paso.CONFIGURACION))
+        assertFalse(reiniciaSeguros(desde = Paso.INICIO, hacia = Paso.PERFIL))
     }
 
     @Test
     fun `volver a la raiz de cada seccion desde adentro`() {
-        assertEquals(Paso.CONFIGURACION, Paso.PRIVACIDAD.atras)
-        assertEquals(Paso.INICIO, Paso.CONFIGURACION.atras)
+        assertEquals(Paso.INICIO, Paso.PERFIL.atras)
         assertNull("INICIO deja que el sistema cierre la app", Paso.INICIO.atras)
         assertNull(Paso.REGISTRO.atras)
     }

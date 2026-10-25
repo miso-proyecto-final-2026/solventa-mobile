@@ -14,7 +14,7 @@
     <string name="registro_reintentar">Retry</string>
     <string name="registro_cargando">Creating your account…</string>
 
-    <string name="consentimiento_titulo">Your permission to use your data</string>
+    <string name="consentimiento_titulo">Personalize your offers with your authorization</string>
     <string name="consentimiento_finalidad_titulo">What we use it for</string>
     <string name="consentimiento_finalidad_v1">To personalize your insurance offers and quotes with your financial and public information.</string>
     <string name="consentimiento_datos_titulo">What data we look up</string>
@@ -28,7 +28,7 @@
     <string name="consentimiento_ver_detalle">View full legal text</string>
     <string name="consentimiento_ocultar_detalle">Hide legal text</string>
     <string name="consentimiento_detalle_legal_v1">Provisional legal text (version v1). I authorize Solventa to look up my Open Finance and Open Data information in order to personalize my insurance offers and quotes, in accordance with the personal data processing policy. The authorization remains valid until I revoke it, and I may do so at any time.</string>
-    <string name="consentimiento_aceptar">I agree</string>
+    <string name="consentimiento_aceptar">Authorize and continue</string>
     <string name="consentimiento_aceptar_descripcion">Agree to the use of my Open Finance and Open Data information</string>
     <string name="consentimiento_rechazar">Not now</string>
     <string name="consentimiento_cargando">Saving your permission…</string>
@@ -153,19 +153,17 @@
     <string name="cotizacion_nueva">Quote another insurance</string>
 
     <!-- Privacy and consent (HU07) -->
-    <string name="privacidad_abrir">Privacy and consent</string>
-    <string name="privacidad_titulo">Privacy</string>
+    <string name="privacidad_titulo">My consents</string>
     <string name="privacidad_consentimiento_titulo">Open Finance consent</string>
     <string name="privacidad_finalidad">Purpose: to personalize your quotes and profile your risk using your Open Finance and Open Data information.</string>
     <string name="privacidad_estado_otorgado">You have been sharing your data since %1$s.</string>
     <string name="privacidad_estado_revocado">You revoked your consent on %1$s. Your quotes use a default profile.</string>
     <string name="privacidad_estado_no_otorgado">You are not sharing your data yet. Your quotes use a default profile.</string>
     <string name="privacidad_revocar">Revoke consent</string>
-    <string name="privacidad_compartir">Share my data</string>
-    <string name="privacidad_volver">Back</string>
+    <string name="privacidad_compartir">Authorize again</string>
     <string name="privacidad_confirmar_titulo">Revoke your consent?</string>
     <string name="privacidad_confirmar_texto">We will stop using your Open Finance and Open Data information. Your next quotes will use a default profile and their price will be approximate. You can share your data again whenever you want.</string>
-    <string name="privacidad_confirmar_si">Yes, revoke</string>
+    <string name="privacidad_confirmar_si">Revoke</string>
     <string name="privacidad_confirmar_no">Cancel</string>
     <string name="privacidad_cargando">Checking your consent…</string>
     <string name="privacidad_revocando">Revoking your consent…</string>
@@ -177,10 +175,7 @@
     <string name="privacidad_sigue_vigente">We did not get a confirmation: your consent is still in effect.</string>
     <string name="privacidad_reintentar">Try again</string>
     <string name="privacidad_iniciar_sesion">Sign in</string>
-    <string name="nav_seguros">Insurance</string>
-    <string name="nav_configuracion">Settings</string>
-    <string name="configuracion_titulo">Settings</string>
-    <string name="configuracion_privacidad_detalle">View or revoke your Open Finance consent.</string>
+    <string name="nav_seguros">Home</string>
 
     <!-- Offer purchase (HU17) -->
     <string name="cotizacion_aceptar">Accept and subscribe</string>
@@ -268,5 +263,20 @@
     <string name="resultado_chequeo_documento">Identity document validated</string>
     <string name="resultado_chequeo_vida">Liveness check passed</string>
     <string name="resultado_chequeo_rostro">Face matches the document</string>
+
+    <!-- Consent and profile: Material 3 design (HU06, HU07) -->
+    <string name="consentimiento_barra">Your data, your decision</string>
+    <string name="consentimiento_apoyo">Solventa looks at your financial information only if you allow it, to calculate a price tailored to your profile.</string>
+    <string name="consentimiento_open_finance">Open Finance</string>
+    <string name="consentimiento_open_finance_detalle">Products and transactions from your financial institutions.</string>
+    <string name="consentimiento_open_data">Open Data</string>
+    <string name="consentimiento_open_data_detalle">Public sources to complete your risk profile.</string>
+    <string name="privacidad_intro">Here you see which data you authorized, and you can withdraw your permission whenever you want.</string>
+    <string name="privacidad_autorizar">Authorize</string>
+    <string name="privacidad_chip_activo">Active</string>
+    <string name="privacidad_chip_revocado">Revoked</string>
+    <string name="privacidad_chip_sin_otorgar">Not granted</string>
+    <string name="nav_polizas">Policies</string>
+    <string name="nav_perfil">Profile</string>
     <string name="resultado_aprobada_mensaje_nombre">All set, %1$s. You can now get quotes and buy your insurance on Solventa.</string>
 </resources>

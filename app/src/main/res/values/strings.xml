@@ -14,7 +14,7 @@
     <string name="registro_reintentar">Reintentar</string>
     <string name="registro_cargando">Creando tu cuenta…</string>
 
-    <string name="consentimiento_titulo">Tu autorización sobre tus datos</string>
+    <string name="consentimiento_titulo">Personaliza tus ofertas con tu autorización</string>
     <string name="consentimiento_finalidad_titulo">Para qué los usamos</string>
     <string name="consentimiento_finalidad_v1">Personalizar tus ofertas y cotizaciones de seguros con tu información financiera y pública.</string>
     <string name="consentimiento_datos_titulo">Qué datos consultamos</string>
@@ -28,9 +28,9 @@
     <string name="consentimiento_ver_detalle">Ver texto legal completo</string>
     <string name="consentimiento_ocultar_detalle">Ocultar texto legal</string>
     <string name="consentimiento_detalle_legal_v1">Texto legal provisional (versión v1). Autorizo a Solventa a consultar mis datos de Open Finance y Open Data con la finalidad de personalizar mis ofertas y cotizaciones de seguros, de acuerdo con la política de tratamiento de datos personales. La autorización permanece vigente hasta que la revoque y puedo hacerlo en cualquier momento.</string>
-    <string name="consentimiento_aceptar">Acepto</string>
+    <string name="consentimiento_aceptar">Autorizar y continuar</string>
     <string name="consentimiento_aceptar_descripcion">Aceptar el uso de mis datos de Open Finance y Open Data</string>
-    <string name="consentimiento_rechazar">No por ahora</string>
+    <string name="consentimiento_rechazar">Ahora no</string>
     <string name="consentimiento_cargando">Registrando tu autorización…</string>
     <string name="consentimiento_otorgado_titulo">Autorización registrada</string>
     <string name="consentimiento_otorgado_mensaje">Gracias. Usaremos tus datos para personalizar tus ofertas.</string>
@@ -153,19 +153,17 @@
     <string name="cotizacion_nueva">Cotizar otro seguro</string>
 
     <!-- Privacidad y consentimiento (HU07) -->
-    <string name="privacidad_abrir">Privacidad y consentimiento</string>
-    <string name="privacidad_titulo">Privacidad</string>
+    <string name="privacidad_titulo">Mis consentimientos</string>
     <string name="privacidad_consentimiento_titulo">Consentimiento Open Finance</string>
     <string name="privacidad_finalidad">Finalidad: personalizar tus cotizaciones y perfilar tu riesgo con tus datos de Open Finance y Open Data.</string>
     <string name="privacidad_estado_otorgado">Compartes tus datos desde el %1$s</string>
     <string name="privacidad_estado_revocado">Revocaste el consentimiento (%1$s). Tus cotizaciones usan un perfil por defecto.</string>
     <string name="privacidad_estado_no_otorgado">Aún no compartes tus datos. Tus cotizaciones usan un perfil por defecto.</string>
     <string name="privacidad_revocar">Revocar consentimiento</string>
-    <string name="privacidad_compartir">Compartir mis datos</string>
-    <string name="privacidad_volver">Volver</string>
+    <string name="privacidad_compartir">Volver a autorizar</string>
     <string name="privacidad_confirmar_titulo">¿Revocar el consentimiento?</string>
     <string name="privacidad_confirmar_texto">Dejaremos de usar tus datos de Open Finance y Open Data. Tus próximas cotizaciones usarán un perfil por defecto y su precio será aproximado. Puedes volver a compartirlos cuando quieras.</string>
-    <string name="privacidad_confirmar_si">Sí, revocar</string>
+    <string name="privacidad_confirmar_si">Revocar</string>
     <string name="privacidad_confirmar_no">Cancelar</string>
     <string name="privacidad_cargando">Consultando tu consentimiento…</string>
     <string name="privacidad_revocando">Revocando tu consentimiento…</string>
@@ -177,10 +175,7 @@
     <string name="privacidad_sigue_vigente">No recibimos la confirmación: tu consentimiento sigue vigente.</string>
     <string name="privacidad_reintentar">Reintentar</string>
     <string name="privacidad_iniciar_sesion">Iniciar sesión</string>
-    <string name="nav_seguros">Seguros</string>
-    <string name="nav_configuracion">Configuración</string>
-    <string name="configuracion_titulo">Configuración</string>
-    <string name="configuracion_privacidad_detalle">Consulta o revoca tu consentimiento Open Finance.</string>
+    <string name="nav_seguros">Inicio</string>
 
     <!-- Compra de la oferta (HU17) -->
     <string name="cotizacion_aceptar">Aceptar y suscribir</string>
@@ -268,5 +263,20 @@
     <string name="resultado_chequeo_documento">Documento de identidad validado</string>
     <string name="resultado_chequeo_vida">Prueba de vida superada</string>
     <string name="resultado_chequeo_rostro">Rostro coincide con el documento</string>
+
+    <!-- Consentimiento y perfil: diseño Material 3 (HU06, HU07) -->
+    <string name="consentimiento_barra">Tus datos, tu decisión</string>
+    <string name="consentimiento_apoyo">Solventa consulta tu información financiera solo si tú lo permites, para calcular un precio ajustado a tu perfil.</string>
+    <string name="consentimiento_open_finance">Open Finance</string>
+    <string name="consentimiento_open_finance_detalle">Productos y movimientos de tus entidades financieras.</string>
+    <string name="consentimiento_open_data">Open Data</string>
+    <string name="consentimiento_open_data_detalle">Fuentes públicas para completar tu perfil de riesgo.</string>
+    <string name="privacidad_intro">Aquí ves qué datos autorizaste y puedes retirar tu permiso cuando quieras.</string>
+    <string name="privacidad_autorizar">Autorizar</string>
+    <string name="privacidad_chip_activo">Activo</string>
+    <string name="privacidad_chip_revocado">Revocado</string>
+    <string name="privacidad_chip_sin_otorgar">Sin otorgar</string>
+    <string name="nav_polizas">Pólizas</string>
+    <string name="nav_perfil">Perfil</string>
     <string name="resultado_aprobada_mensaje_nombre">Listo, %1$s. Ya puedes cotizar y contratar tus seguros en Solventa.</string>
 </resources>

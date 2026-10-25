@@ -124,7 +124,7 @@ class PrivacidadScreenTest(private val idioma: String) {
         mostrar(estado(sinOtorgar))
 
         composeTestRule.onNodeWithText(texto(R.string.privacidad_estado_no_otorgado)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(texto(R.string.privacidad_compartir)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.privacidad_autorizar)).assertIsDisplayed()
         composeTestRule.onAllNodesWithText(texto(R.string.privacidad_revocar)).assertCountEquals(0)
     }
 
@@ -157,11 +157,11 @@ class PrivacidadScreenTest(private val idioma: String) {
     }
 
     @Test
-    fun mientras_revoca_muestra_el_progreso_y_bloquea_volver() {
+    fun mientras_revoca_muestra_el_progreso_y_no_ofrece_otra_accion() {
         mostrar(estado(fase = FasePrivacidad.REVOCANDO))
 
         composeTestRule.onNodeWithText(texto(R.string.privacidad_revocando)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(texto(R.string.privacidad_volver)).assertIsNotEnabled()
+        composeTestRule.onAllNodesWithText(texto(R.string.privacidad_revocar)).assertCountEquals(0)
     }
 
     @Test
@@ -206,8 +206,8 @@ class PrivacidadScreenTest(private val idioma: String) {
     fun si_no_hubo_confirmacion_el_consentimiento_sigue_mostrandose_vigente_con_aviso() {
         mostrar(estado().copy(error = ErrorPrivacidad.SIN_CONEXION, pendiente = AccionPrivacidad.REVOCAR))
 
-        composeTestRule.onNodeWithText(texto(R.string.privacidad_sigue_vigente)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(texto(R.string.privacidad_revocar)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.privacidad_sigue_vigente)).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.privacidad_revocar)).performScrollTo().assertIsDisplayed()
         composeTestRule.onAllNodesWithText(texto(R.string.privacidad_revocado_ok)).assertCountEquals(0)
     }
 
@@ -226,16 +226,13 @@ class PrivacidadScreenTest(private val idioma: String) {
     }
 
     @Test
-    fun compartir_y_volver_disparan_sus_acciones() {
+    fun volver_a_autorizar_dispara_su_accion() {
         var compartir = 0
-        var volver = 0
-        mostrar(estado(revocado), PrivacidadAcciones(compartirDatos = { compartir++ }, volver = { volver++ }))
+        mostrar(estado(revocado), PrivacidadAcciones(compartirDatos = { compartir++ }))
 
         composeTestRule.onNodeWithText(texto(R.string.privacidad_compartir)).performScrollTo().performClick()
-        composeTestRule.onNodeWithText(texto(R.string.privacidad_volver)).performScrollTo().performClick()
 
         assertEquals(1, compartir)
-        assertEquals(1, volver)
     }
 
     @Test
@@ -243,6 +240,5 @@ class PrivacidadScreenTest(private val idioma: String) {
         mostrar(estado())
 
         composeTestRule.onNodeWithText(texto(R.string.privacidad_revocar)).assertHeightIsAtLeast(48.dp)
-        composeTestRule.onNodeWithText(texto(R.string.privacidad_volver)).assertHeightIsAtLeast(48.dp)
     }
 }

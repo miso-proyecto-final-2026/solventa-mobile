@@ -287,7 +287,7 @@ private fun Cobertura(cobertura: CoberturaResponse, moneda: String, locale: Loca
 }
 
 @Composable
-private fun nombreCobertura(tipo: String): String =
+internal fun nombreCobertura(tipo: String): String =
     when (tipo) {
         "muerte" -> stringResource(R.string.cotizacion_cobertura_muerte)
         "incapacidad_total" -> stringResource(R.string.cotizacion_cobertura_incapacidad_total)

@@ -179,16 +179,14 @@
 
     <!-- Compra de la oferta (HU17) -->
     <string name="cotizacion_aceptar">Aceptar y suscribir</string>
-    <string name="compra_oferta_titulo">Resumen de tu oferta</string>
-    <string name="compra_producto">Producto</string>
-    <string name="compra_prima">Prima</string>
+    <string name="compra_oferta_titulo">Revisa antes de pagar</string>
+    <string name="compra_producto">Seguro</string>
     <string name="compra_terminos_titulo">Términos</string>
     <string name="compra_terminos_texto">Al suscribir autorizas el cobro de la prima con el medio de pago que indiques y aceptas las condiciones de la póliza, que incluyen las coberturas, los deducibles y la vigencia mostrados en esta oferta.</string>
-    <string name="compra_terminos_acepto">Acepto los términos de la oferta</string>
+    <string name="compra_terminos_acepto">Acepto las condiciones de la póliza</string>
     <string name="compra_terminos_pendiente">Debes aceptar los términos para continuar.</string>
-    <string name="compra_continuar">Continuar al pago</string>
-    <string name="compra_volver">Volver</string>
-    <string name="compra_pago_titulo">Medio de pago</string>
+    <string name="compra_continuar">Aceptar y pagar</string>
+    <string name="compra_pago_titulo">¿Cómo quieres pagar?</string>
     <string name="compra_pago_seguro">Tus datos de tarjeta no se guardan en la app ni en nuestros servidores: solo se envía un código de un solo uso.</string>
     <string name="compra_tarjeta_numero">Número de tarjeta</string>
     <string name="compra_tarjeta_vencimiento">Vencimiento (MM/AA)</string>
@@ -205,7 +203,7 @@
     <string name="compra_paso_firma">Firma</string>
     <string name="compra_paso_emision">Emitiendo tu póliza</string>
     <string name="compra_paso_otro">En proceso</string>
-    <string name="compra_exitosa_titulo">¡Compra confirmada!</string>
+    <string name="compra_exitosa_titulo">Pago confirmado</string>
     <string name="compra_exitosa_mensaje">Aprobamos tu solicitud y recibimos el pago. El siguiente paso es la firma de tu póliza.</string>
     <string name="compra_exitosa_accion">Listo</string>
     <string name="compra_rechazada_titulo">No pudimos aprobar tu solicitud</string>
@@ -279,4 +277,13 @@
     <string name="nav_polizas">Pólizas</string>
     <string name="nav_perfil">Perfil</string>
     <string name="resultado_aprobada_mensaje_nombre">Listo, %1$s. Ya puedes cotizar y contratar tus seguros en Solventa.</string>
+
+    <!-- Compra: diseño Material 3 (HU17) -->
+    <string name="compra_total">Total a pagar</string>
+    <string name="compra_oferta_barra">Confirma tu oferta</string>
+    <string name="compra_paso_oferta">Oferta</string>
+    <string name="compra_vigencia">Vigente hasta</string>
+    <string name="compra_pago_barra">Pago</string>
+    <string name="compra_paso_pago">Pago</string>
+    <string name="compra_metodo_tarjeta">Tarjeta de crédito o débito</string>
 </resources>

@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -75,10 +76,38 @@ class CompraScreenTest(private val idioma: String) {
 
         composeTestRule.onNode(isHeading() and androidx.compose.ui.test.hasText(texto(R.string.compra_oferta_titulo))).assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.compra_terminos_acepto)).performScrollTo().performClick()
-        composeTestRule.onNodeWithText(texto(R.string.compra_continuar)).performScrollTo().performClick()
+        // «Aceptar y pagar» va fijo al pie, fuera del área desplazable.
+        composeTestRule.onNodeWithText(texto(R.string.compra_continuar)).performClick()
 
         assertEquals(true, terminos)
         assertEquals(true, continuo)
+    }
+
+    @Test
+    fun laOfertaMuestraElPasoElResumenYElTotal() {
+        mostrar(estado(FaseCompra.OFERTA))
+
+        composeTestRule.onNodeWithText(texto(R.string.ui_paso_de, 1, 3, texto(R.string.compra_paso_oferta))).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.compra_oferta_titulo)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.compra_total)).performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun volverDesdeLaOfertaAvisaAlFlujo() {
+        var volvio = 0
+        mostrar(estado(FaseCompra.OFERTA), CompraAcciones(volver = { volvio++ }))
+
+        composeTestRule.onNodeWithContentDescription(texto(R.string.ui_volver)).performClick()
+
+        assertEquals(1, volvio)
+    }
+
+    @Test
+    fun elPagoDiceEnQuePasoVaYSoloOfreceTarjeta() {
+        mostrar(estado(FaseCompra.PAGO))
+
+        composeTestRule.onNodeWithText(texto(R.string.ui_paso_de, 2, 3, texto(R.string.compra_paso_pago))).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.compra_metodo_tarjeta)).assertIsDisplayed()
     }
 
     @Test

@@ -179,16 +179,14 @@
 
     <!-- Offer purchase (HU17) -->
     <string name="cotizacion_aceptar">Accept and subscribe</string>
-    <string name="compra_oferta_titulo">Your offer summary</string>
-    <string name="compra_producto">Product</string>
-    <string name="compra_prima">Premium</string>
+    <string name="compra_oferta_titulo">Review before paying</string>
+    <string name="compra_producto">Insurance</string>
     <string name="compra_terminos_titulo">Terms</string>
     <string name="compra_terminos_texto">By subscribing you authorize charging the premium to the payment method you provide and you accept the policy conditions, which include the coverages, deductibles and validity shown in this offer.</string>
-    <string name="compra_terminos_acepto">I accept the terms of the offer</string>
+    <string name="compra_terminos_acepto">I accept the policy conditions</string>
     <string name="compra_terminos_pendiente">You must accept the terms to continue.</string>
-    <string name="compra_continuar">Continue to payment</string>
-    <string name="compra_volver">Back</string>
-    <string name="compra_pago_titulo">Payment method</string>
+    <string name="compra_continuar">Accept and pay</string>
+    <string name="compra_pago_titulo">How do you want to pay?</string>
     <string name="compra_pago_seguro">Your card details are not stored in the app or on our servers: only a one-time code is sent.</string>
     <string name="compra_tarjeta_numero">Card number</string>
     <string name="compra_tarjeta_vencimiento">Expiry (MM/YY)</string>
@@ -205,7 +203,7 @@
     <string name="compra_paso_firma">Signature</string>
     <string name="compra_paso_emision">Issuing your policy</string>
     <string name="compra_paso_otro">In progress</string>
-    <string name="compra_exitosa_titulo">Purchase confirmed!</string>
+    <string name="compra_exitosa_titulo">Payment confirmed</string>
     <string name="compra_exitosa_mensaje">We approved your request and received the payment. The next step is signing your policy.</string>
     <string name="compra_exitosa_accion">Done</string>
     <string name="compra_rechazada_titulo">We could not approve your request</string>
@@ -279,4 +277,13 @@
     <string name="nav_polizas">Policies</string>
     <string name="nav_perfil">Profile</string>
     <string name="resultado_aprobada_mensaje_nombre">All set, %1$s. You can now get quotes and buy your insurance on Solventa.</string>
+
+    <!-- Purchase: Material 3 design (HU17) -->
+    <string name="compra_total">Total to pay</string>
+    <string name="compra_oferta_barra">Confirm your offer</string>
+    <string name="compra_paso_oferta">Offer</string>
+    <string name="compra_vigencia">Valid until</string>
+    <string name="compra_pago_barra">Payment</string>
+    <string name="compra_paso_pago">Payment</string>
+    <string name="compra_metodo_tarjeta">Credit or debit card</string>
 </resources>

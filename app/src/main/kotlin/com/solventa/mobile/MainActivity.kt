@@ -197,6 +197,8 @@ class MainActivity : ComponentActivity() {
                                             // Oferta vencida o rechazada: cotiza de nuevo; terminar también deja un formulario limpio.
                                             onCotizarDeNuevo = { visitaSeguros++; navegar(Paso.INICIO) },
                                             onTerminar = { visitaSeguros++; navegar(Paso.INICIO) },
+                                            // Atrás deja el resultado de la cotización tal como estaba.
+                                            onVolver = { navegar(Paso.INICIO) },
                                             onSesionVencida = {
                                                 SesionActual.cerrar()
                                                 alcance.launch { almacen.borrar() }

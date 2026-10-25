@@ -268,4 +268,5 @@
     <string name="resultado_chequeo_documento">Identity document validated</string>
     <string name="resultado_chequeo_vida">Liveness check passed</string>
     <string name="resultado_chequeo_rostro">Face matches the document</string>
+    <string name="resultado_aprobada_mensaje_nombre">All set, %1$s. You can now get quotes and buy your insurance on Solventa.</string>
 </resources>

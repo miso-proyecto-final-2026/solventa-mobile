@@ -140,6 +140,15 @@ class ResultadoScreenTest(private val idioma: String) {
     // -- criterio 1 --------------------------------------------------------------------------
 
     @Test
+    fun aprobadaSaludaAlClientePorSuPrimerNombre() {
+        SesionActual.iniciar("c1", "token", "Ana María")
+        servidor.consentimiento = "NO_OTORGADO"
+        mostrar(estado("VERIFICADO"))
+
+        composeTestRule.onNodeWithText(texto(R.string.resultado_aprobada_mensaje_nombre, "Ana")).assertIsDisplayed()
+    }
+
+    @Test
     fun aprobadaConfirmaYContinuarLlevaAlConsentimientoSiFalta() {
         servidor.consentimiento = "NO_OTORGADO"
         mostrar(estado("VERIFICADO"))

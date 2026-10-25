@@ -1,6 +1,7 @@
 package com.solventa.mobile.sesion
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.edit
 import java.io.File
 import java.nio.file.Files
 import kotlinx.coroutines.CoroutineScope
@@ -74,5 +75,39 @@ class AlmacenSesionDataStoreTest {
 
         cifrador.roto = false
         assertNull(almacen.leer())
+    }
+
+    @Test
+    fun `el nombre se recupera al reabrir`() = runTest {
+        almacen.guardar(Credenciales("c1", "token-123", "Ana María"))
+
+        assertEquals(Credenciales("c1", "token-123", "Ana María"), almacen.leer())
+    }
+
+    @Test
+    fun `en disco tampoco queda el nombre en claro`() = runTest {
+        almacen.guardar(Credenciales("c1", "token-123", "Nombre Secreto"))
+
+        assertFalse(String(archivo.readBytes(), Charsets.ISO_8859_1).contains("Nombre Secreto"))
+    }
+
+    @Test
+    fun `una sesion guardada sin nombre sigue siendo valida`() = runTest {
+        almacen.guardar(Credenciales("c1", "token-123"))
+
+        assertEquals(Credenciales("c1", "token-123", null), almacen.leer())
+    }
+
+    @Test
+    fun `un nombre que ya no se puede leer no descarta la sesion`() = runTest {
+        almacen.guardar(Credenciales("c1", "token-123", "Ana"))
+        // Solo el nombre queda ilegible: la sesión (cliente y token) sigue siendo utilizable.
+        datos.edit { it[androidx.datastore.preferences.core.stringPreferencesKey("nombre")] = "ilegible" }
+        val cifradorSelectivo = object : Cifrador {
+            override fun cifrar(texto: String) = cifrador.cifrar(texto)
+            override fun descifrar(cifrado: String) = if (cifrado == "ilegible") null else cifrador.descifrar(cifrado)
+        }
+
+        assertEquals(Credenciales("c1", "token-123", null), AlmacenSesionDataStore(datos, cifradorSelectivo).leer())
     }
 }

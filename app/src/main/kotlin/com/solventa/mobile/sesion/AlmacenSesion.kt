@@ -18,7 +18,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import kotlinx.coroutines.flow.first
 
-data class Credenciales(val clienteId: String, val accessToken: String)
+data class Credenciales(val clienteId: String, val accessToken: String, val nombre: String? = null)
 
 /**
  * Sesión guardada entre aperturas de la app, para que al reabrir se vea el resultado vigente de la
@@ -58,6 +58,8 @@ class AlmacenSesionDataStore(
         datos.edit {
             it[CLIENTE_ID] = cifrador.cifrar(credenciales.clienteId)
             it[ACCESS_TOKEN] = cifrador.cifrar(credenciales.accessToken)
+            // El nombre es opcional y también va cifrado: es un dato personal.
+            if (credenciales.nombre != null) it[NOMBRE] = cifrador.cifrar(credenciales.nombre) else it.remove(NOMBRE)
         }
     }
 
@@ -76,7 +78,9 @@ class AlmacenSesionDataStore(
             borrar()
             return null
         }
-        return Credenciales(clienteId, token)
+        // Sin nombre (sesión de una versión anterior) o con nombre ilegible la sesión sigue siendo válida.
+        val nombre = preferencias[NOMBRE]?.let(cifrador::descifrar)
+        return Credenciales(clienteId, token, nombre)
     }
 
     override suspend fun borrar() {
@@ -86,6 +90,7 @@ class AlmacenSesionDataStore(
     private companion object {
         val CLIENTE_ID = stringPreferencesKey("cliente_id")
         val ACCESS_TOKEN = stringPreferencesKey("access_token")
+        val NOMBRE = stringPreferencesKey("nombre")
     }
 }
 

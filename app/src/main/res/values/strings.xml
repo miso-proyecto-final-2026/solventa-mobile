@@ -213,8 +213,7 @@
     <string name="compra_revision_mensaje">Un asesor la revisará y te contactaremos con el resultado. No se hizo ningún cobro.</string>
     <string name="compra_revision_ajuste">Necesitamos ajustar tu oferta y un asesor la revisará contigo. No se hizo ningún cobro.</string>
     <string name="compra_cobro_rechazado_titulo">No pudimos cobrar tu pago</string>
-    <string name="compra_cobro_rechazado_mensaje">Tu medio de pago no fue aceptado. Puedes intentarlo con otro sin cotizar de nuevo.</string>
-    <string name="compra_otro_medio">Usar otro medio de pago</string>
+    <string name="compra_cobro_rechazado_mensaje">Tu medio de pago no fue aceptado y no se hizo ningún cobro.</string>
     <string name="compra_vencida_titulo">Tu oferta venció</string>
     <string name="compra_vencida_mensaje">El precio ya no está vigente. Cotiza de nuevo con los mismos datos y suscribe en minutos.</string>
     <string name="compra_cotizar_de_nuevo">Cotizar de nuevo</string>
@@ -299,4 +298,10 @@
     <string name="cotizacion_hero_titulo">Cotiza un seguro ahora</string>
     <string name="cotizacion_hero_apoyo">Dinos qué necesitas y te damos el precio al instante.</string>
     <string name="cotizacion_nueva_cotizacion">Nueva cotización</string>
+
+    <!-- Cobro (HU18) -->
+    <string name="compra_referencia">Referencia</string>
+    <string name="compra_fecha_pago">Fecha</string>
+    <string name="compra_cobro_motivo">Motivo: %1$s</string>
+    <string name="compra_cobro_plazo">Fecha límite para resolver el pago: %1$s</string>
 </resources>

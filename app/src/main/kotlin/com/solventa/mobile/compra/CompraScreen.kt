@@ -69,7 +69,6 @@ data class CompraAcciones(
     val cambiarTarjeta: (String, String, String) -> Unit = { _, _, _ -> },
     val pagar: () -> Unit = {},
     val reintentar: () -> Unit = {},
-    val otroMedioDePago: () -> Unit = {},
     val cotizarDeNuevo: () -> Unit = {},
     val terminar: () -> Unit = {},
     val sesionVencida: () -> Unit = {},
@@ -94,7 +93,6 @@ fun CompraRoute(
             cambiarTarjeta = viewModel::cambiarTarjeta,
             pagar = viewModel::pagar,
             reintentar = viewModel::reintentar,
-            otroMedioDePago = viewModel::usarOtroMedioDePago,
             cotizarDeNuevo = onCotizarDeNuevo,
             terminar = onTerminar,
             sesionVencida = onSesionVencida,
@@ -122,6 +120,7 @@ fun CompraScreen(estado: CompraUiState, acciones: CompraAcciones) {
             R.string.compra_exitosa_titulo,
             R.string.compra_exitosa_mensaje,
             R.string.compra_exitosa_accion to acciones.terminar,
+            detalle = { DatosDelPago(estado) },
         )
         FaseCompra.DECISION_RECHAZADA -> Resultado(
             Iconos.Exclamacion, Tono.ERROR,
@@ -140,7 +139,8 @@ fun CompraScreen(estado: CompraUiState, acciones: CompraAcciones) {
             Iconos.Exclamacion, Tono.ERROR,
             R.string.compra_cobro_rechazado_titulo,
             R.string.compra_cobro_rechazado_mensaje,
-            R.string.compra_otro_medio to acciones.otroMedioDePago,
+            R.string.resultado_entendido to acciones.terminar,
+            detalle = { DatosDelCobroRechazado(estado) },
         )
         FaseCompra.OFERTA_VENCIDA -> Resultado(
             Iconos.Informacion, Tono.NEUTRO,
@@ -399,6 +399,7 @@ private fun Resultado(
     @StringRes mensaje: Int,
     accion: Pair<Int, () -> Unit>,
     @StringRes apoyo: Int? = null,
+    detalle: @Composable () -> Unit = {},
 ) {
     val (fondo, color, descripcion) = when (tono) {
         Tono.EXITO -> Triple(SolventaColorScheme.tertiaryContainer, SolventaColorScheme.onTertiaryContainer, R.string.resultado_icono_exito)
@@ -429,10 +430,41 @@ private fun Resultado(
                         textAlign = TextAlign.Center,
                     )
                 }
+                detalle()
             }
         }
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp)) {
             BotonPrimario(stringResource(accion.first), onClick = accion.second)
+        }
+    }
+}
+
+/** Referencia y fecha del pago, tal como las entrega la pasarela (E3). Si no llegan, no se muestra nada. */
+@Composable
+private fun DatosDelPago(estado: CompraUiState) {
+    val locale = LocalConfiguration.current.locales[0]
+    val filas = buildList {
+        estado.referenciaPago?.let { add(stringResource(R.string.compra_referencia) to it) }
+        estado.fechaPago?.let { add(stringResource(R.string.compra_fecha_pago) to FormatoCotizacion.vigencia(it, locale)) }
+    }
+    if (filas.isNotEmpty()) ListaDetalle(filas)
+}
+
+/** Motivo que da la pasarela y fecha límite del período de gracia; qué hacer después lo define HU19. */
+@Composable
+private fun DatosDelCobroRechazado(estado: CompraUiState) {
+    val locale = LocalConfiguration.current.locales[0]
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        estado.motivoCobro?.let {
+            Text(stringResource(R.string.compra_cobro_motivo, it), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+        }
+        estado.graciaHasta?.let {
+            Text(
+                stringResource(R.string.compra_cobro_plazo, FormatoCotizacion.vigencia(it, locale)),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }

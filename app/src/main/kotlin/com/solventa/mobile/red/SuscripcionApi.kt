@@ -9,18 +9,37 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-/** Nunca el número de tarjeta: `metodoPago` es el token de un solo uso de la pasarela (HU17, criterio 3). */
+/**
+ * Nunca el número de tarjeta: `metodoPago` es el token de un solo uso de la pasarela (HU17, criterio 3).
+ * `periodicidadPago` es ANUAL o MENSUAL (HU18 cobra el primer período); sin valor por defecto para que viaje siempre.
+ */
 @Serializable
 data class SolicitudSuscripcion(
     @SerialName("cotizacion_id") val cotizacionId: String,
     @SerialName("metodo_pago") val metodoPago: String,
     @SerialName("acepta_terminos") val aceptaTerminos: Boolean,
+    @SerialName("periodicidad_pago") val periodicidadPago: String,
 )
 
 @Serializable
 data class DecisionResponse(
     val decision: String,
     val motivos: List<String> = emptyList(),
+)
+
+/**
+ * Resultado del cobro según MS Pagos (HU18). Un rechazo no cambia el estado de la saga: sigue `APROBADA` en el paso
+ * `COBRO` y aquí vienen el motivo y la fecha límite del período de gracia. Nunca incluye el token ni la tarjeta.
+ */
+@Serializable
+data class CobroResponse(
+    val estado: String,
+    @SerialName("transaccion_id") val transaccionId: String? = null,
+    @SerialName("referencia_pasarela") val referenciaPasarela: String? = null,
+    val codigo: String? = null,
+    val motivo: String? = null,
+    @SerialName("gracia_hasta") val graciaHasta: String? = null,
+    @SerialName("resuelto_en") val resueltoEn: String? = null,
 )
 
 /** Estado de la saga de MS Suscripción (HU15). Los campos que la app no conoce se ignoran. */
@@ -33,6 +52,7 @@ data class SuscripcionResponse(
     val pasos: List<String> = emptyList(),
     val moneda: String = "COP",
     val decision: DecisionResponse? = null,
+    val cobro: CobroResponse? = null,
     @SerialName("revision_asistida") val revisionAsistida: Boolean = false,
 )
 

@@ -11,6 +11,9 @@ import java.io.InterruptedIOException
 import kotlinx.serialization.json.Json
 import retrofit2.Response
 
+/** Hoy la app cobra el primer año; el cliente aún no elige entre anual y mensual. */
+const val PERIODICIDAD_ANUAL = "ANUAL"
+
 /**
  * Inicia y consulta la saga de suscripción (HU15). El envío es idempotente por la clave del intento: ante un
  * corte de conexión se repite una vez con la misma clave y el servidor devuelve la misma saga, sin cobrar dos
@@ -38,7 +41,7 @@ class SuscripcionRepository(
 
     suspend fun iniciar(cotizacionId: String, tokenPago: String, claveIdempotencia: String): Resultado {
         val token = sesion.accessToken ?: return Resultado.SinSesion
-        val solicitud = SolicitudSuscripcion(cotizacionId, tokenPago, aceptaTerminos = true)
+        val solicitud = SolicitudSuscripcion(cotizacionId, tokenPago, aceptaTerminos = true, periodicidadPago = PERIODICIDAD_ANUAL)
         return intentar(reintentosDisponibles = 1) { api.iniciar("Bearer $token", claveIdempotencia, solicitud) }
     }
 

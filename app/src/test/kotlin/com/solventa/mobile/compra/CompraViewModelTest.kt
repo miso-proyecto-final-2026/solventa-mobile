@@ -1,5 +1,6 @@
 package com.solventa.mobile.compra
 
+import com.solventa.mobile.red.CobroResponse
 import com.solventa.mobile.red.CotizacionResponse
 import com.solventa.mobile.red.DecisionResponse
 import com.solventa.mobile.red.SuscripcionResponse
@@ -17,6 +18,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -49,8 +51,13 @@ class CompraViewModelTest {
         vigenteHasta = "2026-11-17T23:49:58Z",
     )
 
-    private fun saga(estado: String, paso: String = "DECISION", decision: String? = null, motivos: List<String> = emptyList()) =
-        SuscripcionResponse("s1", "q1", estado, paso, decision = decision?.let { DecisionResponse(it, motivos) })
+    private fun saga(
+        estado: String,
+        paso: String = "DECISION",
+        decision: String? = null,
+        motivos: List<String> = emptyList(),
+        cobro: CobroResponse? = null,
+    ) = SuscripcionResponse("s1", "q1", estado, paso, decision = decision?.let { DecisionResponse(it, motivos) }, cobro = cobro)
 
     private fun exito(saga: SuscripcionResponse) = SuscripcionRepository.Resultado.Exito(saga)
 
@@ -178,25 +185,50 @@ class CompraViewModelTest {
     }
 
     @Test
-    fun `un cobro rechazado permite otro medio de pago con una clave nueva sin cotizar de nuevo`() = runTest {
-        coEvery { repository.iniciar("q1", "tok_1", "clave-1") } returns exito(saga("RECHAZADA", "COBRO", "APROBADA"))
-        coEvery { repository.iniciar("q1", "tok_2", "clave-2") } returns exito(saga("COBRO_REALIZADO", "FIRMA", "APROBADA"))
-        coEvery { tokenizador.tokenizar(any()) } returnsMany listOf("tok_1", "tok_2")
+    fun `un cobro rechazado muestra el motivo y el plazo y no ofrece pagar de nuevo`() = runTest {
+        val cobro = CobroResponse("RECHAZADO", "t1", null, "FONDOS_INSUFICIENTES", "Fondos insuficientes", "2026-10-28T12:00:05Z", "2026-10-25T12:00:05Z")
+        coEvery { repository.iniciar(any(), any(), any()) } returns exito(saga("APROBADA", "COBRO", "APROBADA", cobro = cobro))
         val vm = viewModel()
+
         vm.pagarConTarjetaValida()
         advanceUntilIdle()
-        assertEquals(FaseCompra.COBRO_RECHAZADO, vm.estado().fase)
 
-        vm.usarOtroMedioDePago()
-        assertEquals(FaseCompra.PAGO, vm.estado().fase)
-        assertEquals("q1", vm.estado().cotizacion?.id)
-        assertTrue(vm.estado().aceptaTerminos)
-        vm.cambiarTarjeta("5555555555554444", "11/29", "321")
-        vm.pagar()
+        assertEquals(FaseCompra.COBRO_RECHAZADO, vm.estado().fase)
+        assertEquals("Fondos insuficientes", vm.estado().motivoCobro)
+        assertEquals("2026-10-28T12:00:05Z", vm.estado().graciaHasta)
+        // El servidor deja la saga esperando a HU19: la app no reenvía el pago (daría 409, oferta en curso).
+        coVerify(exactly = 1) { repository.iniciar(any(), any(), any()) }
+    }
+
+    @Test
+    fun `el rechazo del cobro se detecta aunque llegue despues de seguir la saga`() = runTest {
+        val cobro = CobroResponse("RECHAZADO", "t1", null, "FONDOS_INSUFICIENTES", "Fondos insuficientes", null, null)
+        coEvery { repository.iniciar(any(), any(), any()) } returns exito(saga("APROBADA", "COBRO", "APROBADA"))
+        coEvery { repository.consultar("s1") } returnsMany listOf(
+            exito(saga("APROBADA", "COBRO", "APROBADA")),
+            exito(saga("APROBADA", "COBRO", "APROBADA", cobro = cobro)),
+        )
+        val vm = viewModel()
+
+        vm.pagarConTarjetaValida()
+        advanceUntilIdle()
+
+        assertEquals(FaseCompra.COBRO_RECHAZADO, vm.estado().fase)
+        assertNull(vm.estado().error)
+    }
+
+    @Test
+    fun `el pago confirmado guarda la referencia y la fecha`() = runTest {
+        val cobro = CobroResponse("APROBADO", "t1", "SIM-0000A1B2C3", null, null, null, "2026-10-25T12:00:05Z")
+        coEvery { repository.iniciar(any(), any(), any()) } returns exito(saga("COBRO_REALIZADO", "FIRMA", "APROBADA", cobro = cobro))
+        val vm = viewModel()
+
+        vm.pagarConTarjetaValida()
         advanceUntilIdle()
 
         assertEquals(FaseCompra.EXITOSA, vm.estado().fase)
-        coVerify { repository.iniciar("q1", "tok_2", "clave-2") }
+        assertEquals("SIM-0000A1B2C3", vm.estado().referenciaPago)
+        assertEquals("2026-10-25T12:00:05Z", vm.estado().fechaPago)
     }
 
     @Test

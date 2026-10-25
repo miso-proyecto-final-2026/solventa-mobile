@@ -65,7 +65,7 @@ class SuscripcionRepositoryTest {
         assertEquals(SuscripcionRepository.Resultado.Exito(saga), resultado)
         assertEquals("Bearer token-123", autorizacion.captured)
         assertEquals("clave-1", clave.captured)
-        assertEquals(SolicitudSuscripcion("q1", "tok_1", aceptaTerminos = true), solicitud.captured)
+        assertEquals(SolicitudSuscripcion("q1", "tok_1", aceptaTerminos = true, periodicidadPago = "ANUAL"), solicitud.captured)
     }
 
     @Test

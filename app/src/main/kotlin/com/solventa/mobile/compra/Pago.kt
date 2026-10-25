@@ -50,7 +50,22 @@ interface TokenizadorPago {
     suspend fun tokenizar(tarjeta: DatosTarjeta): String
 }
 
-/** Pasarela simulada (T4): el token no contiene ni deriva nada de la tarjeta. */
+/**
+ * Pasarela simulada (T4): el token no contiene ni deriva nada de la tarjeta, salvo el modo de la pasarela simulada de
+ * MS Pagos, que se elige por el prefijo (`tok_sim_<modo>_…`). Tres tarjetas de prueba, como en un sandbox real, activan
+ * esos modos para probar en staging los casos de rechazo, respuesta perdida y demora; cualquier otra aprueba.
+ */
 class TokenizadorSimulado(private val generar: () -> String = { UUID.randomUUID().toString() }) : TokenizadorPago {
-    override suspend fun tokenizar(tarjeta: DatosTarjeta): String = "tok_sim_" + generar()
+    override suspend fun tokenizar(tarjeta: DatosTarjeta): String {
+        val modo = MODOS_DE_PRUEBA[tarjeta.numero]
+        return if (modo == null) "tok_sim_" + generar() else "tok_sim_${modo}_" + generar()
+    }
+
+    private companion object {
+        val MODOS_DE_PRUEBA = mapOf(
+            "4000000000000002" to "rechazar",
+            "4000000000000119" to "perder",
+            "4000000000000259" to "tardar",
+        )
+    }
 }

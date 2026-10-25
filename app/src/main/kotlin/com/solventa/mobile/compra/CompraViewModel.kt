@@ -17,7 +17,8 @@ import kotlinx.coroutines.launch
 /**
  * Compra de la oferta (HU17): resumen y términos → medio de pago → seguimiento de la saga → resultado. No calcula
  * precios: muestra los de MS Cotización. Cada intento de compra tiene su clave de idempotencia; se conserva mientras
- * el cliente repite el mismo intento (corte de conexión) y cambia cuando elige otro medio de pago.
+ * el cliente repite el mismo intento (corte de conexión). Tras un cobro rechazado no se reintenta desde la app: el
+ * servidor deja la saga esperando a HU19 y un envío nuevo para la misma oferta daría 409.
  */
 class CompraViewModel @JvmOverloads constructor(
     private val repository: SuscripcionRepository = SuscripcionRepository(),
@@ -109,16 +110,6 @@ class CompraViewModel @JvmOverloads constructor(
         }
     }
 
-    /** Tras un cobro rechazado: otro medio de pago, mismo resumen y nueva clave, sin cotizar de nuevo. */
-    fun usarOtroMedioDePago() {
-        if (_uiState.value.fase != FaseCompra.COBRO_RECHAZADO) return
-        trabajo?.cancel()
-        claveIdempotencia = null
-        tokenPago = null
-        suscripcionId = null
-        _uiState.update { it.copy(fase = FaseCompra.PAGO, tarjeta = DatosTarjeta(), erroresTarjeta = emptySet(), error = null) }
-    }
-
     private suspend fun enviar(cotizacionId: String) {
         val token = tokenPago ?: return
         val clave = claveIdempotencia ?: return
@@ -167,12 +158,15 @@ class CompraViewModel @JvmOverloads constructor(
                 return false
             }
 
-            ProgresoCompra.Exitosa -> _uiState.update { it.copy(fase = FaseCompra.EXITOSA) }
+            is ProgresoCompra.Exitosa ->
+                _uiState.update { it.copy(fase = FaseCompra.EXITOSA, referenciaPago = progreso.referencia, fechaPago = progreso.fecha) }
             is ProgresoCompra.DecisionRechazada ->
                 _uiState.update { it.copy(fase = FaseCompra.DECISION_RECHAZADA, motivos = progreso.motivos) }
             is ProgresoCompra.EnRevision ->
                 _uiState.update { it.copy(fase = FaseCompra.EN_REVISION, ajustada = progreso.ajustada) }
-            ProgresoCompra.CobroRechazado -> _uiState.update { it.copy(fase = FaseCompra.COBRO_RECHAZADO) }
+            is ProgresoCompra.CobroRechazado -> _uiState.update {
+                it.copy(fase = FaseCompra.COBRO_RECHAZADO, motivoCobro = progreso.motivo, graciaHasta = progreso.graciaHasta)
+            }
             ProgresoCompra.Fallida -> _uiState.update { it.copy(fase = FaseCompra.ERROR, error = ErrorCompra.SERVICIO) }
         }
         return true

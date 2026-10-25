@@ -116,7 +116,7 @@ class VerificacionScreenTest {
         mostrar(viewModel("VERIFICADO"))
 
         composeTestRule.onNodeWithText(texto(R.string.verificacion_anverso_titulo)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(texto(R.string.verificacion_progreso, 1, 4)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.ui_paso_de, 2, 3, texto(R.string.verificacion_paso_documento))).assertIsDisplayed()
         capturarYUsar()
         composeTestRule.onNodeWithText(texto(R.string.verificacion_reverso_titulo)).assertIsDisplayed()
         capturarYUsar()

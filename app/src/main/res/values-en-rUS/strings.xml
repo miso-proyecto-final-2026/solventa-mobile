@@ -39,20 +39,19 @@
     <string name="consentimiento_rechazado_mensaje">Your quotes will use a default profile. You can change this later.</string>
     <string name="consentimiento_continuar">Continue</string>
 
-    <string name="verificacion_titulo">Identity verification</string>
-    <string name="verificacion_progreso">Step %1$d of %2$d</string>
+    <string name="verificacion_titulo">Verify your identity</string>
     <string name="verificacion_permiso_explicacion">We use the camera to photograph your ID document and take a selfie. This confirms you are who you say you are. Images are sent encrypted and are not saved to your gallery.</string>
     <string name="verificacion_permiso_denegado">Without camera access we cannot verify your identity. Enable it in Settings > Permissions > Camera and come back to this screen.</string>
     <string name="verificacion_permitir_camara">Allow camera</string>
     <string name="verificacion_abrir_ajustes">Open settings</string>
-    <string name="verificacion_anverso_titulo">Front of your document</string>
+    <string name="verificacion_anverso_titulo">Photograph your document</string>
     <string name="verificacion_anverso_instruccion">Place the front of the document inside the frame, with good light and no glare.</string>
     <string name="verificacion_anverso_camara">Camera view for the front of the document</string>
     <string name="verificacion_reverso_titulo">Back of your document</string>
     <string name="verificacion_reverso_instruccion">Now photograph the back of the document, with good light and no glare.</string>
     <string name="verificacion_reverso_camara">Camera view for the back of the document</string>
-    <string name="verificacion_selfie_titulo">Selfie with liveness check</string>
-    <string name="verificacion_selfie_instruccion">Look at the camera with your face uncovered and well lit.</string>
+    <string name="verificacion_selfie_titulo">Look at the camera</string>
+    <string name="verificacion_selfie_instruccion">Center your face in the oval and follow the instructions.</string>
     <string name="verificacion_selfie_camara">Front camera view for your selfie</string>
     <string name="verificacion_reto_vida">Turn your head to the left and take the photo.</string>
     <string name="verificacion_tomar_foto">Take photo</string>
@@ -87,11 +86,11 @@
     <string name="resultado_error_conexion">No connection. Check your network and try again.</string>
     <string name="resultado_error_inesperado">Something went wrong while checking the result. Please try again in a few minutes.</string>
     <string name="resultado_reintentar_consulta">Try again</string>
-    <string name="resultado_aprobada_titulo">All set! We verified your identity</string>
-    <string name="resultado_aprobada_mensaje">Your identity is confirmed. You can now move on to the next step.</string>
+    <string name="resultado_aprobada_titulo">Identity verified</string>
+    <string name="resultado_aprobada_mensaje">All set. You can now get quotes and buy your insurance on Solventa.</string>
     <string name="resultado_aprobada_accion">Continue</string>
-    <string name="resultado_rechazada_titulo">We could not verify your identity</string>
-    <string name="resultado_rechazada_guia">Take the photos again and make sure your whole document is readable without glare, the lighting is good, and your face is seen from the front without accessories.</string>
+    <string name="resultado_rechazada_titulo">We could not verify you</string>
+    <string name="resultado_rechazada_guia">We could not read your photos well or confirm it is you. You can try again.</string>
     <plurals name="resultado_intentos_restantes">
         <item quantity="one">You have %1$d attempt left.</item>
         <item quantity="other">You have %1$d attempts left.</item>
@@ -248,4 +247,25 @@
     <string name="registro_password_ayuda">At least 8 characters, with letters and numbers</string>
     <string name="registro_mostrar_password">Show password</string>
     <string name="registro_ocultar_password">Hide password</string>
+
+    <!-- Verification and result: Material 3 design (HU02, HU03) -->
+    <string name="verificacion_permiso_titulo">Allow camera access</string>
+    <string name="verificacion_paso_documento">Document</string>
+    <string name="verificacion_paso_vida">Liveness check</string>
+    <string name="verificacion_marco_documento">Fit the document inside the frame</string>
+    <string name="verificacion_marco_rostro">Center your face in the oval</string>
+    <string name="verificacion_aviso_documento">Next we will ask for the back and a selfie. It takes less than 2 minutes.</string>
+    <string name="verificacion_privacidad">Your image is sent encrypted to our verification provider and is not shared with third parties.</string>
+    <string name="verificacion_parte_frente">Front of the document</string>
+    <string name="verificacion_parte_reverso">Back of the document</string>
+    <string name="resultado_aprobada_paso">Step 3 of 3</string>
+    <string name="resultado_consejos_titulo">FOR THE NEXT ATTEMPT</string>
+    <string name="resultado_consejo_luz">Find a place with even light</string>
+    <string name="resultado_consejo_reflejos">Avoid shadows and glare on the document</string>
+    <string name="resultado_icono_exito">Verification successful</string>
+    <string name="resultado_icono_aviso">Verification not completed</string>
+    <string name="resultado_icono_info">Information</string>
+    <string name="resultado_chequeo_documento">Identity document validated</string>
+    <string name="resultado_chequeo_vida">Liveness check passed</string>
+    <string name="resultado_chequeo_rostro">Face matches the document</string>
 </resources>

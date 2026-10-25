@@ -54,4 +54,29 @@ class PagoTest {
 
         assertEquals("tok_sim_abc", token)
     }
+
+    @Test
+    fun `las tarjetas de prueba eligen el modo de la pasarela simulada por el prefijo del token`() = runTest {
+        val tokenizador = TokenizadorSimulado { "abc" }
+
+        assertEquals("tok_sim_rechazar_abc", tokenizador.tokenizar(tarjeta(numero = "4000000000000002")))
+        assertEquals("tok_sim_perder_abc", tokenizador.tokenizar(tarjeta(numero = "4000000000000119")))
+        assertEquals("tok_sim_tardar_abc", tokenizador.tokenizar(tarjeta(numero = "4000000000000259")))
+        assertEquals("tok_sim_abc", tokenizador.tokenizar(tarjeta(numero = "4111111111111111")))
+    }
+
+    @Test
+    fun `el token con prefijo de modo tampoco contiene datos de la tarjeta`() = runTest {
+        val token = TokenizadorSimulado { "abc" }.tokenizar(tarjeta(numero = "4000000000000002", cvv = "987"))
+
+        assertFalse(token.contains("4000000000000002"))
+        assertFalse(token.contains("987"))
+    }
+
+    @Test
+    fun `las tarjetas de prueba pasan la validacion local`() {
+        listOf("4000000000000002", "4000000000000119", "4000000000000259").forEach {
+            assertTrue(it, ValidadorTarjeta.validar(tarjeta(numero = it), hoy).isEmpty())
+        }
+    }
 }

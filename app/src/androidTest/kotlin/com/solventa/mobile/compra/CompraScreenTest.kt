@@ -153,14 +153,28 @@ class CompraScreenTest(private val idioma: String) {
     }
 
     @Test
-    fun elCobroRechazadoOfreceOtroMedioDePago() {
-        var otro = false
-        mostrar(estado(FaseCompra.COBRO_RECHAZADO), CompraAcciones(otroMedioDePago = { otro = true }))
+    fun elCobroRechazadoExplicaElMotivoYElPlazoSinReintentar() {
+        var terminado = 0
+        mostrar(
+            estado(FaseCompra.COBRO_RECHAZADO) { copy(motivoCobro = "Fondos insuficientes", graciaHasta = "2026-10-28T12:00:05Z") },
+            CompraAcciones(terminar = { terminado++ }),
+        )
 
         composeTestRule.onNodeWithText(texto(R.string.compra_cobro_rechazado_titulo)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(texto(R.string.compra_otro_medio)).performClick()
+        composeTestRule.onNodeWithText(texto(R.string.compra_cobro_motivo, "Fondos insuficientes")).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Fondos insuficientes", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.resultado_entendido)).performClick()
 
-        assertEquals(true, otro)
+        assertEquals(1, terminado)
+    }
+
+    @Test
+    fun elPagoConfirmadoMuestraLaReferenciaYLaFecha() {
+        mostrar(estado(FaseCompra.EXITOSA) { copy(referenciaPago = "SIM-0000A1B2C3", fechaPago = "2026-10-25T12:00:05Z") })
+
+        composeTestRule.onNodeWithText(texto(R.string.compra_referencia)).assertIsDisplayed()
+        composeTestRule.onNodeWithText("SIM-0000A1B2C3").assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.compra_fecha_pago)).assertIsDisplayed()
     }
 
     @Test

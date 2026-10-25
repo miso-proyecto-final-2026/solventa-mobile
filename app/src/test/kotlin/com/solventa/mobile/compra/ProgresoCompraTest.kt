@@ -34,7 +34,7 @@ class ProgresoCompraTest {
     @Test
     fun `cobro realizado y los estados posteriores son compra exitosa`() {
         listOf("COBRO_REALIZADO", "FIRMADA", "EMITIDA").forEach {
-            assertEquals(it, ProgresoCompra.Exitosa, ProgresoCompra.de(saga(it, "FIRMA", "APROBADA")))
+            assertEquals(it, ProgresoCompra.Exitosa(null, null), ProgresoCompra.de(saga(it, "FIRMA", "APROBADA")))
         }
     }
 
@@ -47,7 +47,7 @@ class ProgresoCompraTest {
 
     @Test
     fun `rechazada en el cobro es cobro rechazado`() {
-        assertEquals(ProgresoCompra.CobroRechazado, ProgresoCompra.de(saga("RECHAZADA", "COBRO", "APROBADA")))
+        assertEquals(ProgresoCompra.CobroRechazado(null, null), ProgresoCompra.de(saga("RECHAZADA", "COBRO", "APROBADA")))
     }
 
     @Test

@@ -37,5 +37,11 @@ data class CompraUiState(
     val paso: String = "DECISION",
     val motivos: List<String> = emptyList(),
     val ajustada: Boolean = false,
+    /** Referencia y fecha del pago confirmado, tal como las entrega la pasarela. */
+    val referenciaPago: String? = null,
+    val fechaPago: String? = null,
+    /** Motivo y fecha límite del cobro rechazado (período de gracia). */
+    val motivoCobro: String? = null,
+    val graciaHasta: String? = null,
     val error: ErrorCompra? = null,
 )

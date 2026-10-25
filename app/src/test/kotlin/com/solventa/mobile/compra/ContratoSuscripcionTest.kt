@@ -29,6 +29,20 @@ class ContratoSuscripcionTest {
     }
 
     @Test
+    fun `el cobro aprobado trae la referencia y la fecha del pago`() {
+        val progreso = ProgresoCompra.de(saga("suscripcion_cobro_aprobado.json"))
+
+        assertEquals(ProgresoCompra.Exitosa("SIM-0000A1B2C3", "2026-10-25T12:00:05Z"), progreso)
+    }
+
+    @Test
+    fun `el cobro rechazado llega con la saga aprobada en el cobro y trae motivo y plazo`() {
+        val progreso = ProgresoCompra.de(saga("suscripcion_cobro_rechazado.json"))
+
+        assertEquals(ProgresoCompra.CobroRechazado("Fondos insuficientes", "2026-10-28T12:00:05Z"), progreso)
+    }
+
+    @Test
     fun `derivada a revision asistida`() {
         assertEquals(ProgresoCompra.EnRevision(false), ProgresoCompra.de(saga("suscripcion_derivada.json")))
     }
@@ -48,10 +62,13 @@ class ContratoSuscripcionTest {
     }
 
     @Test
-    fun `la solicitud solo lleva la cotizacion, el token y la aceptacion`() {
-        val cuerpo = Json.encodeToString(SolicitudSuscripcion("q1", "tok_sim_1", true))
+    fun `la solicitud solo lleva la cotizacion, el token, la aceptacion y la periodicidad`() {
+        val cuerpo = Json.encodeToString(SolicitudSuscripcion("q1", "tok_sim_1", true, "ANUAL"))
 
-        assertEquals("""{"cotizacion_id":"q1","metodo_pago":"tok_sim_1","acepta_terminos":true}""", cuerpo)
+        assertEquals(
+            """{"cotizacion_id":"q1","metodo_pago":"tok_sim_1","acepta_terminos":true,"periodicidad_pago":"ANUAL"}""",
+            cuerpo,
+        )
     }
 
     @Test

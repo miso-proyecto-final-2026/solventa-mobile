@@ -69,6 +69,21 @@ object Iconos {
         trazo("Candado", "M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z", "M8 11V8a4 4 0 0 1 8 0v3")
     }
 
+    /** Inicio. */
+    val Casa: ImageVector by lazy { trazo("Casa", "M4 11l8-7 8 7v9H4z") }
+
+    /** Pólizas: escudo. */
+    val Escudo: ImageVector by lazy { trazo("Escudo", "M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z") }
+
+    /** Perfil. */
+    val Persona: ImageVector by lazy { trazo("Persona", "M16 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0z", "M4 21c1-4 4-6 8-6s7 2 8 6") }
+
+    /** Advertencia de acciones destructivas. */
+    val Advertencia: ImageVector by lazy { trazo("Advertencia", "M12 3l10 18H2z", "M12 10v5M12 18h.01") }
+
+    /** Guion: estado «revocado». */
+    val Menos: ImageVector by lazy { trazo("Menos", "M6 12h12") }
+
     /** «Ocultar contraseña»: el mismo ojo tachado. */
     val OjoTachado: ImageVector by lazy { trazo("OjoTachado", OJO, PUPILA, "M4 4l16 16") }
 }

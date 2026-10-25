@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.solventa.mobile.compra.CompraRoute
 import com.solventa.mobile.compra.CompraViewModel
-import com.solventa.mobile.configuracion.ConfiguracionScreen
 import com.solventa.mobile.consentimiento.ConsentimientoScreen
 import com.solventa.mobile.consentimiento.ConsentimientoViewModel
 import com.solventa.mobile.cotizacion.CotizacionRoute
@@ -58,7 +57,7 @@ class MainActivity : ComponentActivity() {
             SolventaTheme {
                 Surface {
                     // Registro (HU01) → consentimiento (HU06) → verificación (HU02) → resultado (HU03) → secciones: seguros (HU37) y
-                    // configuración con privacidad (HU07), unidas por la barra inferior.
+                    // perfil con los consentimientos (HU07), unidas por la barra inferior.
                     var paso by rememberSaveable { mutableStateOf(Paso.ARRANQUE) }
                     var pasoTrasConsentimiento by rememberSaveable { mutableStateOf(Paso.VERIFICACION) }
                     // Cada visita a verificación o resultado empieza con un ViewModel nuevo.
@@ -97,7 +96,7 @@ class MainActivity : ComponentActivity() {
                         bottomBar = {
                             paso.seccion?.let { seccion ->
                                 BarraPrincipal(seleccion = seccion) { elegida ->
-                                    val destino = if (elegida == Seccion.SEGUROS) Paso.INICIO else Paso.CONFIGURACION
+                                    val destino = if (elegida == Seccion.SEGUROS) Paso.INICIO else Paso.PERFIL
                                     if (destino != paso) navegar(destino)
                                 }
                             }
@@ -207,18 +206,15 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
 
-                                Paso.CONFIGURACION -> ConfiguracionScreen(alAbrirPrivacidad = { navegar(Paso.PRIVACIDAD) })
-
-                                Paso.PRIVACIDAD -> {
+                                Paso.PERFIL -> {
                                     val viewModel: PrivacidadViewModel = viewModel(key = "privacidad-$visita")
                                     PrivacidadRoute(
                                         viewModel = viewModel,
                                         // Volver a compartir reutiliza el consentimiento de HU06 y regresa aquí con el estado al día.
                                         onCompartirDatos = {
-                                            pasoTrasConsentimiento = Paso.PRIVACIDAD
+                                            pasoTrasConsentimiento = Paso.PERFIL
                                             navegar(Paso.CONSENTIMIENTO)
                                         },
-                                        onVolver = { navegar(Paso.CONFIGURACION) },
                                         onSesionVencida = {
                                             SesionActual.cerrar()
                                             alcance.launch { almacen.borrar() }

@@ -69,6 +69,11 @@ object Iconos {
         trazo("Candado", "M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z", "M8 11V8a4 4 0 0 1 8 0v3")
     }
 
+    /** Tarjeta de crédito o débito. */
+    val Tarjeta: ImageVector by lazy {
+        trazo("Tarjeta", "M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z", "M3 10h18")
+    }
+
     /** Inicio. */
     val Casa: ImageVector by lazy { trazo("Casa", "M4 11l8-7 8 7v9H4z") }
 

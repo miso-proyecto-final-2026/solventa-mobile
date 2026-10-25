@@ -206,8 +206,8 @@ class PrivacidadScreenTest(private val idioma: String) {
     fun si_no_hubo_confirmacion_el_consentimiento_sigue_mostrandose_vigente_con_aviso() {
         mostrar(estado().copy(error = ErrorPrivacidad.SIN_CONEXION, pendiente = AccionPrivacidad.REVOCAR))
 
-        composeTestRule.onNodeWithText(texto(R.string.privacidad_sigue_vigente)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(texto(R.string.privacidad_revocar)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.privacidad_sigue_vigente)).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.privacidad_revocar)).performScrollTo().assertIsDisplayed()
         composeTestRule.onAllNodesWithText(texto(R.string.privacidad_revocado_ok)).assertCountEquals(0)
     }
 

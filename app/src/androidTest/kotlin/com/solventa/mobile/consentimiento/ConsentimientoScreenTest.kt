@@ -36,7 +36,8 @@ class ConsentimientoScreenTest {
         composeTestRule.onNodeWithContentDescription(
             "Aceptar el uso de mis datos de Open Finance y Open Data",
         ).assertIsEnabled()
-        composeTestRule.onNodeWithText("Ahora no").performScrollTo().assertIsDisplayed()
+        // Los botones de decisión van fijos al pie, fuera del área desplazable.
+        composeTestRule.onNodeWithText("Ahora no").assertIsDisplayed()
     }
 
     @Test
@@ -51,9 +52,9 @@ class ConsentimientoScreenTest {
     fun rechazarMuestraLaConfirmacionSinCompartirDatos() {
         mostrar()
 
-        composeTestRule.onNodeWithText("Ahora no").performScrollTo().performClick()
+        composeTestRule.onNodeWithText("Ahora no").performClick()
 
         composeTestRule.onNodeWithText("Continuarás sin compartir datos").performScrollTo().assertIsDisplayed()
-        composeTestRule.onNodeWithText("Continuar").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("Continuar").assertIsDisplayed()
     }
 }

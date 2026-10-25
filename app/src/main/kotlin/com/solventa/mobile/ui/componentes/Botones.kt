@@ -77,7 +77,7 @@ fun BotonDestructivoContorno(texto: String, onClick: () -> Unit, modifier: Modif
         shape = FormaBoton,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-        modifier = modifier.heightIn(min = 44.dp),
+        modifier = modifier.heightIn(min = AlturaBoton),
     ) { Contenido(texto, null) }
 
 /** Acción suave sobre un tono del tema (por ejemplo, «Volver a autorizar»). */
@@ -89,5 +89,5 @@ fun BotonTonal(texto: String, onClick: () -> Unit, modifier: Modifier = Modifier
         containerColor = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     ),
-    modifier = modifier.heightIn(min = 44.dp),
+    modifier = modifier.heightIn(min = AlturaBoton),
 ) { Contenido(texto, null) }

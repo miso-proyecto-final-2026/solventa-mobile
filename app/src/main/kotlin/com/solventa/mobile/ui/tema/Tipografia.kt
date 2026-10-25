@@ -2,12 +2,21 @@ package com.solventa.mobile.ui.tema
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.solventa.mobile.R
 
-/** Roboto es la fuente del sistema en Android: `FontFamily.Default` evita empaquetar archivos de fuente. */
-private val Roboto = FontFamily.Default
+/**
+ * Roboto va dentro de la app (Apache 2.0, ver NOTICE-fuentes.md): `FontFamily.Default` seguiría la fuente del
+ * sistema y en varios teléfonos no es Roboto. Pesos 400, 500 y 700, los que usa el diseño.
+ */
+val Roboto = FontFamily(
+    Font(R.font.roboto_regular, FontWeight.Normal),
+    Font(R.font.roboto_medium, FontWeight.Medium),
+    Font(R.font.roboto_bold, FontWeight.Bold),
+)
 
 private fun estilo(tamano: Int, linea: Int, peso: FontWeight = FontWeight.Normal, espaciado: Double = 0.0) =
     TextStyle(fontFamily = Roboto, fontSize = tamano.sp, lineHeight = linea.sp, fontWeight = peso, letterSpacing = espaciado.sp)

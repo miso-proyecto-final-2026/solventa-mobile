@@ -278,4 +278,5 @@
     <string name="privacidad_chip_sin_otorgar">Sin otorgar</string>
     <string name="nav_polizas">Pólizas</string>
     <string name="nav_perfil">Perfil</string>
+    <string name="resultado_aprobada_mensaje_nombre">Listo, %1$s. Ya puedes cotizar y contratar tus seguros en Solventa.</string>
 </resources>

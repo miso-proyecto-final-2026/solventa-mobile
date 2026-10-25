@@ -278,4 +278,5 @@
     <string name="privacidad_chip_sin_otorgar">Not granted</string>
     <string name="nav_polizas">Policies</string>
     <string name="nav_perfil">Profile</string>
+    <string name="resultado_aprobada_mensaje_nombre">All set, %1$s. You can now get quotes and buy your insurance on Solventa.</string>
 </resources>

@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
                     // Al reabrir la app (o tras morir el proceso) la sesión vuelve del almacén cifrado.
                     LaunchedEffect(Unit) {
                         if (!SesionActual.activa) {
-                            almacen.leer()?.let { SesionActual.iniciar(it.clienteId, it.accessToken) }
+                            almacen.leer()?.let { SesionActual.iniciar(it.clienteId, it.accessToken, it.nombre) }
                         }
                         sesionRestaurada = true
                         if (paso == Paso.ARRANQUE) navegar(if (SesionActual.activa) Paso.RESULTADO else Paso.REGISTRO)

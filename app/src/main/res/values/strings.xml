@@ -288,4 +288,9 @@
     <string name="cotizacion_modificar">Modificar datos</string>
     <string name="cotizacion_precio_personalizado">%1$s · Precio personalizado para ti</string>
     <string name="cotizacion_precio_estimado">%1$s · Precio estimado</string>
+    <string name="cotizacion_saludo_sin_nombre">Hola</string>
+    <string name="cotizacion_inicio_apoyo">Cotiza en minutos, con un precio hecho a tu medida.</string>
+    <string name="cotizacion_hero_titulo">Cotiza un seguro ahora</string>
+    <string name="cotizacion_hero_apoyo">Dinos qué necesitas y te damos el precio al instante.</string>
+    <string name="cotizacion_nueva_cotizacion">Nueva cotización</string>
 </resources>

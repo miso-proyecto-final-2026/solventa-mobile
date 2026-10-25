@@ -14,6 +14,8 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +69,7 @@ data class CotizacionAcciones(
     val nuevaCotizacion: () -> Unit = {},
     val aceptarOferta: (CotizacionResponse) -> Unit = {},
     val modificarDatos: () -> Unit = {},
+    val iniciarCotizacion: () -> Unit = {},
     val compartirDatos: () -> Unit = {},
     val sesionVencida: () -> Unit = {},
 )
@@ -90,6 +93,7 @@ fun CotizacionRoute(
             nuevaCotizacion = viewModel::nuevaCotizacion,
             aceptarOferta = onAceptarOferta,
             modificarDatos = viewModel::modificarDatos,
+            iniciarCotizacion = viewModel::iniciarCotizacion,
             compartirDatos = onCompartirDatos,
             sesionVencida = onSesionVencida,
         ),
@@ -99,7 +103,8 @@ fun CotizacionRoute(
 @Composable
 fun CotizacionScreen(estado: CotizacionUiState, acciones: CotizacionAcciones, nombre: String? = SesionActual.nombre) {
     when (estado.fase) {
-        FaseCotizacion.ELEGIR_PRODUCTO -> ElegirProducto(acciones, primerNombre(nombre))
+        FaseCotizacion.INICIO -> Portada(acciones, primerNombre(nombre))
+        FaseCotizacion.ELEGIR_PRODUCTO -> ElegirProducto(acciones)
         FaseCotizacion.FORMULARIO -> Formulario(estado, acciones)
         FaseCotizacion.CARGANDO -> Cargando()
         FaseCotizacion.RESULTADO -> estado.cotizacion?.let { Resultado(estado, it, acciones) }
@@ -144,50 +149,108 @@ private fun Titular(texto: String, apoyo: String? = null) {
     }
 }
 
-/** Inicio (D1 del diseño): saludo por nombre y «Seguros disponibles»; sin póliza activa ni notificaciones aún. */
+/**
+ * Portada de seguros (D1 del diseño): saludo, la tarjeta que invita a cotizar y «Seguros disponibles». Sin póliza
+ * activa (HU35) ni notificaciones, que aún no existen. Con «Hola» a secas cuando no se conoce el nombre: solo se
+ * guarda al registrarse con esta versión, y la API no lo entrega después.
+ */
 @Composable
-private fun ElegirProducto(acciones: CotizacionAcciones, nombre: String?) =
+private fun Portada(acciones: CotizacionAcciones, nombre: String?) =
     Estructura(titulo = null, onAtras = null, pie = null) {
         Titular(
-            texto = nombre?.let { stringResource(R.string.cotizacion_saludo, it) } ?: stringResource(R.string.cotizacion_elegir_titulo),
-            apoyo = stringResource(R.string.cotizacion_elegir_ayuda),
+            texto = nombre?.let { stringResource(R.string.cotizacion_saludo, it) } ?: stringResource(R.string.cotizacion_saludo_sin_nombre),
+            apoyo = stringResource(R.string.cotizacion_inicio_apoyo),
         )
+        TarjetaInvitacion(onNuevaCotizacion = acciones.iniciarCotizacion)
         Text(
             stringResource(R.string.cotizacion_seguros_disponibles),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Catalogo.productos.forEach { producto ->
-            val nombreProducto = stringResource(producto.nombre)
-            val accion = stringResource(R.string.cotizacion_producto_accion, nombreProducto)
-            Surface(
-                shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 72.dp)
-                    .clickable { acciones.elegirProducto(producto.id) }
-                    .semantics(mergeDescendants = true) {
-                        role = Role.Button
-                        contentDescription = accion
-                    },
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconoCircular(
-                        Iconos.Escudo,
-                        descripcion = null,
-                        contenedor = MaterialTheme.colorScheme.primaryContainer,
-                        contenido = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                    Text(nombreProducto, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                }
-            }
+        Catalogo.productos.forEach { FilaProducto(it, acciones) }
+    }
+
+/** Tarjeta destacada que invita a cotizar: fondo primario, radio de 28 dp y botón blanco. */
+@Composable
+private fun TarjetaInvitacion(onNuevaCotizacion: () -> Unit) {
+    Surface(
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(
+                stringResource(R.string.cotizacion_hero_titulo),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.semantics { heading() },
+            )
+            Text(
+                stringResource(R.string.cotizacion_hero_apoyo),
+                style = MaterialTheme.typography.bodyMedium,
+                color = androidx.compose.ui.graphics.Color(0xFFD8F0FA),
+            )
+            Button(
+                onClick = onNuevaCotizacion,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.onPrimary,
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
+                modifier = Modifier.heightIn(min = 48.dp),
+            ) { Text(stringResource(R.string.cotizacion_nueva_cotizacion), style = MaterialTheme.typography.labelLarge) }
         }
     }
+}
+
+/** Segundo paso de «Nueva cotización»: elegir el producto. */
+@Composable
+private fun ElegirProducto(acciones: CotizacionAcciones) =
+    Estructura(
+        titulo = stringResource(R.string.cotizacion_elegir_titulo),
+        onAtras = acciones.nuevaCotizacion,
+        pie = null,
+    ) {
+        Text(
+            stringResource(R.string.cotizacion_elegir_ayuda),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Catalogo.productos.forEach { FilaProducto(it, acciones) }
+    }
+
+/** Fila táctil de un producto, anunciada como «Cotizar <producto>». */
+@Composable
+private fun FilaProducto(producto: Producto, acciones: CotizacionAcciones) {
+    val nombreProducto = stringResource(producto.nombre)
+    val accion = stringResource(R.string.cotizacion_producto_accion, nombreProducto)
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 72.dp)
+            .clickable { acciones.elegirProducto(producto.id) }
+            .semantics(mergeDescendants = true) {
+                role = Role.Button
+                contentDescription = accion
+            },
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconoCircular(
+                Iconos.Escudo,
+                descripcion = null,
+                contenedor = MaterialTheme.colorScheme.primaryContainer,
+                contenido = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Text(nombreProducto, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        }
+    }
+}
 
 /** Datos de la cotización (D2): los campos de cada producto con el estilo del diseño. */
 @Composable

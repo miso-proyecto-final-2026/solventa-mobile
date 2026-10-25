@@ -57,10 +57,10 @@ class CotizacionViewModelTest {
     }
 
     @Test
-    fun `al iniciar se elige el producto y nada esta cargando`() {
+    fun `al iniciar se ve la portada y nada esta cargando`() {
         val estado = viewModel().uiState.value
 
-        assertEquals(FaseCotizacion.ELEGIR_PRODUCTO, estado.fase)
+        assertEquals(FaseCotizacion.INICIO, estado.fase)
         assertNull(estado.producto)
         assertNull(estado.error)
     }
@@ -82,7 +82,7 @@ class CotizacionViewModelTest {
 
         vm.elegirProducto("inventado")
 
-        assertEquals(FaseCotizacion.ELEGIR_PRODUCTO, vm.uiState.value.fase)
+        assertEquals(FaseCotizacion.INICIO, vm.uiState.value.fase)
     }
 
     @Test
@@ -256,7 +256,7 @@ class CotizacionViewModelTest {
     }
 
     @Test
-    fun `cotizar de nuevo vuelve a elegir producto sin datos previos`() = runTest(dispatcher) {
+    fun `cotizar de nuevo vuelve a la portada sin datos previos`() = runTest(dispatcher) {
         coEvery { repository.cotizar(any(), any()) } returns CotizacionRepository.Resultado.Exito(cotizacion())
         val vm = viewModel()
         vm.llenarVida()
@@ -265,7 +265,7 @@ class CotizacionViewModelTest {
 
         vm.nuevaCotizacion()
 
-        assertEquals(FaseCotizacion.ELEGIR_PRODUCTO, vm.uiState.value.fase)
+        assertEquals(FaseCotizacion.INICIO, vm.uiState.value.fase)
         assertNull(vm.uiState.value.cotizacion)
         assertEquals(emptyMap<String, String>(), vm.uiState.value.valores)
     }
@@ -305,6 +305,34 @@ class CotizacionViewModelTest {
 
         vm.modificarDatos()
 
+        assertEquals(FaseCotizacion.INICIO, vm.uiState.value.fase)
+    }
+
+    @Test
+    fun `nueva cotizacion de la portada lleva a elegir el producto`() {
+        val vm = viewModel()
+
+        vm.iniciarCotizacion()
+
         assertEquals(FaseCotizacion.ELEGIR_PRODUCTO, vm.uiState.value.fase)
+    }
+
+    @Test
+    fun `desde la portada se puede elegir un producto directamente`() {
+        val vm = viewModel()
+
+        vm.elegirProducto("microseguro_vida")
+
+        assertEquals(FaseCotizacion.FORMULARIO, vm.uiState.value.fase)
+    }
+
+    @Test
+    fun `nueva cotizacion fuera de la portada no cambia la fase`() {
+        val vm = viewModel()
+        vm.elegirProducto("microseguro_vida")
+
+        vm.iniciarCotizacion()
+
+        assertEquals(FaseCotizacion.FORMULARIO, vm.uiState.value.fase)
     }
 }

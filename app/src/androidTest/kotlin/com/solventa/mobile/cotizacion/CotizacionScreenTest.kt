@@ -86,7 +86,7 @@ class CotizacionScreenTest(private val idioma: String) {
     @Test
     fun elegirProductoMuestraLosProductosYPermiteElegir() {
         val elegidos = mutableListOf<String>()
-        mostrar(CotizacionUiState(), CotizacionAcciones(elegirProducto = { elegidos += it }))
+        mostrar(CotizacionUiState(fase = FaseCotizacion.ELEGIR_PRODUCTO), CotizacionAcciones(elegirProducto = { elegidos += it }))
 
         composeTestRule.onNode(hasText(texto(R.string.cotizacion_elegir_titulo)) and isHeading()).assertIsDisplayed()
         // Cada producto es una fila táctil con su nombre; el lector de pantalla anuncia «Cotizar <producto>».
@@ -158,6 +158,39 @@ class CotizacionScreenTest(private val idioma: String) {
         mostrar(CotizacionUiState(fase = FaseCotizacion.CARGANDO, producto = vida))
 
         composeTestRule.onNodeWithText(texto(R.string.cotizacion_cargando)).assertIsDisplayed()
+    }
+
+    @Test
+    fun laPortadaInvitaACotizarConLaTarjetaYLaAccion() {
+        var iniciadas = 0
+        mostrar(CotizacionUiState(), CotizacionAcciones(iniciarCotizacion = { iniciadas++ }), nombre = "Ana")
+
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_hero_titulo)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_hero_apoyo)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_nueva_cotizacion))
+            .assertHasClickAction()
+            .assertHeightIsAtLeast(48.dp)
+            .performClick()
+
+        assertEquals(1, iniciadas)
+    }
+
+    @Test
+    fun sinNombreLaPortadaSaludaConHola() {
+        mostrar(CotizacionUiState())
+
+        composeTestRule.onNode(hasText(texto(R.string.cotizacion_saludo_sin_nombre)) and isHeading()).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_inicio_apoyo)).assertIsDisplayed()
+    }
+
+    @Test
+    fun desdeLaPortadaSePuedeElegirUnProductoDirectamente() {
+        val elegidos = mutableListOf<String>()
+        mostrar(CotizacionUiState(), CotizacionAcciones(elegirProducto = { elegidos += it }))
+
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_producto_microseguro_vida)).performScrollTo().performClick()
+
+        assertEquals(listOf("microseguro_vida"), elegidos)
     }
 
     @Test

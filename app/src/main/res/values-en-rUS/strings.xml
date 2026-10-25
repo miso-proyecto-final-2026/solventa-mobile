@@ -288,4 +288,9 @@
     <string name="cotizacion_modificar">Edit details</string>
     <string name="cotizacion_precio_personalizado">%1$s · Price personalized for you</string>
     <string name="cotizacion_precio_estimado">%1$s · Estimated price</string>
+    <string name="cotizacion_saludo_sin_nombre">Hi</string>
+    <string name="cotizacion_inicio_apoyo">Get a quote in minutes, with a price made for you.</string>
+    <string name="cotizacion_hero_titulo">Get an insurance quote now</string>
+    <string name="cotizacion_hero_apoyo">Tell us what you need and we give you the price instantly.</string>
+    <string name="cotizacion_nueva_cotizacion">New quote</string>
 </resources>

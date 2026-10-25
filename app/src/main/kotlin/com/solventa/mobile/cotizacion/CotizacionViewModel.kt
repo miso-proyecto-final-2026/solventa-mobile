@@ -21,6 +21,11 @@ class CotizacionViewModel @JvmOverloads constructor(
     private val _uiState = MutableStateFlow(CotizacionUiState())
     val uiState: StateFlow<CotizacionUiState> = _uiState.asStateFlow()
 
+    /** «Nueva cotización» de la portada: pasa a elegir el producto. */
+    fun iniciarCotizacion() {
+        _uiState.update { if (it.fase == FaseCotizacion.INICIO) it.copy(fase = FaseCotizacion.ELEGIR_PRODUCTO) else it }
+    }
+
     fun elegirProducto(id: String) {
         val producto = Catalogo.porId(id) ?: return
         _uiState.value = CotizacionUiState(fase = FaseCotizacion.FORMULARIO, producto = producto)
@@ -80,7 +85,10 @@ class CotizacionViewModel @JvmOverloads constructor(
         }
     }
 
-    fun volverAProductos() = nuevaCotizacion()
+    /** Descarta lo ingresado y vuelve a elegir producto. */
+    fun volverAProductos() {
+        _uiState.value = CotizacionUiState(fase = FaseCotizacion.ELEGIR_PRODUCTO)
+    }
 
     fun nuevaCotizacion() {
         _uiState.value = CotizacionUiState()

@@ -2,13 +2,14 @@ package com.solventa.mobile.cotizacion
 
 import com.solventa.mobile.red.CotizacionResponse
 
-enum class FaseCotizacion { ELEGIR_PRODUCTO, FORMULARIO, CARGANDO, RESULTADO }
+/** `INICIO` es la portada de seguros; `ELEGIR_PRODUCTO` aparece al tocar «Nueva cotización». */
+enum class FaseCotizacion { INICIO, ELEGIR_PRODUCTO, FORMULARIO, CARGANDO, RESULTADO }
 
 /** Cada falla tiene su mensaje y su acción (HU37, criterio 8). */
 enum class ErrorCotizacion { TIEMPO_AGOTADO, SIN_CONEXION, SERVICIO, SESION_VENCIDA }
 
 data class CotizacionUiState(
-    val fase: FaseCotizacion = FaseCotizacion.ELEGIR_PRODUCTO,
+    val fase: FaseCotizacion = FaseCotizacion.INICIO,
     val producto: Producto? = null,
     val valores: Map<String, String> = emptyMap(),
     /** Validación local, en línea. */

@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,6 +45,7 @@ import com.solventa.mobile.ui.componentes.BotonPrimario
 import com.solventa.mobile.ui.componentes.Tarjeta
 import com.solventa.mobile.ui.iconos.Iconos
 import com.solventa.mobile.ui.tema.SolventaColorScheme
+import com.solventa.mobile.ui.tema.extra
 
 /** Consulta el estado cada vez que la pantalla vuelve a primer plano (criterios 4 y 5). */
 @Composable
@@ -137,7 +141,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.Resultado(
                     exito = true,
                     titulo = R.string.resultado_aprobada_titulo,
                     mensaje = stringResource(R.string.resultado_aprobada_mensaje),
-                )
+                ) { ListaChequeo() }
             }
             Pie {
                 estado.errorAccion?.let {
@@ -249,6 +253,39 @@ private fun Bloque(
         mensaje = mensaje,
         contenido = contenido,
     )
+}
+
+/**
+ * Qué se comprobó (A4). MS Identidad aprueba solo si el rostro coincide con el documento y se supera la prueba de
+ * vida, así que un resultado `VERIFICADO` implica los tres puntos.
+ */
+@Composable
+private fun ListaChequeo() {
+    val filas = listOf(
+        R.string.resultado_chequeo_documento,
+        R.string.resultado_chequeo_vida,
+        R.string.resultado_chequeo_rostro,
+    )
+    Card(
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            filas.forEachIndexed { i, texto ->
+                if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Row(
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // Decorativo: cada fila ya dice qué se comprobó.
+                    Icon(Iconos.Check, contentDescription = null, tint = MaterialTheme.extra.exitoIcono, modifier = Modifier.size(20.dp))
+                    Text(stringResource(texto), style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+        }
+    }
 }
 
 /** «Para el próximo intento»: consejos generales de captura, no un diagnóstico de este rechazo. */

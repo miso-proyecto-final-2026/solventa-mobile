@@ -146,6 +146,9 @@ class ResultadoScreenTest(private val idioma: String) {
 
         composeTestRule.onNodeWithText(texto(R.string.resultado_aprobada_mensaje)).assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.resultado_aprobada_paso)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.resultado_chequeo_documento)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.resultado_chequeo_vida)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.resultado_chequeo_rostro)).assertIsDisplayed()
         verificarAccesibilidad(R.string.resultado_aprobada_titulo, R.string.resultado_aprobada_accion)
 
         composeTestRule.onNodeWithText(texto(R.string.resultado_aprobada_accion)).performClick()

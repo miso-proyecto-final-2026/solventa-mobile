@@ -13,14 +13,21 @@ object SesionActual {
     var accessToken: String? = null
         private set
 
-    fun iniciar(clienteId: String, accessToken: String) {
+    /** Nombre con el que se registró el cliente; solo para saludarlo. Puede faltar en sesiones guardadas antes. */
+    @Volatile
+    var nombre: String? = null
+        private set
+
+    fun iniciar(clienteId: String, accessToken: String, nombre: String? = null) {
         this.clienteId = clienteId
         this.accessToken = accessToken
+        this.nombre = nombre
     }
 
     fun cerrar() {
         clienteId = null
         accessToken = null
+        nombre = null
     }
 
     val activa: Boolean get() = clienteId != null && accessToken != null
@@ -28,6 +35,10 @@ object SesionActual {
     fun credenciales(): Credenciales? {
         val id = clienteId ?: return null
         val token = accessToken ?: return null
-        return Credenciales(id, token)
+        return Credenciales(id, token, nombre)
     }
 }
+
+/** «Ana María» → «Ana». `null` si no hay nombre que mostrar. */
+fun primerNombre(nombre: String?): String? =
+    nombre?.trim()?.substringBefore(' ')?.takeIf { it.isNotEmpty() }

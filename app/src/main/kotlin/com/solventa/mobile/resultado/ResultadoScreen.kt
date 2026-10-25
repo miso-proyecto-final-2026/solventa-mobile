@@ -40,6 +40,8 @@ import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.solventa.mobile.R
+import com.solventa.mobile.sesion.SesionActual
+import com.solventa.mobile.sesion.primerNombre
 import com.solventa.mobile.ui.componentes.BloqueResultado
 import com.solventa.mobile.ui.componentes.BotonPrimario
 import com.solventa.mobile.ui.componentes.Tarjeta
@@ -66,7 +68,13 @@ fun ResultadoRoute(viewModel: ResultadoViewModel, onDestino: (Destino) -> Unit, 
  * pie. Aprobada, rechazada, sin intentos y en revisión comparten la misma estructura.
  */
 @Composable
-fun ResultadoScreen(viewModel: ResultadoViewModel, onDestino: (Destino) -> Unit, onSalir: () -> Unit) {
+fun ResultadoScreen(
+    viewModel: ResultadoViewModel,
+    onDestino: (Destino) -> Unit,
+    onSalir: () -> Unit,
+    /** Nombre con el que se registró el cliente, para el saludo de la verificación aprobada. */
+    nombre: String? = SesionActual.nombre,
+) {
     val estado by viewModel.uiState.collectAsState()
     val destino by viewModel.destino.collectAsState()
 
@@ -100,7 +108,7 @@ fun ResultadoScreen(viewModel: ResultadoViewModel, onDestino: (Destino) -> Unit,
                 }
                 Pie { BotonPrimario(stringResource(R.string.resultado_reintentar_consulta), onClick = viewModel::actualizar) }
             }
-            is ResultadoUiState.Mostrando -> Resultado(actual, viewModel, onSalir)
+            is ResultadoUiState.Mostrando -> Resultado(actual, viewModel, onSalir, primerNombre(nombre))
         }
     }
 }
@@ -132,6 +140,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.Resultado(
     estado: ResultadoUiState.Mostrando,
     viewModel: ResultadoViewModel,
     onSalir: () -> Unit,
+    nombre: String?,
 ) {
     when (val pantalla = estado.pantalla) {
         PantallaResultado.Aprobada -> {
@@ -140,7 +149,11 @@ private fun androidx.compose.foundation.layout.ColumnScope.Resultado(
                     icono = Iconos.Check,
                     exito = true,
                     titulo = R.string.resultado_aprobada_titulo,
-                    mensaje = stringResource(R.string.resultado_aprobada_mensaje),
+                    mensaje = if (nombre != null) {
+                        stringResource(R.string.resultado_aprobada_mensaje_nombre, nombre)
+                    } else {
+                        stringResource(R.string.resultado_aprobada_mensaje)
+                    },
                 ) { ListaChequeo() }
             }
             Pie {

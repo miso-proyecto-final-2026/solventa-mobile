@@ -268,4 +268,5 @@
     <string name="resultado_chequeo_documento">Documento de identidad validado</string>
     <string name="resultado_chequeo_vida">Prueba de vida superada</string>
     <string name="resultado_chequeo_rostro">Rostro coincide con el documento</string>
+    <string name="resultado_aprobada_mensaje_nombre">Listo, %1$s. Ya puedes cotizar y contratar tus seguros en Solventa.</string>
 </resources>

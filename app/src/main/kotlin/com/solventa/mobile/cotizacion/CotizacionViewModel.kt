@@ -73,6 +73,13 @@ class CotizacionViewModel @JvmOverloads constructor(
     /** Repite la solicitud con lo que el usuario ya ingresó: ante un error no se pierde nada. */
     fun reintentar() = solicitar()
 
+    /** Vuelve al formulario con lo que el usuario ya ingresó, para cambiar un dato y cotizar de nuevo. */
+    fun modificarDatos() {
+        _uiState.update {
+            if (it.producto == null) it else it.copy(fase = FaseCotizacion.FORMULARIO, cotizacion = null, error = null)
+        }
+    }
+
     fun volverAProductos() = nuevaCotizacion()
 
     fun nuevaCotizacion() {

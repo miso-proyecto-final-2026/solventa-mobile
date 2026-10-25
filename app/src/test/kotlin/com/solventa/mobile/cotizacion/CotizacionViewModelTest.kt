@@ -280,4 +280,31 @@ class CotizacionViewModelTest {
         assertEquals(FaseCotizacion.ELEGIR_PRODUCTO, vm.uiState.value.fase)
         assertEquals(emptyMap<String, String>(), vm.uiState.value.valores)
     }
+
+    @Test
+    fun `modificar datos vuelve al formulario con lo ingresado y sin el resultado`() = runTest {
+        coEvery { repository.cotizar(any(), any()) } returns CotizacionRepository.Resultado.Exito(cotizacion())
+        val vm = viewModel()
+        vm.elegirProducto("microseguro_vida")
+        vm.llenarVida()
+        vm.solicitar()
+        advanceUntilIdle()
+        assertEquals(FaseCotizacion.RESULTADO, vm.uiState.value.fase)
+
+        vm.modificarDatos()
+
+        assertEquals(FaseCotizacion.FORMULARIO, vm.uiState.value.fase)
+        assertNull(vm.uiState.value.cotizacion)
+        assertEquals("30", vm.uiState.value.valores["edad"])
+        assertEquals("microseguro_vida", vm.uiState.value.producto?.id)
+    }
+
+    @Test
+    fun `modificar datos sin producto elegido no hace nada`() {
+        val vm = viewModel()
+
+        vm.modificarDatos()
+
+        assertEquals(FaseCotizacion.ELEGIR_PRODUCTO, vm.uiState.value.fase)
+    }
 }

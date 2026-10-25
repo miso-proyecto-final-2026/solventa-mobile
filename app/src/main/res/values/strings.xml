@@ -120,9 +120,9 @@
     <string name="cotizacion_elegir_ayuda">Elige un producto y obtén tu precio al instante.</string>
     <string name="cotizacion_producto_accion">Cotizar %1$s</string>
     <string name="cotizacion_datos_titulo">Datos de tu seguro</string>
-    <string name="cotizacion_solicitar">Cotizar</string>
+    <string name="cotizacion_solicitar">Calcular precio</string>
     <string name="cotizacion_cambiar_producto">Cambiar de producto</string>
-    <string name="cotizacion_cargando">Calculando tu precio…</string>
+    <string name="cotizacion_cargando">Calculando tu precio</string>
     <string name="cotizacion_error_requerido">Este dato es obligatorio</string>
     <string name="cotizacion_error_entero">Ingresa solo números enteros</string>
     <string name="cotizacion_error_minimo">El valor mínimo es %1$s</string>
@@ -178,7 +178,7 @@
     <string name="nav_seguros">Inicio</string>
 
     <!-- Compra de la oferta (HU17) -->
-    <string name="cotizacion_aceptar">Aceptar y suscribir</string>
+    <string name="cotizacion_aceptar">Contratar</string>
     <string name="compra_oferta_titulo">Resumen de tu oferta</string>
     <string name="compra_producto">Producto</string>
     <string name="compra_prima">Prima</string>
@@ -279,4 +279,13 @@
     <string name="nav_polizas">Pólizas</string>
     <string name="nav_perfil">Perfil</string>
     <string name="resultado_aprobada_mensaje_nombre">Listo, %1$s. Ya puedes cotizar y contratar tus seguros en Solventa.</string>
+
+    <!-- Cotización: diseño Material 3 (HU37) -->
+    <string name="cotizacion_saludo">Hola, %1$s</string>
+    <string name="cotizacion_seguros_disponibles">Seguros disponibles</string>
+    <string name="cotizacion_barra_titulo">Cotizar %1$s</string>
+    <string name="cotizacion_cargando_apoyo">Esto toma unos segundos.</string>
+    <string name="cotizacion_modificar">Modificar datos</string>
+    <string name="cotizacion_precio_personalizado">%1$s · Precio personalizado para ti</string>
+    <string name="cotizacion_precio_estimado">%1$s · Precio estimado</string>
 </resources>

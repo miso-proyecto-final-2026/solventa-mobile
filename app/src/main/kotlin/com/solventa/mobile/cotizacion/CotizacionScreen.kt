@@ -2,6 +2,7 @@ package com.solventa.mobile.cotizacion
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,14 +13,12 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,14 +29,31 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.solventa.mobile.R
 import com.solventa.mobile.red.CoberturaResponse
 import com.solventa.mobile.red.CotizacionResponse
+import com.solventa.mobile.sesion.SesionActual
+import com.solventa.mobile.sesion.primerNombre
+import com.solventa.mobile.ui.componentes.BarraSuperior
+import com.solventa.mobile.ui.componentes.Aviso
+import com.solventa.mobile.ui.componentes.BotonPrimario
+import com.solventa.mobile.ui.componentes.BotonSecundario
+import com.solventa.mobile.ui.componentes.CampoTexto
+import com.solventa.mobile.ui.componentes.IconoCircular
+import com.solventa.mobile.ui.componentes.Tarjeta
+import com.solventa.mobile.ui.componentes.TarjetaDestacada
+import com.solventa.mobile.ui.iconos.Iconos
+import com.solventa.mobile.ui.tema.extra
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -50,6 +66,7 @@ data class CotizacionAcciones(
     val volverAProductos: () -> Unit = {},
     val nuevaCotizacion: () -> Unit = {},
     val aceptarOferta: (CotizacionResponse) -> Unit = {},
+    val modificarDatos: () -> Unit = {},
     val compartirDatos: () -> Unit = {},
     val sesionVencida: () -> Unit = {},
 )
@@ -72,6 +89,7 @@ fun CotizacionRoute(
             volverAProductos = viewModel::volverAProductos,
             nuevaCotizacion = viewModel::nuevaCotizacion,
             aceptarOferta = onAceptarOferta,
+            modificarDatos = viewModel::modificarDatos,
             compartirDatos = onCompartirDatos,
             sesionVencida = onSesionVencida,
         ),
@@ -79,85 +97,156 @@ fun CotizacionRoute(
 }
 
 @Composable
-fun CotizacionScreen(estado: CotizacionUiState, acciones: CotizacionAcciones) {
+fun CotizacionScreen(estado: CotizacionUiState, acciones: CotizacionAcciones, nombre: String? = SesionActual.nombre) {
     when (estado.fase) {
-        FaseCotizacion.ELEGIR_PRODUCTO -> ElegirProducto(acciones)
+        FaseCotizacion.ELEGIR_PRODUCTO -> ElegirProducto(acciones, primerNombre(nombre))
         FaseCotizacion.FORMULARIO -> Formulario(estado, acciones)
         FaseCotizacion.CARGANDO -> Cargando()
         FaseCotizacion.RESULTADO -> estado.cotizacion?.let { Resultado(estado, it, acciones) }
     }
 }
 
+/** Zona desplazable con su barra superior opcional y los botones de decisión fijos al pie. */
 @Composable
-private fun Pantalla(contenido: @Composable () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) { contenido() }
-}
-
-@Composable
-private fun Titulo(texto: String) =
-    Text(text = texto, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
-
-@Composable
-private fun ElegirProducto(acciones: CotizacionAcciones) = Pantalla {
-    Titulo(stringResource(R.string.cotizacion_elegir_titulo))
-    Text(stringResource(R.string.cotizacion_elegir_ayuda))
-    Catalogo.productos.forEach { producto ->
-        Button(
-            onClick = { acciones.elegirProducto(producto.id) },
-            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
-        ) { Text(stringResource(R.string.cotizacion_producto_accion, stringResource(producto.nombre))) }
-    }
-}
-
-@Composable
-private fun Formulario(estado: CotizacionUiState, acciones: CotizacionAcciones) = Pantalla {
-    val producto = estado.producto ?: return@Pantalla
-    Titulo(stringResource(R.string.cotizacion_datos_titulo))
-    Text(stringResource(producto.nombre), style = MaterialTheme.typography.titleMedium)
-    estado.error?.let { Falla(it, acciones) }
-    producto.campos.forEach { campo ->
-        val valor = estado.valores[campo.clave].orEmpty()
-        val error = mensajeDeError(campo, estado.errores[campo.clave], estado.erroresServidor.containsKey(campo.clave))
-        when (campo) {
-            is Campo.Entero -> OutlinedTextField(
-                value = valor,
-                onValueChange = { acciones.cambiarValor(campo.clave, it) },
-                label = { Text(stringResource(campo.etiqueta)) },
-                isError = error != null,
-                supportingText = { error?.let { Text(it) } },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
+private fun Estructura(
+    titulo: String?,
+    onAtras: (() -> Unit)?,
+    pie: (@Composable ColumnScope.() -> Unit)?,
+    cuerpo: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (titulo != null) BarraSuperior(titulo = titulo, onAtras = onAtras)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            content = cuerpo,
+        )
+        if (pie != null) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                content = pie,
             )
-
-            is Campo.Seleccion -> Seleccion(campo, valor, error) { acciones.cambiarValor(campo.clave, it) }
         }
     }
-    Button(onClick = acciones.solicitar, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
-        Text(stringResource(R.string.cotizacion_solicitar))
+}
+
+@Composable
+private fun Titular(texto: String, apoyo: String? = null) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(texto, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+        apoyo?.let {
+            Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
-    OutlinedButton(onClick = acciones.volverAProductos, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-        Text(stringResource(R.string.cotizacion_cambiar_producto))
+}
+
+/** Inicio (D1 del diseño): saludo por nombre y «Seguros disponibles»; sin póliza activa ni notificaciones aún. */
+@Composable
+private fun ElegirProducto(acciones: CotizacionAcciones, nombre: String?) =
+    Estructura(titulo = null, onAtras = null, pie = null) {
+        Titular(
+            texto = nombre?.let { stringResource(R.string.cotizacion_saludo, it) } ?: stringResource(R.string.cotizacion_elegir_titulo),
+            apoyo = stringResource(R.string.cotizacion_elegir_ayuda),
+        )
+        Text(
+            stringResource(R.string.cotizacion_seguros_disponibles),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Catalogo.productos.forEach { producto ->
+            val nombreProducto = stringResource(producto.nombre)
+            val accion = stringResource(R.string.cotizacion_producto_accion, nombreProducto)
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 72.dp)
+                    .clickable { acciones.elegirProducto(producto.id) }
+                    .semantics(mergeDescendants = true) {
+                        role = Role.Button
+                        contentDescription = accion
+                    },
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconoCircular(
+                        Iconos.Escudo,
+                        descripcion = null,
+                        contenedor = MaterialTheme.colorScheme.primaryContainer,
+                        contenido = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                    Text(nombreProducto, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+
+/** Datos de la cotización (D2): los campos de cada producto con el estilo del diseño. */
+@Composable
+private fun Formulario(estado: CotizacionUiState, acciones: CotizacionAcciones) {
+    val producto = estado.producto ?: return
+    Estructura(
+        titulo = stringResource(R.string.cotizacion_barra_titulo, stringResource(producto.nombre)),
+        onAtras = acciones.volverAProductos,
+        pie = { BotonPrimario(stringResource(R.string.cotizacion_solicitar), onClick = acciones.solicitar) },
+    ) {
+        Titular(stringResource(R.string.cotizacion_datos_titulo), stringResource(producto.nombre))
+        estado.error?.let { Falla(it, acciones) }
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            producto.campos.forEach { campo ->
+                val valor = estado.valores[campo.clave].orEmpty()
+                val error = mensajeDeError(campo, estado.errores[campo.clave], estado.erroresServidor.containsKey(campo.clave))
+                when (campo) {
+                    is Campo.Entero -> CampoTexto(
+                        valor = valor,
+                        onValorChange = { acciones.cambiarValor(campo.clave, it) },
+                        etiqueta = stringResource(campo.etiqueta),
+                        error = error,
+                        teclado = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    )
+
+                    is Campo.Seleccion -> Seleccion(campo, valor, error) { acciones.cambiarValor(campo.clave, it) }
+                }
+            }
+        }
+        BotonSecundario(stringResource(R.string.cotizacion_cambiar_producto), onClick = acciones.volverAProductos)
     }
 }
 
 @Composable
 private fun Seleccion(campo: Campo.Seleccion, valor: String, error: String?, alElegir: (String) -> Unit) {
     Column(modifier = Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(stringResource(campo.etiqueta), style = MaterialTheme.typography.titleSmall)
+        Text(
+            stringResource(campo.etiqueta),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         campo.opciones.forEach { opcion ->
-            Row(
+            val elegida = valor == opcion.valor
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = if (elegida) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 48.dp)
-                    .selectable(selected = valor == opcion.valor, role = Role.RadioButton, onClick = { alElegir(opcion.valor) }),
-                verticalAlignment = Alignment.CenterVertically,
+                    .heightIn(min = 56.dp)
+                    .selectable(selected = elegida, role = Role.RadioButton, onClick = { alElegir(opcion.valor) }),
             ) {
-                RadioButton(selected = valor == opcion.valor, onClick = null)
-                Text(stringResource(opcion.etiqueta), modifier = Modifier.padding(start = 12.dp))
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    RadioButton(selected = elegida, onClick = null)
+                    Text(stringResource(opcion.etiqueta), style = MaterialTheme.typography.bodyLarge)
+                }
             }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
@@ -189,74 +278,112 @@ private fun Falla(error: ErrorCotizacion, acciones: CotizacionAcciones) {
         ErrorCotizacion.SERVICIO -> R.string.cotizacion_error_servicio
         ErrorCotizacion.SESION_VENCIDA -> R.string.cotizacion_error_sesion
     }
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
         modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Assertive },
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(mensaje), color = MaterialTheme.colorScheme.onErrorContainer)
+            Text(stringResource(mensaje))
             if (error == ErrorCotizacion.SESION_VENCIDA) {
-                Button(onClick = acciones.sesionVencida, modifier = Modifier.heightIn(min = 48.dp)) {
-                    Text(stringResource(R.string.cotizacion_iniciar_sesion))
-                }
+                BotonPrimario(stringResource(R.string.cotizacion_iniciar_sesion), onClick = acciones.sesionVencida)
             } else {
-                Button(onClick = acciones.reintentar, modifier = Modifier.heightIn(min = 48.dp)) {
-                    Text(stringResource(R.string.cotizacion_reintentar))
-                }
+                BotonPrimario(stringResource(R.string.cotizacion_reintentar), onClick = acciones.reintentar)
             }
         }
     }
 }
 
+/** Calculando precio (D3): el servicio no informa avances, así que solo hay progreso indeterminado. */
 @Composable
 private fun Cargando() {
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        modifier = Modifier.fillMaxSize().padding(32.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CircularProgressIndicator()
-        Text(
-            stringResource(R.string.cotizacion_cargando),
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-        )
+        ) {
+            Text(
+                stringResource(R.string.cotizacion_cargando),
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                stringResource(R.string.cotizacion_cargando_apoyo),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 
+/** Cotización lista (D4): precio destacado, coberturas, vigencia y «Contratar» fijo al pie. */
 @Composable
-private fun Resultado(estado: CotizacionUiState, cotizacion: CotizacionResponse, acciones: CotizacionAcciones) = Pantalla {
-    val locale = configuracionLocale()
-    Titulo(stringResource(R.string.cotizacion_resultado_titulo))
-    Catalogo.porId(cotizacion.producto)?.let { Text(stringResource(it.nombre), style = MaterialTheme.typography.titleMedium) }
-    if (estado.esEstimacion) Aviso(cotizacion, estado.ofreceCompartirDatos, acciones)
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(R.string.cotizacion_prima_anual), style = MaterialTheme.typography.labelLarge)
+private fun Resultado(estado: CotizacionUiState, cotizacion: CotizacionResponse, acciones: CotizacionAcciones) =
+    Estructura(
+        titulo = stringResource(R.string.cotizacion_resultado_titulo),
+        onAtras = acciones.modificarDatos,
+        pie = {
+            BotonPrimario(stringResource(R.string.cotizacion_aceptar), onClick = { acciones.aceptarOferta(cotizacion) })
+            BotonSecundario(stringResource(R.string.cotizacion_modificar), onClick = acciones.modificarDatos)
+        },
+    ) {
+        val locale = configuracionLocale()
+        if (estado.esEstimacion) AvisoEstimacion(cotizacion, estado.ofreceCompartirDatos, acciones)
+        TarjetaDestacada {
+            Catalogo.porId(cotizacion.producto)?.let {
+                Text(stringResource(it.nombre), style = MaterialTheme.typography.titleSmall)
+            }
+            Text(stringResource(R.string.cotizacion_prima_anual), style = MaterialTheme.typography.bodyMedium)
             Text(
                 FormatoCotizacion.moneda(cotizacion.primaAnual, cotizacion.moneda, locale),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineMedium.copy(fontSize = 48.sp, lineHeight = 56.sp),
+            )
+            Text(
+                stringResource(
+                    if (estado.esEstimacion) R.string.cotizacion_precio_estimado else R.string.cotizacion_precio_personalizado,
+                    cotizacion.moneda,
+                ),
+                style = MaterialTheme.typography.bodyMedium,
             )
             Text(
                 stringResource(R.string.cotizacion_prima_mensual) + ": " +
                     FormatoCotizacion.moneda(cotizacion.primaMensual, cotizacion.moneda, locale),
+                style = MaterialTheme.typography.bodyMedium,
             )
-            Text(stringResource(R.string.cotizacion_vigencia, FormatoCotizacion.vigencia(cotizacion.vigenteHasta, locale)))
         }
+        Tarjeta {
+            Text(
+                stringResource(R.string.cotizacion_coberturas).uppercase(locale),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            cotizacion.coberturas.forEachIndexed { i, cobertura ->
+                if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Cobertura(cobertura, cotizacion.moneda, locale)
+            }
+        }
+        Aviso(
+            texto = stringResource(R.string.cotizacion_vigencia, FormatoCotizacion.vigencia(cotizacion.vigenteHasta, locale)),
+            icono = Iconos.Informacion,
+        )
+        BotonSecundario(stringResource(R.string.cotizacion_nueva), onClick = acciones.nuevaCotizacion)
     }
-    Text(stringResource(R.string.cotizacion_coberturas), style = MaterialTheme.typography.titleMedium)
-    cotizacion.coberturas.forEach { Cobertura(it, cotizacion.moneda, locale) }
-    Button(onClick = { acciones.aceptarOferta(cotizacion) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-        Text(stringResource(R.string.cotizacion_aceptar))
-    }
-    OutlinedButton(onClick = acciones.nuevaCotizacion, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-        Text(stringResource(R.string.cotizacion_nueva))
-    }
-}
 
+/** Aviso de estimación (sin consentimiento o con proveedores caídos), con la acción de compartir los datos. */
 @Composable
-private fun Aviso(cotizacion: CotizacionResponse, ofreceCompartir: Boolean, acciones: CotizacionAcciones) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+private fun AvisoEstimacion(cotizacion: CotizacionResponse, ofreceCompartir: Boolean, acciones: CotizacionAcciones) {
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.extra.advertenciaContenedor,
+        contentColor = MaterialTheme.extra.onAdvertencia,
         modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -265,11 +392,10 @@ private fun Aviso(cotizacion: CotizacionResponse, ofreceCompartir: Boolean, acci
                 stringResource(
                     if (cotizacion.degradado) R.string.cotizacion_aviso_degradado else R.string.cotizacion_aviso_sin_consentimiento,
                 ),
+                style = MaterialTheme.typography.bodyMedium,
             )
             if (ofreceCompartir) {
-                Button(onClick = acciones.compartirDatos, modifier = Modifier.heightIn(min = 48.dp)) {
-                    Text(stringResource(R.string.cotizacion_compartir_datos))
-                }
+                BotonPrimario(stringResource(R.string.cotizacion_compartir_datos), onClick = acciones.compartirDatos)
             }
         }
     }
@@ -277,12 +403,19 @@ private fun Aviso(cotizacion: CotizacionResponse, ofreceCompartir: Boolean, acci
 
 @Composable
 private fun Cobertura(cobertura: CoberturaResponse, moneda: String, locale: Locale) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(nombreCobertura(cobertura.tipo), style = MaterialTheme.typography.titleSmall)
-            Text(stringResource(R.string.cotizacion_cobertura_monto, FormatoCotizacion.moneda(cobertura.monto, moneda, locale)))
-            Text(stringResource(R.string.cotizacion_cobertura_deducible, FormatoCotizacion.moneda(cobertura.deducible, moneda, locale)))
+    Column(modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(nombreCobertura(cobertura.tipo), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+            Text(
+                FormatoCotizacion.moneda(cobertura.monto, moneda, locale),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+            )
         }
+        Text(
+            stringResource(R.string.cotizacion_cobertura_deducible, FormatoCotizacion.moneda(cobertura.deducible, moneda, locale)),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Solventa</string>
 
-    <string name="registro_titulo">Crea tu cuenta</string>
+    <string name="registro_titulo">Crear cuenta</string>
     <string name="registro_nombre">Nombres</string>
     <string name="registro_apellido">Apellidos</string>
     <string name="registro_tipo_documento">Tipo de documento</string>
@@ -9,8 +9,8 @@
     <string name="registro_email">Correo electrónico</string>
     <string name="registro_celular">Celular</string>
     <string name="registro_password">Contraseña</string>
-    <string name="registro_terminos">Acepto la política de tratamiento de datos</string>
-    <string name="registro_boton">Registrarme</string>
+    <string name="registro_terminos">Acepto los términos y condiciones y la política de tratamiento de datos</string>
+    <string name="registro_boton">Continuar</string>
     <string name="registro_reintentar">Reintentar</string>
     <string name="registro_cargando">Creando tu cuenta…</string>
 
@@ -240,4 +240,12 @@
     <!-- Componentes compartidos (diseño Material 3) -->
     <string name="ui_volver">Volver</string>
     <string name="ui_paso_de">Paso %1$d de %2$d · %3$s</string>
+
+    <!-- Registro: diseño Material 3 (HU01) -->
+    <string name="registro_paso_nombre">Tus datos</string>
+    <string name="registro_encabezado">Empecemos por conocerte</string>
+    <string name="registro_intro">Con estos datos creamos tu cuenta y luego verificamos tu identidad para que puedas contratar.</string>
+    <string name="registro_password_ayuda">Mínimo 8 caracteres, con letras y números</string>
+    <string name="registro_mostrar_password">Mostrar contraseña</string>
+    <string name="registro_ocultar_password">Ocultar contraseña</string>
 </resources>

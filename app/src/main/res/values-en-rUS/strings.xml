@@ -304,4 +304,46 @@
     <string name="compra_fecha_pago">Date</string>
     <string name="compra_cobro_motivo">Reason: %1$s</string>
     <string name="compra_cobro_plazo">Deadline to resolve the payment: %1$s</string>
+
+    <!-- Policy e-signature (HU21) -->
+    <string name="firma_barra">Sign your policy</string>
+    <string name="firma_cargando">Preparing your policy…</string>
+    <string name="firma_firmando">Signing your policy…</string>
+    <string name="firma_poliza">Policy %1$s</string>
+    <string name="firma_pdf">PDF</string>
+    <string name="firma_leer">Read</string>
+    <string name="firma_revisado">I read the policy and agree with its content</string>
+    <string name="firma_revision_pendiente">Confirm that you read the policy to sign it.</string>
+    <string name="firma_codigo_instruccion">Enter the 6-digit code we sent you</string>
+    <string name="firma_codigo_etiqueta">%1$d-digit verification code</string>
+    <string name="firma_codigo_incompleto">Enter all 6 digits of the code.</string>
+    <string name="firma_reenviar">Resend code</string>
+    <string name="firma_reenviar_en">Resend code in %1$s</string>
+    <string name="firma_codigo_reenviado">We sent you a new code.</string>
+    <string name="firma_constancia">Your signature is recorded with date, time and device as legal proof.</string>
+    <string name="firma_firmar">Sign policy</string>
+    <string name="firma_aviso_codigo">The code is not correct.</string>
+    <plurals name="firma_aviso_codigo_con_intentos">
+        <item quantity="one">The code is not correct. You have %d attempt left.</item>
+        <item quantity="other">The code is not correct. You have %d attempts left.</item>
+    </plurals>
+    <string name="firma_aviso_documento">The document changed. Read it again before signing.</string>
+    <string name="firma_aviso_sin_conexion">No connection. Check your network and try again.</string>
+    <string name="firma_aviso_servicio">We could not send the code. Try again in a few minutes.</string>
+    <string name="firma_lector_titulo">Your policy</string>
+    <string name="firma_lector_pagina">Page %1$d of %2$d</string>
+    <string name="firma_lector_error">We could not open the document. Try again.</string>
+    <string name="firma_ok_titulo">Policy signed</string>
+    <string name="firma_ok_mensaje">Your policy is signed and active. We saved your signature with date, time and device.</string>
+    <string name="firma_ok_poliza">Policy %1$s</string>
+    <string name="firma_ok_accion">Done</string>
+    <string name="firma_fallida_titulo">We could not verify your identity</string>
+    <string name="firma_fallida_mensaje">You used all your code attempts. We will refund the charge; you can quote again whenever you want.</string>
+    <string name="firma_vencida_titulo">The signing period ended</string>
+    <string name="firma_vencida_mensaje">We will refund the charge. You can quote again whenever you want.</string>
+    <string name="firma_error_titulo">We could not complete the signature</string>
+    <string name="firma_error_documento">Your policy is not ready yet. Try again in a moment.</string>
+    <string name="firma_error_no_disponible">This policy can no longer be signed.</string>
+    <string name="firma_error_desconocido">We do not know if your signature arrived. We will check before asking for another code.</string>
+    <string name="compra_firmar_accion">Sign my policy</string>
 </resources>

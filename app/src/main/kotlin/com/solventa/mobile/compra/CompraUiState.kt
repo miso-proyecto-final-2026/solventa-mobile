@@ -43,5 +43,7 @@ data class CompraUiState(
     /** Motivo y fecha límite del cobro rechazado (período de gracia). */
     val motivoCobro: String? = null,
     val graciaHasta: String? = null,
+    /** Saga en curso: la firma (HU21) se abre sobre ella. */
+    val suscripcionId: String? = null,
     val error: ErrorCompra? = null,
 )

@@ -1,5 +1,6 @@
 package com.solventa.mobile
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -27,6 +28,8 @@ import com.solventa.mobile.consentimiento.ConsentimientoScreen
 import com.solventa.mobile.consentimiento.ConsentimientoViewModel
 import com.solventa.mobile.cotizacion.CotizacionRoute
 import com.solventa.mobile.cotizacion.CotizacionViewModel
+import com.solventa.mobile.firma.FirmaRoute
+import com.solventa.mobile.firma.FirmaViewModel
 import com.solventa.mobile.red.CotizacionResponse
 import com.solventa.mobile.privacidad.PrivacidadRoute
 import com.solventa.mobile.privacidad.PrivacidadViewModel
@@ -66,6 +69,8 @@ class MainActivity : ComponentActivity() {
                     var visitaSeguros by rememberSaveable { mutableIntStateOf(0) }
                     // Oferta que el cliente va a comprar; no sobrevive a que el sistema mate el proceso (se vuelve a cotizar).
                     var ofertaAComprar by remember { mutableStateOf<CotizacionResponse?>(null) }
+                    // Saga cuya póliza se va a firmar. Sobrevive a que el sistema mate el proceso: la firma queda pendiente 24 h.
+                    var suscripcionAFirmar by rememberSaveable { mutableStateOf<String?>(null) }
                     var sesionRestaurada by remember { mutableStateOf(SesionActual.activa) }
                     val alcance = rememberCoroutineScope()
 
@@ -198,6 +203,37 @@ class MainActivity : ComponentActivity() {
                                             onCotizarDeNuevo = { visitaSeguros++; navegar(Paso.INICIO) },
                                             onTerminar = { visitaSeguros++; navegar(Paso.INICIO) },
                                             // Atrás deja el resultado de la cotización tal como estaba.
+                                            onVolver = { navegar(Paso.INICIO) },
+                                            // Cobro confirmado: lo que falta es firmar la póliza (HU21).
+                                            onFirmar = { id ->
+                                                suscripcionAFirmar = id
+                                                navegar(Paso.FIRMA)
+                                            },
+                                            onSesionVencida = {
+                                                SesionActual.cerrar()
+                                                alcance.launch { almacen.borrar() }
+                                                navegar(Paso.REGISTRO)
+                                            },
+                                        )
+                                    }
+                                }
+
+                                Paso.FIRMA -> {
+                                    val id = suscripcionAFirmar
+                                    if (id == null) {
+                                        LaunchedEffect(Unit) { navegar(Paso.INICIO) }
+                                    } else {
+                                        val viewModel: FirmaViewModel = viewModel(key = "firma-$id") {
+                                            FirmaViewModel(dispositivo = {
+                                                "${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE}"
+                                            })
+                                        }
+                                        LaunchedEffect(id) { viewModel.iniciar(id) }
+                                        FirmaRoute(
+                                            viewModel = viewModel,
+                                            // Firmada o devuelta: se vuelve a un formulario de cotización limpio.
+                                            onTerminar = { visitaSeguros++; navegar(Paso.INICIO) },
+                                            onCotizarDeNuevo = { visitaSeguros++; navegar(Paso.INICIO) },
                                             onVolver = { navegar(Paso.INICIO) },
                                             onSesionVencida = {
                                                 SesionActual.cerrar()

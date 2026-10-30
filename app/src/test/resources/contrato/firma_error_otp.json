@@ -1,0 +1,1 @@
+{"error":{"code":"OTP_INVALIDO","message":"El código no es correcto.","details":[{"campo":"codigo","motivo":"intentos restantes: 2"}],"trace_id":"a0f40839-bd8b-476c-9c81-35176e85d11c"}}

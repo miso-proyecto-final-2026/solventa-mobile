@@ -155,6 +155,7 @@ class CompraViewModel @JvmOverloads constructor(
     /** Refleja la saga en la pantalla. Devuelve `true` si ya terminó para el cliente. */
     private fun aplicar(saga: SuscripcionResponse): Boolean {
         suscripcionId = saga.id
+        _uiState.update { it.copy(suscripcionId = saga.id) }
         when (val progreso = ProgresoCompra.de(saga)) {
             is ProgresoCompra.EnCurso -> {
                 _uiState.update { it.copy(fase = FaseCompra.PROGRESO, paso = progreso.paso, error = null) }

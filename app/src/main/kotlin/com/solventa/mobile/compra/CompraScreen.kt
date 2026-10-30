@@ -71,6 +71,7 @@ data class CompraAcciones(
     val reintentar: () -> Unit = {},
     val cotizarDeNuevo: () -> Unit = {},
     val terminar: () -> Unit = {},
+    val firmar: (String) -> Unit = {},
     val sesionVencida: () -> Unit = {},
     val volver: () -> Unit = {},
 )
@@ -82,6 +83,7 @@ fun CompraRoute(
     onTerminar: () -> Unit,
     onSesionVencida: () -> Unit,
     onVolver: () -> Unit = {},
+    onFirmar: (String) -> Unit = {},
 ) {
     val estado by viewModel.uiState.collectAsState()
     CompraScreen(
@@ -95,6 +97,7 @@ fun CompraRoute(
             reintentar = viewModel::reintentar,
             cotizarDeNuevo = onCotizarDeNuevo,
             terminar = onTerminar,
+            firmar = onFirmar,
             sesionVencida = onSesionVencida,
             volver = onVolver,
         ),
@@ -119,7 +122,9 @@ fun CompraScreen(estado: CompraUiState, acciones: CompraAcciones) {
             Iconos.Check, Tono.EXITO,
             R.string.compra_exitosa_titulo,
             R.string.compra_exitosa_mensaje,
-            R.string.compra_exitosa_accion to acciones.terminar,
+            // El cobro ya se hizo: la compra termina con la firma (HU21). Sin saga a la mano, solo se cierra.
+            if (estado.suscripcionId != null) R.string.compra_firmar_accion to { acciones.firmar(estado.suscripcionId) }
+            else R.string.compra_exitosa_accion to acciones.terminar,
             detalle = { DatosDelPago(estado) },
         )
         FaseCompra.DECISION_RECHAZADA -> Resultado(
@@ -344,7 +349,7 @@ internal fun textoPaso(paso: String): Int = when (paso) {
 }
 
 @Composable
-private fun Espera(@StringRes mensaje: Int) = Centrado {
+internal fun Espera(@StringRes mensaje: Int) = Centrado {
     CircularProgressIndicator()
     Text(
         stringResource(mensaje),
@@ -377,7 +382,7 @@ private fun Progreso(paso: String) = Centrado {
 }
 
 @Composable
-private fun Centrado(contenido: @Composable ColumnScope.() -> Unit) {
+internal fun Centrado(contenido: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -386,11 +391,11 @@ private fun Centrado(contenido: @Composable ColumnScope.() -> Unit) {
     )
 }
 
-private enum class Tono { EXITO, ERROR, NEUTRO }
+internal enum class Tono { EXITO, ERROR, NEUTRO }
 
 /** Resultado de la compra: círculo con ícono, título, mensaje y una sola acción al pie (E3 y variantes). */
 @Composable
-private fun Resultado(
+internal fun Resultado(
     icono: ImageVector,
     tono: Tono,
     @StringRes titulo: Int,

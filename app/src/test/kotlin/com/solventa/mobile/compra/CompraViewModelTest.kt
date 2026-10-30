@@ -124,6 +124,18 @@ class CompraViewModelTest {
     }
 
     @Test
+    fun `al cobrarse guarda la saga para abrir la firma sobre ella`() = runTest {
+        coEvery { repository.iniciar("q1", "tok_1", "clave-1") } returns exito(saga("COBRO_REALIZADO", "FIRMA", "APROBADA"))
+        val vm = viewModel()
+
+        vm.pagarConTarjetaValida()
+        advanceUntilIdle()
+
+        assertEquals(FaseCompra.EXITOSA, vm.estado().fase)
+        assertEquals("s1", vm.estado().suscripcionId)
+    }
+
+    @Test
     fun `solo el token viaja y la tarjeta se borra del estado`() = runTest {
         coEvery { repository.iniciar("q1", "tok_1", "clave-1") } returns exito(saga("COBRO_REALIZADO", "FIRMA", "APROBADA"))
         val vm = viewModel()

@@ -304,4 +304,46 @@
     <string name="compra_fecha_pago">Fecha</string>
     <string name="compra_cobro_motivo">Motivo: %1$s</string>
     <string name="compra_cobro_plazo">Fecha límite para resolver el pago: %1$s</string>
+
+    <!-- Firma electrónica de la póliza (HU21) -->
+    <string name="firma_barra">Firma tu póliza</string>
+    <string name="firma_cargando">Preparando tu póliza…</string>
+    <string name="firma_firmando">Firmando tu póliza…</string>
+    <string name="firma_poliza">Póliza %1$s</string>
+    <string name="firma_pdf">PDF</string>
+    <string name="firma_leer">Leer</string>
+    <string name="firma_revisado">Leí la póliza y estoy de acuerdo con su contenido</string>
+    <string name="firma_revision_pendiente">Confirma que leíste la póliza para poder firmar.</string>
+    <string name="firma_codigo_instruccion">Ingresa el código de 6 dígitos que te enviamos</string>
+    <string name="firma_codigo_etiqueta">Código de verificación de %1$d dígitos</string>
+    <string name="firma_codigo_incompleto">Escribe los 6 dígitos del código.</string>
+    <string name="firma_reenviar">Reenviar código</string>
+    <string name="firma_reenviar_en">Reenviar código en %1$s</string>
+    <string name="firma_codigo_reenviado">Te enviamos un código nuevo.</string>
+    <string name="firma_constancia">Tu firma queda registrada con fecha, hora y dispositivo como constancia legal.</string>
+    <string name="firma_firmar">Firmar póliza</string>
+    <string name="firma_aviso_codigo">El código no es correcto.</string>
+    <plurals name="firma_aviso_codigo_con_intentos">
+        <item quantity="one">El código no es correcto. Te queda %d intento.</item>
+        <item quantity="other">El código no es correcto. Te quedan %d intentos.</item>
+    </plurals>
+    <string name="firma_aviso_documento">El documento cambió. Léelo de nuevo antes de firmar.</string>
+    <string name="firma_aviso_sin_conexion">No hay conexión. Revisa tu red e inténtalo de nuevo.</string>
+    <string name="firma_aviso_servicio">No pudimos enviar el código. Inténtalo de nuevo en unos minutos.</string>
+    <string name="firma_lector_titulo">Tu póliza</string>
+    <string name="firma_lector_pagina">Página %1$d de %2$d</string>
+    <string name="firma_lector_error">No pudimos abrir el documento. Inténtalo de nuevo.</string>
+    <string name="firma_ok_titulo">Póliza firmada</string>
+    <string name="firma_ok_mensaje">Tu póliza quedó firmada y activa. Guardamos tu firma con fecha, hora y dispositivo.</string>
+    <string name="firma_ok_poliza">Póliza %1$s</string>
+    <string name="firma_ok_accion">Listo</string>
+    <string name="firma_fallida_titulo">No pudimos verificar tu identidad</string>
+    <string name="firma_fallida_mensaje">Agotaste los intentos con el código. Te devolveremos el cobro; puedes cotizar de nuevo cuando quieras.</string>
+    <string name="firma_vencida_titulo">El plazo para firmar terminó</string>
+    <string name="firma_vencida_mensaje">Te devolveremos el cobro. Puedes cotizar de nuevo cuando quieras.</string>
+    <string name="firma_error_titulo">No pudimos completar la firma</string>
+    <string name="firma_error_documento">Tu póliza todavía no está lista. Inténtalo de nuevo en un momento.</string>
+    <string name="firma_error_no_disponible">Esta póliza ya no está disponible para firmar.</string>
+    <string name="firma_error_desconocido">No sabemos si tu firma llegó. La comprobaremos antes de pedirte otro código.</string>
+    <string name="compra_firmar_accion">Firmar mi póliza</string>
 </resources>

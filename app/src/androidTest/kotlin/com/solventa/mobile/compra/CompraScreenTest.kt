@@ -153,6 +153,16 @@ class CompraScreenTest(private val idioma: String) {
     }
 
     @Test
+    fun conElCobroConfirmadoLaCompraContinuaALaFirmaDeLaSaga() {
+        var firmada: String? = null
+        mostrar(estado(FaseCompra.EXITOSA) { copy(suscripcionId = "s1") }, CompraAcciones(firmar = { firmada = it }))
+
+        composeTestRule.onNodeWithText(texto(R.string.compra_firmar_accion)).performClick()
+
+        assertEquals("s1", firmada)
+    }
+
+    @Test
     fun elCobroRechazadoExplicaElMotivoYElPlazoSinReintentar() {
         var terminado = 0
         mostrar(

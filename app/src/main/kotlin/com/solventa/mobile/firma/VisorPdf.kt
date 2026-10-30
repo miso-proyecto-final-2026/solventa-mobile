@@ -44,7 +44,10 @@ internal fun VisorPdf(contenido: ContenidoPdf, onCerrar: () -> Unit) {
     val paginas by produceState<List<Bitmap>?>(initialValue = null, contenido) {
         value = withContext(Dispatchers.IO) { renderizar(contexto.cacheDir, contenido.bytes, anchoPx) }
     }
-    DisposableEffect(paginas) { onDispose { paginas?.forEach { if (!it.isRecycled) it.recycle() } } }
+    // Se libera cada lista al dejar de usarse. La lista se captura aquí: dentro de `onDispose`, `paginas` (un delegado
+    // de estado) devolvería la lista *actual* y no la que este efecto vio, y reciclaría las bitmaps que se están dibujando.
+    val aLiberar = paginas
+    DisposableEffect(aLiberar) { onDispose { aLiberar?.forEach { if (!it.isRecycled) it.recycle() } } }
 
     Column(Modifier.fillMaxSize()) {
         BarraSuperior(titulo = stringResource(R.string.firma_lector_titulo), onAtras = onCerrar)

@@ -43,6 +43,32 @@ data class FirmaResponse(
     @SerialName("metodo_autenticacion") val metodoAutenticacion: String,
 )
 
+/** Cobertura de la póliza con su monto y deducible, tal como las entrega la billetera. */
+@Serializable
+data class CoberturaPolizaResponse(
+    val tipo: String,
+    val monto: Long,
+    val deducible: Long = 0,
+)
+
+/** La póliza emitida (HU20, HU22): lo que muestra el certificado en pantalla. Los campos que la app no conoce se ignoran. */
+@Serializable
+data class PolizaResponse(
+    val id: String,
+    @SerialName("suscripcion_id") val suscripcionId: String,
+    @SerialName("numero_poliza") val numeroPoliza: String,
+    val producto: String,
+    val estado: String,
+    @SerialName("vigencia_desde") val vigenciaDesde: String,
+    @SerialName("fecha_vencimiento") val fechaVencimiento: String,
+    @SerialName("fecha_emision") val fechaEmision: String? = null,
+    val moneda: String = "COP",
+    @SerialName("prima_anual") val primaAnual: Long = 0,
+    @SerialName("prima_mensual") val primaMensual: Long = 0,
+    @SerialName("periodicidad_pago") val periodicidadPago: String = "ANUAL",
+    val coberturas: List<CoberturaPolizaResponse> = emptyList(),
+)
+
 interface FirmaApi {
     @GET("v1/suscripciones/{id}/documento-firma")
     suspend fun documento(
@@ -70,4 +96,19 @@ interface FirmaApi {
         @Header("Authorization") autorizacion: String,
         @Body solicitud: SolicitudFirma,
     ): Response<FirmaResponse>
+
+    // La póliza de la suscripción (HU20): producto, vigencia, prima y coberturas para el certificado en pantalla.
+    @GET("v1/suscripciones/{id}/poliza")
+    suspend fun poliza(
+        @Path("id") id: String,
+        @Header("Authorization") autorizacion: String,
+    ): Response<PolizaResponse>
+
+    // El PDF del certificado de cobertura (HU22), en el idioma de `Accept-Language`. Solo lo descarga el titular.
+    @GET("v1/suscripciones/{id}/certificado")
+    suspend fun certificado(
+        @Path("id") id: String,
+        @Header("Authorization") autorizacion: String,
+        @Header("Accept-Language") idioma: String,
+    ): Response<ResponseBody>
 }

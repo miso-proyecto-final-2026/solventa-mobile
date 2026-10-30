@@ -333,9 +333,6 @@
     <string name="firma_lector_titulo">Tu póliza</string>
     <string name="firma_lector_pagina">Página %1$d de %2$d</string>
     <string name="firma_lector_error">No pudimos abrir el documento. Inténtalo de nuevo.</string>
-    <string name="firma_ok_titulo">Póliza firmada</string>
-    <string name="firma_ok_mensaje">Tu póliza quedó firmada y activa. Guardamos tu firma con fecha, hora y dispositivo.</string>
-    <string name="firma_ok_poliza">Póliza %1$s</string>
     <string name="firma_ok_accion">Listo</string>
     <string name="firma_fallida_titulo">No pudimos verificar tu identidad</string>
     <string name="firma_fallida_mensaje">Agotaste los intentos con el código. Te devolveremos el cobro; puedes cotizar de nuevo cuando quieras.</string>
@@ -346,4 +343,23 @@
     <string name="firma_error_no_disponible">Esta póliza ya no está disponible para firmar.</string>
     <string name="firma_error_desconocido">No sabemos si tu firma llegó. La comprobaremos antes de pedirte otro código.</string>
     <string name="compra_firmar_accion">Firmar mi póliza</string>
+
+    <!-- Certificado y notificaciones (HU22) -->
+    <string name="notificaciones_canal_nombre">Tu póliza</string>
+    <string name="notificaciones_canal_descripcion">Avisos de que tu póliza quedó activa.</string>
+    <string name="certificado_titulo">Tu cobertura está activa</string>
+    <string name="certificado_mensaje">Tu póliza quedó firmada y activa. También te enviamos el certificado por correo.</string>
+    <string name="certificado_encabezado">CERTIFICADO DE COBERTURA</string>
+    <string name="certificado_activa">Activa</string>
+    <string name="certificado_poliza">Póliza</string>
+    <string name="certificado_producto">Producto</string>
+    <string name="certificado_vigencia">Vigencia</string>
+    <string name="certificado_prima">Prima anual</string>
+    <string name="certificado_aviso">Te avisaremos por notificación y por correo cuando haya novedades de tu póliza.</string>
+    <string name="certificado_descargar">Descargar certificado</string>
+    <string name="certificado_descargando">Descargando certificado…</string>
+    <string name="certificado_guardado">Certificado guardado.</string>
+    <string name="certificado_abrir">Abrir</string>
+    <string name="certificado_error">No pudimos descargar o guardar el certificado. Inténtalo de nuevo.</string>
+    <string name="certificado_nombre_archivo">certificado-%1$s.pdf</string>
 </resources>

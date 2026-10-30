@@ -1,6 +1,7 @@
 package com.solventa.mobile.firma
 
 import com.solventa.mobile.red.DocumentoFirmaResponse
+import com.solventa.mobile.red.PolizaResponse
 
 enum class FaseFirma {
     /** Obteniendo el documento (el PDF se genera aparte, justo después del cobro). */
@@ -23,6 +24,21 @@ enum class ErrorFirma { SIN_CONEXION, SERVICIO, SESION_VENCIDA, DOCUMENTO_NO_LIS
 
 /** Avisos que se muestran sobre el formulario sin sacar al cliente de la pantalla. */
 enum class AvisoFirma { CODIGO_INCORRECTO, DOCUMENTO_CAMBIO, SIN_CONEXION, SERVICIO }
+
+/** Descarga del certificado de cobertura (HU22): se baja el PDF y el cliente elige dónde guardarlo. */
+enum class EstadoCertificado {
+    INACTIVO,
+
+    /** Pidiendo el PDF al servidor. */
+    DESCARGANDO,
+
+    /** El PDF está en memoria y falta que el cliente elija dónde guardarlo. */
+    LISTO_PARA_GUARDAR,
+    GUARDADO,
+
+    /** No se pudo descargar o guardar. */
+    ERROR,
+}
 
 const val LARGO_CODIGO = 6
 
@@ -48,5 +64,10 @@ data class FirmaUiState(
     val pdf: ContenidoPdf? = null,
     val cargandoPdf: Boolean = false,
     val errorPdf: Boolean = false,
+    /** La póliza emitida, para el certificado en pantalla. `null` mientras carga o si no se pudo leer. */
+    val poliza: PolizaResponse? = null,
+    val certificado: EstadoCertificado = EstadoCertificado.INACTIVO,
+    /** El PDF del certificado ya descargado, a la espera de que el cliente elija dónde guardarlo. */
+    val certificadoPdf: ContenidoPdf? = null,
     val error: ErrorFirma? = null,
 )

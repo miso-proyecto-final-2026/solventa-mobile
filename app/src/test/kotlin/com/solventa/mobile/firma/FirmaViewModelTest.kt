@@ -2,6 +2,7 @@ package com.solventa.mobile.firma
 
 import com.solventa.mobile.red.DocumentoFirmaResponse
 import com.solventa.mobile.red.FirmaResponse
+import com.solventa.mobile.red.PolizaResponse
 import com.solventa.mobile.red.SolicitudFirma
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -32,12 +33,17 @@ class FirmaViewModelTest {
     private val documento = DocumentoFirmaResponse("s1", "POL1", "h".repeat(64), "PENDIENTE", "2026-10-31T20:43:00Z")
     private val firmada = FirmaResponse("s1", "p1", "EMITIDA", "h".repeat(64), "2026-10-30T20:43:21Z", "MOVIL", "OTP")
 
+    private val poliza = PolizaResponse(
+        "p1", "s1", "POL1", "microseguro_vida", "VIGENTE", "2026-10-30T20:00:00Z", "2027-10-30T20:00:00Z", primaAnual = 175_000,
+    )
+
     private fun viewModel(maximoConsultas: Int = 4) = FirmaViewModel(
         repository = repository,
         dispositivo = { "Pixel 8 · Android 15" },
         segundosEntreCodigos = 3,
         intervaloDocumentoMs = 1_000,
         maximoConsultasDocumento = maximoConsultas,
+        idioma = { "en-US" },
     )
 
     private fun <T> exito(valor: T) = FirmaRepository.Resultado.Exito(valor)
@@ -47,6 +53,7 @@ class FirmaViewModelTest {
         Dispatchers.setMain(dispatcher)
         coEvery { repository.documento("s1") } returns exito(documento)
         coEvery { repository.pedirCodigo("s1") } returns exito(Unit)
+        coEvery { repository.poliza("s1") } returns exito(poliza)
     }
 
     @After
@@ -396,5 +403,125 @@ class FirmaViewModelTest {
         assertTrue(vm.uiState.value.errorPdf)
         assertNull(vm.uiState.value.pdf)
         assertEquals(FaseFirma.LISTA, vm.uiState.value.fase)
+    }
+
+    // --- certificado (HU22) ---------------------------------------------------------------------------------------------
+
+    private fun FirmaViewModel.firmado(): FirmaViewModel = abierto().apply {
+        coEvery { repository.firmar(any(), any()) } returns exito(firmada)
+        listoParaFirmar()
+        firmar()
+        dispatcher.scheduler.advanceUntilIdle()
+    }
+
+    @Test
+    fun `al quedar firmada carga el detalle de la poliza para el certificado`() = runTest(dispatcher) {
+        val vm = viewModel().firmado()
+
+        assertEquals(FaseFirma.FIRMADA, vm.uiState.value.fase)
+        assertEquals(poliza, vm.uiState.value.poliza)
+    }
+
+    @Test
+    fun `si no se puede leer el detalle de la poliza igual queda firmada`() = runTest(dispatcher) {
+        coEvery { repository.poliza("s1") } returns FirmaRepository.Resultado.SinConexion
+
+        val vm = viewModel().firmado()
+
+        assertEquals(FaseFirma.FIRMADA, vm.uiState.value.fase)
+        assertNull(vm.uiState.value.poliza)
+    }
+
+    @Test
+    fun `una firma hecha en otro canal tambien trae el detalle de la poliza`() = runTest(dispatcher) {
+        coEvery { repository.documento("s1") } returns exito(documento.copy(estado = "FIRMADA"))
+
+        val vm = viewModel().abierto()
+
+        assertEquals(FaseFirma.FIRMADA, vm.uiState.value.fase)
+        assertEquals(poliza, vm.uiState.value.poliza)
+    }
+
+    @Test
+    fun `descargar el certificado lo pide en el idioma del telefono y queda listo para guardar`() = runTest(dispatcher) {
+        val pdf = "%PDF-1.4".toByteArray()
+        coEvery { repository.certificado("s1", "en-US") } returns exito(pdf)
+        val vm = viewModel().firmado()
+
+        vm.descargarCertificado()
+        assertEquals(EstadoCertificado.DESCARGANDO, vm.uiState.value.certificado)
+        advanceUntilIdle()
+
+        assertEquals(EstadoCertificado.LISTO_PARA_GUARDAR, vm.uiState.value.certificado)
+        assertTrue(vm.uiState.value.certificadoPdf!!.bytes.contentEquals(pdf))
+    }
+
+    @Test
+    fun `no se puede pedir el certificado dos veces a la vez`() = runTest(dispatcher) {
+        coEvery { repository.certificado(any(), any()) } returns exito(ByteArray(1))
+        val vm = viewModel().firmado()
+
+        vm.descargarCertificado()
+        vm.descargarCertificado()
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { repository.certificado(any(), any()) }
+    }
+
+    @Test
+    fun `antes de firmar no hay certificado que descargar`() = runTest(dispatcher) {
+        val vm = viewModel().abierto()
+
+        vm.descargarCertificado()
+        advanceUntilIdle()
+
+        assertEquals(EstadoCertificado.INACTIVO, vm.uiState.value.certificado)
+        coVerify(exactly = 0) { repository.certificado(any(), any()) }
+    }
+
+    @Test
+    fun `si el certificado no se puede descargar se avisa y se puede reintentar`() = runTest(dispatcher) {
+        coEvery { repository.certificado(any(), any()) } returns FirmaRepository.Resultado.SinConexion
+        val vm = viewModel().firmado()
+
+        vm.descargarCertificado()
+        advanceUntilIdle()
+        assertEquals(EstadoCertificado.ERROR, vm.uiState.value.certificado)
+        assertNull(vm.uiState.value.certificadoPdf)
+
+        coEvery { repository.certificado(any(), any()) } returns exito(ByteArray(1))
+        vm.descargarCertificado()
+        advanceUntilIdle()
+        assertEquals(EstadoCertificado.LISTO_PARA_GUARDAR, vm.uiState.value.certificado)
+    }
+
+    @Test
+    fun `al guardarlo suelta el pdf de la memoria y lo marca guardado`() = runTest(dispatcher) {
+        coEvery { repository.certificado(any(), any()) } returns exito(ByteArray(1))
+        val vm = viewModel().firmado()
+        vm.descargarCertificado()
+        advanceUntilIdle()
+
+        vm.certificadoGuardado(true)
+
+        assertEquals(EstadoCertificado.GUARDADO, vm.uiState.value.certificado)
+        assertNull(vm.uiState.value.certificadoPdf)
+    }
+
+    @Test
+    fun `si el cliente cancela el selector vuelve al inicio y si falla la escritura avisa`() = runTest(dispatcher) {
+        coEvery { repository.certificado(any(), any()) } returns exito(ByteArray(1))
+        val vm = viewModel().firmado()
+
+        vm.descargarCertificado()
+        advanceUntilIdle()
+        vm.certificadoGuardado(null)
+        assertEquals(EstadoCertificado.INACTIVO, vm.uiState.value.certificado)
+        assertNull(vm.uiState.value.certificadoPdf)
+
+        vm.descargarCertificado()
+        advanceUntilIdle()
+        vm.certificadoGuardado(false)
+        assertEquals(EstadoCertificado.ERROR, vm.uiState.value.certificado)
     }
 }

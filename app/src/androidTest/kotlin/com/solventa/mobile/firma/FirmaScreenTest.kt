@@ -19,6 +19,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import com.solventa.mobile.R
 import com.solventa.mobile.red.DocumentoFirmaResponse
+import com.solventa.mobile.red.PolizaResponse
 import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -150,16 +151,72 @@ class FirmaScreenTest(private val idioma: String) {
         assertEquals(1, reenviado)
     }
 
-    @Test
-    fun laFirmaExitosaConfirmaConElNumeroDePoliza() {
-        var terminado = 0
-        mostrar(estado(FaseFirma.FIRMADA), FirmaAcciones(terminar = { terminado++ }))
+    private val poliza = PolizaResponse(
+        id = "p1", suscripcionId = "s1", numeroPoliza = "36GBQKV2CWMM3EBB8Q6Q", producto = "microseguro_vida", estado = "VIGENTE",
+        vigenciaDesde = "2026-10-30T20:00:00Z", fechaVencimiento = "2027-10-30T20:00:00Z", primaAnual = 175_000,
+    )
 
-        composeTestRule.onNodeWithText(texto(R.string.firma_ok_titulo)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(texto(R.string.firma_ok_poliza, "36GBQKV2CWMM3EBB8Q6Q")).assertIsDisplayed()
+    @Test
+    fun laFirmaExitosaMuestraElCertificadoConLosDatosDeLaPoliza() {
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = poliza) })
+
+        composeTestRule.onNodeWithText(texto(R.string.certificado_titulo)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.certificado_mensaje)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.certificado_encabezado)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.certificado_activa)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_producto_microseguro_vida)).assertIsDisplayed()
+        composeTestRule.onNodeWithText("36GBQKV2CWMM3EBB8Q6Q").assertIsDisplayed()
+    }
+
+    @Test
+    fun siNoSePudoLeerElDetalleElCertificadoSeMuestraConElNumeroQueYaSeTiene() {
+        mostrar(estado(FaseFirma.FIRMADA))
+
+        composeTestRule.onNodeWithText(texto(R.string.certificado_titulo)).assertIsDisplayed()
+        composeTestRule.onNodeWithText("36GBQKV2CWMM3EBB8Q6Q").assertIsDisplayed()
+    }
+
+    @Test
+    fun descargarYTerminarLlegaAlFlujo() {
+        var descargas = 0
+        var terminado = 0
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = poliza) }, FirmaAcciones(descargarCertificado = { descargas++ }, terminar = { terminado++ }))
+
+        composeTestRule.onNodeWithTag("descargar_certificado").performClick()
         composeTestRule.onNodeWithText(texto(R.string.firma_ok_accion)).performClick()
 
+        assertEquals(1, descargas)
         assertEquals(1, terminado)
+    }
+
+    @Test
+    fun mientrasSeDescargaElBotonSeDeshabilitaYSeAvisa() {
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = poliza, certificado = EstadoCertificado.DESCARGANDO) })
+
+        composeTestRule.onNodeWithTag("descargar_certificado").assertIsNotEnabled()
+        composeTestRule.onNodeWithText(texto(R.string.certificado_descargando)).assertIsDisplayed()
+    }
+
+    @Test
+    fun guardadoElCertificadoSeOfreceAbrirlo() {
+        var abierto = 0
+        mostrar(
+            estado(FaseFirma.FIRMADA) { copy(poliza = poliza, certificado = EstadoCertificado.GUARDADO) },
+            FirmaAcciones(abrirCertificado = { abierto++ }),
+        )
+
+        composeTestRule.onNodeWithText(texto(R.string.certificado_guardado)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.certificado_abrir)).performClick()
+
+        assertEquals(1, abierto)
+    }
+
+    @Test
+    fun siFallaLaDescargaOElGuardadoSeExplicaYSePuedeReintentar() {
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = poliza, certificado = EstadoCertificado.ERROR) })
+
+        composeTestRule.onNodeWithText(texto(R.string.certificado_error)).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("descargar_certificado").assertIsEnabled()
     }
 
     @Test

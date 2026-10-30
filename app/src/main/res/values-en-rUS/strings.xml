@@ -333,9 +333,6 @@
     <string name="firma_lector_titulo">Your policy</string>
     <string name="firma_lector_pagina">Page %1$d of %2$d</string>
     <string name="firma_lector_error">We could not open the document. Try again.</string>
-    <string name="firma_ok_titulo">Policy signed</string>
-    <string name="firma_ok_mensaje">Your policy is signed and active. We saved your signature with date, time and device.</string>
-    <string name="firma_ok_poliza">Policy %1$s</string>
     <string name="firma_ok_accion">Done</string>
     <string name="firma_fallida_titulo">We could not verify your identity</string>
     <string name="firma_fallida_mensaje">You used all your code attempts. We will refund the charge; you can quote again whenever you want.</string>
@@ -346,4 +343,23 @@
     <string name="firma_error_no_disponible">This policy can no longer be signed.</string>
     <string name="firma_error_desconocido">We do not know if your signature arrived. We will check before asking for another code.</string>
     <string name="compra_firmar_accion">Sign my policy</string>
+
+    <!-- Certificate and notifications (HU22) -->
+    <string name="notificaciones_canal_nombre">Your policy</string>
+    <string name="notificaciones_canal_descripcion">Alerts that your policy is now active.</string>
+    <string name="certificado_titulo">Your coverage is active</string>
+    <string name="certificado_mensaje">Your policy is signed and active. We also emailed you the certificate.</string>
+    <string name="certificado_encabezado">CERTIFICATE OF COVERAGE</string>
+    <string name="certificado_activa">Active</string>
+    <string name="certificado_poliza">Policy</string>
+    <string name="certificado_producto">Product</string>
+    <string name="certificado_vigencia">Term</string>
+    <string name="certificado_prima">Annual premium</string>
+    <string name="certificado_aviso">We will notify you by push notification and email when there is news about your policy.</string>
+    <string name="certificado_descargar">Download certificate</string>
+    <string name="certificado_descargando">Downloading certificate…</string>
+    <string name="certificado_guardado">Certificate saved.</string>
+    <string name="certificado_abrir">Open</string>
+    <string name="certificado_error">We could not download or save the certificate. Try again.</string>
+    <string name="certificado_nombre_archivo">certificate-%1$s.pdf</string>
 </resources>

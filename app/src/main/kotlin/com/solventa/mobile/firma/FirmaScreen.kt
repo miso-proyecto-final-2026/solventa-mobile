@@ -1,6 +1,26 @@
 package com.solventa.mobile.firma
 
 import androidx.activity.compose.BackHandler
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import com.solventa.mobile.cotizacion.Catalogo
+import com.solventa.mobile.cotizacion.FormatoCotizacion
+import com.solventa.mobile.ui.componentes.BloqueResultado
+import com.solventa.mobile.ui.componentes.BotonSecundario
+import com.solventa.mobile.ui.componentes.ChipEstado
+import com.solventa.mobile.ui.componentes.TarjetaDestacada
+import com.solventa.mobile.ui.componentes.TipoEstado
+import kotlinx.coroutines.launch
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -73,6 +93,11 @@ data class FirmaAcciones(
     val cotizarDeNuevo: () -> Unit = {},
     val sesionVencida: () -> Unit = {},
     val volver: () -> Unit = {},
+    /** El cliente pidió el certificado (HU22). */
+    val descargarCertificado: () -> Unit = {},
+    /** El selector de archivos devolvió dónde guardarlo, o `null` si el cliente canceló. */
+    val guardarCertificado: (Uri?) -> Unit = {},
+    val abrirCertificado: () -> Unit = {},
 )
 
 @Composable
@@ -84,6 +109,9 @@ fun FirmaRoute(
     onVolver: () -> Unit,
 ) {
     val estado by viewModel.uiState.collectAsState()
+    val contexto = LocalContext.current
+    val alcance = rememberCoroutineScope()
+    var guardadoEn by remember { mutableStateOf<Uri?>(null) }
     // Atrás cierra primero el lector del PDF; con el lector cerrado, deja la firma.
     BackHandler(enabled = estado.pdf != null) { viewModel.cerrarLector() }
     FirmaScreen(
@@ -100,6 +128,20 @@ fun FirmaRoute(
             cotizarDeNuevo = onCotizarDeNuevo,
             sesionVencida = onSesionVencida,
             volver = onVolver,
+            descargarCertificado = viewModel::descargarCertificado,
+            guardarCertificado = { destino ->
+                val pdf = estado.certificadoPdf
+                if (destino == null || pdf == null) {
+                    viewModel.certificadoGuardado(null)
+                } else {
+                    alcance.launch {
+                        val exito = guardarEnArchivo(contexto, destino, pdf.bytes)
+                        if (exito) guardadoEn = destino
+                        viewModel.certificadoGuardado(exito)
+                    }
+                }
+            },
+            abrirCertificado = { guardadoEn?.let { abrirPdf(contexto, it) } },
         ),
     )
 }
@@ -116,13 +158,7 @@ fun FirmaScreen(estado: FirmaUiState, acciones: FirmaAcciones) {
         FaseFirma.CARGANDO -> Espera(R.string.firma_cargando)
         FaseFirma.FIRMANDO -> Espera(R.string.firma_firmando)
         FaseFirma.LISTA -> estado.documento?.let { Formulario(estado, it, acciones) }
-        FaseFirma.FIRMADA -> Resultado(
-            Iconos.Check, Tono.EXITO,
-            R.string.firma_ok_titulo,
-            R.string.firma_ok_mensaje,
-            R.string.firma_ok_accion to acciones.terminar,
-            detalle = { estado.documento?.let { Text(stringResource(R.string.firma_ok_poliza, it.numeroPoliza), style = MaterialTheme.typography.bodyLarge) } },
-        )
+        FaseFirma.FIRMADA -> Certificado(estado, acciones)
         FaseFirma.FALLIDA -> Resultado(
             Iconos.Exclamacion, Tono.ERROR,
             R.string.firma_fallida_titulo,
@@ -136,6 +172,117 @@ fun FirmaScreen(estado: FirmaUiState, acciones: FirmaAcciones) {
             R.string.compra_cotizar_de_nuevo to acciones.cotizarDeNuevo,
         )
         FaseFirma.ERROR -> Falla(estado.error ?: ErrorFirma.SERVICIO, acciones)
+    }
+}
+
+/**
+ * Póliza firmada y emitida (HU21) con su certificado (HU22, E5 del diseño): la tarjeta del certificado, el aviso de las
+ * notificaciones y «Descargar certificado». El diseño dice «Ya estás cubierta»; aquí el texto no marca género.
+ * Si no se pudo leer el detalle de la póliza, la tarjeta se muestra con el número que ya se tiene.
+ */
+@Composable
+private fun Certificado(estado: FirmaUiState, acciones: FirmaAcciones) {
+    val locale = LocalConfiguration.current.locales[0]
+    val poliza = estado.poliza
+    val numero = poliza?.numeroPoliza ?: estado.documento?.numeroPoliza
+    val nombreArchivo = stringResource(R.string.certificado_nombre_archivo, numero.orEmpty())
+    val guardar = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { destino ->
+        acciones.guardarCertificado(destino)
+    }
+    // Cuando el PDF está descargado, el sistema le pregunta al cliente dónde guardarlo.
+    LaunchedEffect(estado.certificado) {
+        if (estado.certificado == EstadoCertificado.LISTO_PARA_GUARDAR) guardar.launch(nombreArchivo)
+    }
+    Column(modifier = Modifier.fillMaxSize().semantics { liveRegion = LiveRegionMode.Polite }) {
+        Column(
+            modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        ) {
+            BloqueResultado(
+                icono = Iconos.Check,
+                descripcionIcono = stringResource(R.string.resultado_icono_exito),
+                contenedor = SolventaColorScheme.tertiaryContainer,
+                colorIcono = SolventaColorScheme.onTertiaryContainer,
+                titulo = stringResource(R.string.certificado_titulo),
+                mensaje = stringResource(R.string.certificado_mensaje),
+            )
+            TarjetaDestacada(modifier = Modifier.padding(horizontal = 24.dp)) {
+                Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.certificado_encabezado), style = MaterialTheme.typography.labelMedium, modifier = Modifier.weight(1f))
+                    ChipEstado(stringResource(R.string.certificado_activa), Iconos.Check, TipoEstado.ACTIVO)
+                }
+                poliza?.let { Catalogo.porId(it.producto) }?.let {
+                    Text(stringResource(it.nombre), style = MaterialTheme.typography.titleLarge)
+                }
+                numero?.let { FilaCertificado(stringResource(R.string.certificado_poliza), it) }
+                poliza?.let {
+                    FilaCertificado(
+                        stringResource(R.string.certificado_vigencia),
+                        "${FormatoCotizacion.vigencia(it.vigenciaDesde, locale)} – ${FormatoCotizacion.vigencia(it.fechaVencimiento, locale)}",
+                    )
+                    FilaCertificado(stringResource(R.string.certificado_prima), FormatoCotizacion.moneda(it.primaAnual, it.moneda, locale))
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()) {
+                Icon(Iconos.Informacion, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                Text(
+                    stringResource(R.string.certificado_aviso),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            EstadoDeLaDescarga(estado.certificado, acciones)
+        }
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            BotonPrimario(
+                stringResource(R.string.certificado_descargar),
+                onClick = acciones.descargarCertificado,
+                habilitado = estado.certificado != EstadoCertificado.DESCARGANDO,
+                modifier = Modifier.testTag("descargar_certificado"),
+            )
+            BotonSecundario(stringResource(R.string.firma_ok_accion), onClick = acciones.terminar)
+        }
+    }
+}
+
+@Composable
+private fun FilaCertificado(etiqueta: String, valor: String) = Row(
+    horizontalArrangement = Arrangement.SpaceBetween,
+    modifier = Modifier.fillMaxWidth(),
+) {
+    Text(etiqueta, style = MaterialTheme.typography.bodyMedium)
+    Text(valor, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium), textAlign = TextAlign.End, modifier = Modifier.weight(1f).padding(start = 12.dp))
+}
+
+@Composable
+private fun EstadoDeLaDescarga(estado: EstadoCertificado, acciones: FirmaAcciones) {
+    when (estado) {
+        EstadoCertificado.DESCARGANDO -> Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 24.dp),
+        ) {
+            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+            Text(stringResource(R.string.certificado_descargando), style = MaterialTheme.typography.bodyMedium)
+        }
+        EstadoCertificado.GUARDADO -> Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 24.dp),
+        ) {
+            Text(stringResource(R.string.certificado_guardado), style = MaterialTheme.typography.bodyMedium)
+            TextButton(onClick = acciones.abrirCertificado, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.certificado_abrir))
+            }
+        }
+        EstadoCertificado.ERROR -> Text(
+            stringResource(R.string.certificado_error),
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+        EstadoCertificado.INACTIVO, EstadoCertificado.LISTO_PARA_GUARDAR -> Unit
     }
 }
 

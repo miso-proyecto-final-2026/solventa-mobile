@@ -2,6 +2,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Android 13 o superior: la app pide el permiso al llegar a la firma, para avisar cuando la póliza esté activa (HU22). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- La verificación de identidad usa la cámara, pero la app sigue instalable sin ella. -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
@@ -16,7 +18,8 @@
 
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

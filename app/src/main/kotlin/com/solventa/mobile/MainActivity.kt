@@ -2,6 +2,18 @@ package com.solventa.mobile
 
 import android.os.Build
 import android.os.Bundle
+import android.Manifest
+import android.content.Intent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import com.solventa.mobile.notificaciones.AvisosAndroid
+import com.solventa.mobile.notificaciones.IdentificadorDispositivoPreferencias
+import com.solventa.mobile.notificaciones.IdiomaDelTelefono
+import com.solventa.mobile.notificaciones.NotificacionesRepository
+import com.solventa.mobile.notificaciones.SondeadorNotificaciones
+import kotlinx.coroutines.delay
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -53,9 +65,20 @@ import com.solventa.mobile.verificacion.VerificacionViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    // Póliza cuyo certificado debe abrirse porque el cliente tocó la notificación (HU22). Lo recoge la composición.
+    private var suscripcionDeNotificacion by mutableStateOf<String?>(null)
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        suscripcionDeNotificacion = intent.getStringExtra(EXTRA_SUSCRIPCION)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val almacen = AlmacenSesion.crear(this)
+        suscripcionDeNotificacion = intent?.getStringExtra(EXTRA_SUSCRIPCION)
+        val avisos = AvisosAndroid(this)
+        val sondeador = SondeadorNotificaciones(NotificacionesRepository(), avisos, IdentificadorDispositivoPreferencias(this))
         setContent {
             SolventaTheme {
                 Surface {
@@ -92,6 +115,40 @@ class MainActivity : ComponentActivity() {
                     if (!sesionRestaurada || paso == Paso.ARRANQUE) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
                         return@Surface
+                    }
+
+                    // Notificaciones (HU22): mientras el cliente está dentro de la app y esta se ve, el «push» simulado de la
+                    // bandeja del servidor se muestra como notificación del sistema.
+                    val dentroDeLaApp = paso.seccion != null
+                    LaunchedEffect(dentroDeLaApp) {
+                        val cliente = SesionActual.clienteId
+                        if (dentroDeLaApp && cliente != null) {
+                            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                                sondeador.registrar(cliente, IdiomaDelTelefono.actual())
+                                while (true) {
+                                    sondeador.sondear()
+                                    delay(INTERVALO_SONDEO_MS)
+                                }
+                            }
+                        }
+                    }
+                    // Android 13 o superior: el permiso se pide al llegar a la firma, que es cuando tiene sentido avisar.
+                    var permisoPedido by rememberSaveable { mutableStateOf(false) }
+                    val pedirPermiso = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+                    LaunchedEffect(paso) {
+                        if (paso == Paso.FIRMA && !permisoPedido && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !avisos.puedeMostrar()) {
+                            permisoPedido = true
+                            pedirPermiso.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    }
+                    // Tocar la notificación abre el certificado de esa póliza.
+                    LaunchedEffect(suscripcionDeNotificacion, paso) {
+                        val id = suscripcionDeNotificacion ?: return@LaunchedEffect
+                        suscripcionDeNotificacion = null
+                        if (SesionActual.activa) {
+                            suscripcionAFirmar = id
+                            navegar(Paso.FIRMA)
+                        }
                     }
 
                     // Atrás dentro de una sección vuelve a su raíz; desde seguros sale de la app.
@@ -266,5 +323,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        /** Identificador de la suscripción cuyo certificado abre la notificación (HU22). */
+        const val EXTRA_SUSCRIPCION = "suscripcion_id"
+
+        /** Cada cuánto se consulta la bandeja mientras la app está visible. */
+        private const val INTERVALO_SONDEO_MS = 10_000L
     }
 }

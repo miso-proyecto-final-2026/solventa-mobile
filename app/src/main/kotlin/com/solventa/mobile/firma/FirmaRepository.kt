@@ -5,6 +5,7 @@ import com.solventa.mobile.red.DocumentoFirmaResponse
 import com.solventa.mobile.red.ErrorSuscripcionResponse
 import com.solventa.mobile.red.FirmaApi
 import com.solventa.mobile.red.FirmaResponse
+import com.solventa.mobile.red.PolizaResponse
 import com.solventa.mobile.red.SolicitudFirma
 import com.solventa.mobile.sesion.SesionActual
 import java.io.IOException
@@ -12,6 +13,7 @@ import java.io.InterruptedIOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import okhttp3.ResponseBody
 import retrofit2.Response
 
 /**
@@ -31,6 +33,9 @@ class FirmaRepository(
 
         /** Cobrada pero el PDF aún no está generado (se genera aparte, en menos de un segundo). */
         data object DocumentoNoListo : Resultado<Nothing>
+
+        /** El certificado solo existe cuando la póliza ya está emitida. */
+        data object CertificadoNoDisponible : Resultado<Nothing>
 
         /** La suscripción ya no está en el paso de firma. */
         data object FirmaNoDisponible : Resultado<Nothing>
@@ -53,10 +58,19 @@ class FirmaRepository(
         llamar { token -> api.documento(suscripcionId, token) }
 
     /** El PDF que se va a firmar, para leerlo en la app. */
-    suspend fun pdf(suscripcionId: String): Resultado<ByteArray> {
+    suspend fun pdf(suscripcionId: String): Resultado<ByteArray> = descargar { token -> api.pdf(suscripcionId, token) }
+
+    /** El certificado de cobertura en PDF (HU22), en el idioma del teléfono. Solo lo descarga el titular de una póliza emitida. */
+    suspend fun certificado(suscripcionId: String, idioma: String): Resultado<ByteArray> =
+        descargar { token -> api.certificado(suscripcionId, token, idioma) }
+
+    /** La póliza emitida: producto, vigencia, prima y coberturas, para mostrar el certificado. */
+    suspend fun poliza(suscripcionId: String): Resultado<PolizaResponse> = llamar { token -> api.poliza(suscripcionId, token) }
+
+    private suspend fun descargar(llamada: suspend (String) -> Response<ResponseBody>): Resultado<ByteArray> {
         val token = sesion.accessToken ?: return Resultado.SinSesion
         return try {
-            val respuesta = api.pdf(suscripcionId, "Bearer $token")
+            val respuesta = llamada("Bearer $token")
             val cuerpo = respuesta.body()
             if (respuesta.isSuccessful && cuerpo != null) {
                 Resultado.Exito(withContext(Dispatchers.IO) { cuerpo.bytes() })
@@ -109,6 +123,7 @@ class FirmaRepository(
         }.getOrNull()
         return when (error?.code) {
             "POLIZA_NO_LISTA", "POLIZA_NO_ENCONTRADA" -> Resultado.DocumentoNoListo
+            "CERTIFICADO_NO_DISPONIBLE" -> Resultado.CertificadoNoDisponible
             "FIRMA_NO_DISPONIBLE" -> Resultado.FirmaNoDisponible
             "FIRMA_VENCIDA" -> Resultado.Vencida
             "FIRMA_FALLIDA" -> Resultado.Fallida

@@ -3,6 +3,7 @@ package com.solventa.mobile.firma
 import com.solventa.mobile.red.DocumentoFirmaResponse
 import com.solventa.mobile.red.FirmaApi
 import com.solventa.mobile.red.FirmaResponse
+import com.solventa.mobile.red.PolizaResponse
 import com.solventa.mobile.red.SolicitudFirma
 import com.solventa.mobile.sesion.SesionActual
 import io.mockk.coEvery
@@ -149,5 +150,47 @@ class FirmaRepositoryTest {
     fun `pedir el codigo acepta el 202 sin cuerpo`() = runTest {
         coEvery { api.pedirCodigo(any(), any()) } returns Response.success(202, Unit)
         assertEquals(FirmaRepository.Resultado.Exito(Unit), repository.pedirCodigo("s1"))
+    }
+
+    // --- certificado (HU22) -------------------------------------------------------------------------------------------
+
+    @Test
+    fun `la poliza se pide con el token de la sesion`() = runTest {
+        val poliza = PolizaResponse("p1", "s1", "36GBQKV2CWMM3EBB8Q6Q", "microseguro_vida", "VIGENTE", "2026-10-30T20:00:00Z", "2027-10-30T20:00:00Z")
+        val autorizacion = slot<String>()
+        coEvery { api.poliza("s1", capture(autorizacion)) } returns Response.success(poliza)
+
+        assertEquals(FirmaRepository.Resultado.Exito(poliza), repository.poliza("s1"))
+        assertEquals("Bearer token-123", autorizacion.captured)
+    }
+
+    @Test
+    fun `el certificado se descarga en el idioma que se pide`() = runTest {
+        val idioma = slot<String>()
+        val contenido = "%PDF-1.4 certificado".toByteArray()
+        coEvery { api.certificado("s1", any(), capture(idioma)) } returns
+            Response.success(contenido.toResponseBody("application/pdf".toMediaType()))
+
+        val resultado = repository.certificado("s1", "en-US")
+
+        assertEquals("en-US", idioma.captured)
+        assertEquals("%PDF-1.4 certificado", String((resultado as FirmaRepository.Resultado.Exito).valor))
+    }
+
+    @Test
+    fun `un certificado de una poliza sin emitir tiene su propio resultado`() = runTest {
+        coEvery { api.certificado(any(), any(), any()) } returns error(409, "CERTIFICADO_NO_DISPONIBLE")
+
+        assertEquals(FirmaRepository.Resultado.CertificadoNoDisponible, repository.certificado("s1", "es-CO"))
+    }
+
+    @Test
+    fun `sin sesion o sin red el certificado no se descarga`() = runTest {
+        coEvery { api.certificado(any(), any(), any()) } throws IOException("sin red")
+        assertEquals(FirmaRepository.Resultado.SinConexion, repository.certificado("s1", "es-CO"))
+
+        SesionActual.cerrar()
+        assertEquals(FirmaRepository.Resultado.SinSesion, repository.certificado("s1", "es-CO"))
+        assertEquals(FirmaRepository.Resultado.SinSesion, repository.poliza("s1"))
     }
 }

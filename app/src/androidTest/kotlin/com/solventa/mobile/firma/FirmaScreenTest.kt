@@ -3,6 +3,7 @@ package com.solventa.mobile.firma
 import android.content.Context
 import android.content.res.Configuration
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalConfiguration
@@ -19,6 +20,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import com.solventa.mobile.R
 import com.solventa.mobile.red.DocumentoFirmaResponse
+import com.solventa.mobile.red.PolizaResponse
 import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -51,7 +53,12 @@ class FirmaScreenTest(private val idioma: String) {
 
     private fun mostrar(estado: FirmaUiState, acciones: FirmaAcciones = FirmaAcciones()) {
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalContext provides contexto, LocalConfiguration provides configuracion) {
+            CompositionLocalProvider(
+                LocalContext provides contexto,
+                LocalConfiguration provides configuracion,
+                // El contexto con otro idioma ya no es la actividad: sin esto el selector de archivos no encuentra su registro.
+                LocalActivityResultRegistryOwner provides composeTestRule.activity,
+            ) {
                 MaterialTheme { FirmaScreen(estado, acciones) }
             }
         }
@@ -150,16 +157,72 @@ class FirmaScreenTest(private val idioma: String) {
         assertEquals(1, reenviado)
     }
 
-    @Test
-    fun laFirmaExitosaConfirmaConElNumeroDePoliza() {
-        var terminado = 0
-        mostrar(estado(FaseFirma.FIRMADA), FirmaAcciones(terminar = { terminado++ }))
+    private val polizaEmitida = PolizaResponse(
+        id = "p1", suscripcionId = "s1", numeroPoliza = "36GBQKV2CWMM3EBB8Q6Q", producto = "microseguro_vida", estado = "VIGENTE",
+        vigenciaDesde = "2026-10-30T20:00:00Z", fechaVencimiento = "2027-10-30T20:00:00Z", primaAnual = 175_000,
+    )
 
-        composeTestRule.onNodeWithText(texto(R.string.firma_ok_titulo)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(texto(R.string.firma_ok_poliza, "36GBQKV2CWMM3EBB8Q6Q")).assertIsDisplayed()
+    @Test
+    fun laFirmaExitosaMuestraElCertificadoConLosDatosDeLaPoliza() {
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = polizaEmitida) })
+
+        composeTestRule.onNodeWithText(texto(R.string.certificado_titulo)).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.certificado_mensaje)).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.certificado_encabezado)).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.certificado_activa)).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.cotizacion_producto_microseguro_vida)).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("36GBQKV2CWMM3EBB8Q6Q").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun siNoSePudoLeerElDetalleElCertificadoSeMuestraConElNumeroQueYaSeTiene() {
+        mostrar(estado(FaseFirma.FIRMADA))
+
+        composeTestRule.onNodeWithText(texto(R.string.certificado_titulo)).assertIsDisplayed()
+        composeTestRule.onNodeWithText("36GBQKV2CWMM3EBB8Q6Q").assertIsDisplayed()
+    }
+
+    @Test
+    fun descargarYTerminarLlegaAlFlujo() {
+        var descargas = 0
+        var terminado = 0
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = polizaEmitida) }, FirmaAcciones(descargarCertificado = { descargas++ }, terminar = { terminado++ }))
+
+        composeTestRule.onNodeWithTag("descargar_certificado").performClick()
         composeTestRule.onNodeWithText(texto(R.string.firma_ok_accion)).performClick()
 
+        assertEquals(1, descargas)
         assertEquals(1, terminado)
+    }
+
+    @Test
+    fun mientrasSeDescargaElBotonSeDeshabilitaYSeAvisa() {
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = polizaEmitida, certificado = EstadoCertificado.DESCARGANDO) })
+
+        composeTestRule.onNodeWithTag("descargar_certificado").assertIsNotEnabled()
+        composeTestRule.onNodeWithText(texto(R.string.certificado_descargando)).assertIsDisplayed()
+    }
+
+    @Test
+    fun guardadoElCertificadoSeOfreceAbrirlo() {
+        var abierto = 0
+        mostrar(
+            estado(FaseFirma.FIRMADA) { copy(poliza = polizaEmitida, certificado = EstadoCertificado.GUARDADO) },
+            FirmaAcciones(abrirCertificado = { abierto++ }),
+        )
+
+        composeTestRule.onNodeWithText(texto(R.string.certificado_guardado, texto(R.string.certificado_nombre_archivo, "36GBQKV2CWMM3EBB8Q6Q"))).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.certificado_abrir)).performClick()
+
+        assertEquals(1, abierto)
+    }
+
+    @Test
+    fun siFallaLaDescargaOElGuardadoSeExplicaYSePuedeReintentar() {
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = polizaEmitida, certificado = EstadoCertificado.ERROR) })
+
+        composeTestRule.onNodeWithText(texto(R.string.certificado_error)).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("descargar_certificado").assertIsEnabled()
     }
 
     @Test

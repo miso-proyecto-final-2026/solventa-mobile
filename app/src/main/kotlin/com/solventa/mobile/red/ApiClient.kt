@@ -63,6 +63,8 @@ object ApiClient {
 
     val suscripcionApi: SuscripcionApi by lazy { retrofit.create(SuscripcionApi::class.java) }
 
+    val notificacionesApi: NotificacionesApi by lazy { retrofit.create(NotificacionesApi::class.java) }
+
     val firmaApi: FirmaApi by lazy { retrofit.create(FirmaApi::class.java) }
 
     val clienteApi: ClienteApi by lazy { retrofit.create(ClienteApi::class.java) }

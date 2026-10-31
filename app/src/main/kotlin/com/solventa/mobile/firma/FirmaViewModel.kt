@@ -3,6 +3,7 @@ package com.solventa.mobile.firma
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.solventa.mobile.red.SolicitudFirma
+import java.util.Locale
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +28,8 @@ class FirmaViewModel @JvmOverloads constructor(
     /** El PDF se genera justo después del cobro: se reintenta unos instantes hasta que esté. */
     private val intervaloDocumentoMs: Long = 1_000,
     private val maximoConsultasDocumento: Int = 15,
+    /** Idioma del teléfono (`es-CO`, `en-US`): el certificado se descarga en él. */
+    private val idioma: () -> String = { Locale.getDefault().toLanguageTag() },
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FirmaUiState())
@@ -59,7 +62,8 @@ class FirmaViewModel @JvmOverloads constructor(
                     is FirmaRepository.Resultado.Exito -> {
                         val documento = resultado.valor
                         if (documento.estado == "FIRMADA") {
-                            _uiState.update { it.copy(fase = FaseFirma.FIRMADA, documento = documento) }
+                            _uiState.update { it.copy(documento = documento) }
+                            firmada()
                         } else {
                             _uiState.update { it.copy(fase = FaseFirma.LISTA, documento = documento, aviso = null) }
                             pedirCodigo()
@@ -153,7 +157,7 @@ class FirmaViewModel @JvmOverloads constructor(
         cargando?.cancel()
         cargando = viewModelScope.launch {
             when (val resultado = repository.firmar(id, solicitud)) {
-                is FirmaRepository.Resultado.Exito -> _uiState.update { it.copy(fase = FaseFirma.FIRMADA) }
+                is FirmaRepository.Resultado.Exito -> firmada()
                 is FirmaRepository.Resultado.CodigoInvalido -> _uiState.update {
                     it.copy(fase = FaseFirma.LISTA, aviso = AvisoFirma.CODIGO_INCORRECTO, intentosRestantes = resultado.intentosRestantes)
                 }
@@ -171,7 +175,7 @@ class FirmaViewModel @JvmOverloads constructor(
         val id = suscripcionId ?: return
         when (val resultado = repository.documento(id)) {
             is FirmaRepository.Resultado.Exito ->
-                if (resultado.valor.estado == "FIRMADA") _uiState.update { it.copy(fase = FaseFirma.FIRMADA) }
+                if (resultado.valor.estado == "FIRMADA") firmada()
                 else _uiState.update { it.copy(fase = FaseFirma.LISTA, aviso = AvisoFirma.SIN_CONEXION) }
             else -> fallar(ErrorFirma.RESULTADO_DESCONOCIDO)
         }
@@ -186,6 +190,46 @@ class FirmaViewModel @JvmOverloads constructor(
             }
             else -> terminarCon(resultado)
         }
+    }
+
+    /** La póliza quedó firmada y emitida: se muestra el certificado y se lee el detalle de la póliza sin bloquear la pantalla. */
+    private fun firmada() {
+        _uiState.update { it.copy(fase = FaseFirma.FIRMADA) }
+        val id = suscripcionId ?: return
+        viewModelScope.launch {
+            // Un fallo aquí no quita lo importante (la firma ya está hecha): la tarjeta se muestra con lo que haya.
+            (repository.poliza(id) as? FirmaRepository.Resultado.Exito)?.let { r -> _uiState.update { it.copy(poliza = r.valor) } }
+        }
+    }
+
+    // --- certificado --------------------------------------------------------------------------------------------------
+
+    /** Baja el PDF del certificado; la pantalla le pide al cliente dónde guardarlo cuando está listo. */
+    fun descargarCertificado() {
+        val id = suscripcionId ?: return
+        val estado = _uiState.value
+        if (estado.fase != FaseFirma.FIRMADA || estado.certificado == EstadoCertificado.DESCARGANDO) return
+        _uiState.update { it.copy(certificado = EstadoCertificado.DESCARGANDO, certificadoPdf = null) }
+        viewModelScope.launch {
+            when (val resultado = repository.certificado(id, idioma())) {
+                is FirmaRepository.Resultado.Exito -> _uiState.update {
+                    it.copy(certificado = EstadoCertificado.LISTO_PARA_GUARDAR, certificadoPdf = ContenidoPdf(resultado.valor))
+                }
+                else -> _uiState.update { it.copy(certificado = EstadoCertificado.ERROR) }
+            }
+        }
+    }
+
+    /** El cliente eligió dónde guardarlo (`true`), canceló (`null`) o no se pudo escribir (`false`). */
+    fun certificadoGuardado(exito: Boolean?) = _uiState.update {
+        it.copy(
+            certificadoPdf = null,
+            certificado = when (exito) {
+                true -> EstadoCertificado.GUARDADO
+                null -> EstadoCertificado.INACTIVO
+                false -> EstadoCertificado.ERROR
+            },
+        )
     }
 
     private fun terminarCon(resultado: FirmaRepository.Resultado<*>) = when (resultado) {

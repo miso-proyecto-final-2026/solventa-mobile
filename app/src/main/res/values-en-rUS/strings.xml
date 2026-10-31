@@ -358,7 +358,7 @@
     <string name="certificado_aviso">We will notify you by push notification and email when there is news about your policy.</string>
     <string name="certificado_descargar">Download certificate</string>
     <string name="certificado_descargando">Downloading certificate…</string>
-    <string name="certificado_guardado">Certificate saved.</string>
+    <string name="certificado_guardado">Saved as %1$s in the folder you chose.</string>
     <string name="certificado_abrir">Open</string>
     <string name="certificado_error">We could not download or save the certificate. Try again.</string>
     <string name="certificado_nombre_archivo">certificate-%1$s.pdf</string>

@@ -358,7 +358,7 @@
     <string name="certificado_aviso">Te avisaremos por notificación y por correo cuando haya novedades de tu póliza.</string>
     <string name="certificado_descargar">Descargar certificado</string>
     <string name="certificado_descargando">Descargando certificado…</string>
-    <string name="certificado_guardado">Certificado guardado.</string>
+    <string name="certificado_guardado">Guardado como %1$s en la carpeta que elegiste.</string>
     <string name="certificado_abrir">Abrir</string>
     <string name="certificado_error">No pudimos descargar o guardar el certificado. Inténtalo de nuevo.</string>
     <string name="certificado_nombre_archivo">certificado-%1$s.pdf</string>

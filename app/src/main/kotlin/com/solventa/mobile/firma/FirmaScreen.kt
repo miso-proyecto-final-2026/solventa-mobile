@@ -232,9 +232,10 @@ private fun Certificado(estado: FirmaUiState, acciones: FirmaAcciones) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            EstadoDeLaDescarga(estado.certificado, acciones)
         }
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // En la franja fija, junto a los botones: así el avance y dónde quedó el archivo siempre se ven.
+            EstadoDeLaDescarga(estado.certificado, nombreArchivo, acciones)
             BotonPrimario(
                 stringResource(R.string.certificado_descargar),
                 onClick = acciones.descargarCertificado,
@@ -256,12 +257,11 @@ private fun FilaCertificado(etiqueta: String, valor: String) = Row(
 }
 
 @Composable
-private fun EstadoDeLaDescarga(estado: EstadoCertificado, acciones: FirmaAcciones) {
+private fun EstadoDeLaDescarga(estado: EstadoCertificado, nombreArchivo: String, acciones: FirmaAcciones) {
     when (estado) {
         EstadoCertificado.DESCARGANDO -> Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 24.dp),
         ) {
             CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
             Text(stringResource(R.string.certificado_descargando), style = MaterialTheme.typography.bodyMedium)
@@ -269,9 +269,8 @@ private fun EstadoDeLaDescarga(estado: EstadoCertificado, acciones: FirmaAccione
         EstadoCertificado.GUARDADO -> Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 24.dp),
         ) {
-            Text(stringResource(R.string.certificado_guardado), style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.certificado_guardado, nombreArchivo), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
             TextButton(onClick = acciones.abrirCertificado, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.certificado_abrir))
             }
@@ -280,7 +279,6 @@ private fun EstadoDeLaDescarga(estado: EstadoCertificado, acciones: FirmaAccione
             stringResource(R.string.certificado_error),
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = 24.dp),
         )
         EstadoCertificado.INACTIVO, EstadoCertificado.LISTO_PARA_GUARDAR -> Unit
     }

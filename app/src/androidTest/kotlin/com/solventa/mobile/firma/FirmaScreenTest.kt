@@ -3,6 +3,7 @@ package com.solventa.mobile.firma
 import android.content.Context
 import android.content.res.Configuration
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalConfiguration
@@ -52,7 +53,12 @@ class FirmaScreenTest(private val idioma: String) {
 
     private fun mostrar(estado: FirmaUiState, acciones: FirmaAcciones = FirmaAcciones()) {
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalContext provides contexto, LocalConfiguration provides configuracion) {
+            CompositionLocalProvider(
+                LocalContext provides contexto,
+                LocalConfiguration provides configuracion,
+                // El contexto con otro idioma ya no es la actividad: sin esto el selector de archivos no encuentra su registro.
+                LocalActivityResultRegistryOwner provides composeTestRule.activity,
+            ) {
                 MaterialTheme { FirmaScreen(estado, acciones) }
             }
         }

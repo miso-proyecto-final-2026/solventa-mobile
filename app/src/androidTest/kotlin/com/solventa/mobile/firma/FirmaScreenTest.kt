@@ -157,14 +157,14 @@ class FirmaScreenTest(private val idioma: String) {
         assertEquals(1, reenviado)
     }
 
-    private val poliza = PolizaResponse(
+    private val polizaEmitida = PolizaResponse(
         id = "p1", suscripcionId = "s1", numeroPoliza = "36GBQKV2CWMM3EBB8Q6Q", producto = "microseguro_vida", estado = "VIGENTE",
         vigenciaDesde = "2026-10-30T20:00:00Z", fechaVencimiento = "2027-10-30T20:00:00Z", primaAnual = 175_000,
     )
 
     @Test
     fun laFirmaExitosaMuestraElCertificadoConLosDatosDeLaPoliza() {
-        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = poliza) })
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = polizaEmitida) })
 
         composeTestRule.onNodeWithText(texto(R.string.certificado_titulo)).performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.certificado_mensaje)).performScrollTo().assertIsDisplayed()
@@ -186,7 +186,7 @@ class FirmaScreenTest(private val idioma: String) {
     fun descargarYTerminarLlegaAlFlujo() {
         var descargas = 0
         var terminado = 0
-        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = poliza) }, FirmaAcciones(descargarCertificado = { descargas++ }, terminar = { terminado++ }))
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = polizaEmitida) }, FirmaAcciones(descargarCertificado = { descargas++ }, terminar = { terminado++ }))
 
         composeTestRule.onNodeWithTag("descargar_certificado").performClick()
         composeTestRule.onNodeWithText(texto(R.string.firma_ok_accion)).performClick()
@@ -197,7 +197,7 @@ class FirmaScreenTest(private val idioma: String) {
 
     @Test
     fun mientrasSeDescargaElBotonSeDeshabilitaYSeAvisa() {
-        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = poliza, certificado = EstadoCertificado.DESCARGANDO) })
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = polizaEmitida, certificado = EstadoCertificado.DESCARGANDO) })
 
         composeTestRule.onNodeWithTag("descargar_certificado").assertIsNotEnabled()
         composeTestRule.onNodeWithText(texto(R.string.certificado_descargando)).performScrollTo().assertIsDisplayed()
@@ -207,7 +207,7 @@ class FirmaScreenTest(private val idioma: String) {
     fun guardadoElCertificadoSeOfreceAbrirlo() {
         var abierto = 0
         mostrar(
-            estado(FaseFirma.FIRMADA) { copy(poliza = poliza, certificado = EstadoCertificado.GUARDADO) },
+            estado(FaseFirma.FIRMADA) { copy(poliza = polizaEmitida, certificado = EstadoCertificado.GUARDADO) },
             FirmaAcciones(abrirCertificado = { abierto++ }),
         )
 
@@ -219,7 +219,7 @@ class FirmaScreenTest(private val idioma: String) {
 
     @Test
     fun siFallaLaDescargaOElGuardadoSeExplicaYSePuedeReintentar() {
-        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = poliza, certificado = EstadoCertificado.ERROR) })
+        mostrar(estado(FaseFirma.FIRMADA) { copy(poliza = polizaEmitida, certificado = EstadoCertificado.ERROR) })
 
         composeTestRule.onNodeWithText(texto(R.string.certificado_error)).performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithTag("descargar_certificado").assertIsEnabled()

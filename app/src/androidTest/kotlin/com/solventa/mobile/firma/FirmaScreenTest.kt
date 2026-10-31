@@ -211,7 +211,7 @@ class FirmaScreenTest(private val idioma: String) {
             FirmaAcciones(abrirCertificado = { abierto++ }),
         )
 
-        composeTestRule.onNodeWithText(texto(R.string.certificado_guardado, "certificado-36GBQKV2CWMM3EBB8Q6Q.pdf")).assertIsDisplayed()
+        composeTestRule.onNodeWithText(texto(R.string.certificado_guardado, texto(R.string.certificado_nombre_archivo, "36GBQKV2CWMM3EBB8Q6Q"))).assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.certificado_abrir)).performClick()
 
         assertEquals(1, abierto)

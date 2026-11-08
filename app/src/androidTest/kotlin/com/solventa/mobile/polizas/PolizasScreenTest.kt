@@ -234,6 +234,26 @@ class PolizasScreenTest(private val idioma: String) {
     }
 
     @Test
+    fun el_deducible_va_en_su_propio_renglon_debajo_de_la_cobertura() {
+        mostrar { PolizaDetallePantalla(detalle(vigente), vigente, PolizaDetalleAcciones()) }
+
+        // La cobertura con deducible es la segunda (índice 1): su fila no menciona el deducible, la siguiente sí.
+        composeTestRule.onNodeWithText("Incapacidad total").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("deducible_1").performScrollTo().assertIsDisplayed()
+            .assertTextContains(texto(R.string.polizas_deducible), substring = true)
+        composeTestRule.onNodeWithTag("deducible_0").assertDoesNotExist() // la primera cobertura no tiene deducible
+    }
+
+    @Test
+    fun cada_estado_muestra_su_chip() {
+        mostrar { PolizasPantalla(lista(vigente, proxima, pendiente), PolizasAcciones()) }
+
+        composeTestRule.onNodeWithTag("poliza_s1").assertTextContains(texto(R.string.polizas_estado_vigente), substring = true)
+        composeTestRule.onNodeWithTag("poliza_s2").assertTextContains(texto(R.string.polizas_estado_proxima), substring = true)
+        composeTestRule.onNodeWithTag("poliza_s4").assertTextContains(texto(R.string.polizas_estado_pendiente_firma), substring = true)
+    }
+
+    @Test
     fun una_poliza_sin_coberturas_guardadas_lo_dice() {
         val antigua = vigente.copy(coberturas = emptyList())
         mostrar { PolizaDetallePantalla(detalle(antigua), antigua, PolizaDetalleAcciones()) }

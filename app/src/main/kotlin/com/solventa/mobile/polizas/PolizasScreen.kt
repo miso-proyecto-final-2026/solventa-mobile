@@ -228,6 +228,22 @@ internal val EstadoPoliza.etiqueta: Int
         EstadoPoliza.ANULADA -> R.string.polizas_estado_anulada
     }
 
-internal val EstadoPoliza.icono get() = if (activa && this != EstadoPoliza.PENDIENTE_FIRMA) Iconos.Check else Iconos.Advertencia
+/** Ícono del chip: el color no es el único indicador. */
+internal val EstadoPoliza.icono
+    get() = when (this) {
+        EstadoPoliza.VIGENTE -> Iconos.Check
+        EstadoPoliza.PROXIMA_A_VENCER -> Iconos.Informacion
+        EstadoPoliza.PENDIENTE_FIRMA -> Iconos.Advertencia
+        EstadoPoliza.VENCIDA -> Iconos.Exclamacion
+        EstadoPoliza.ANULADA -> Iconos.Menos
+    }
 
-internal val EstadoPoliza.tipoChip get() = if (this == EstadoPoliza.VIGENTE) TipoEstado.ACTIVO else TipoEstado.NEUTRO
+/** Color del chip con el patrón de la app: verde vigente, azul próxima a vencer, ámbar firma pendiente, rojo vencida, gris anulada. */
+internal val EstadoPoliza.tipoChip
+    get() = when (this) {
+        EstadoPoliza.VIGENTE -> TipoEstado.ACTIVO
+        EstadoPoliza.PROXIMA_A_VENCER -> TipoEstado.INFO
+        EstadoPoliza.PENDIENTE_FIRMA -> TipoEstado.ADVERTENCIA
+        EstadoPoliza.VENCIDA -> TipoEstado.ERROR
+        EstadoPoliza.ANULADA -> TipoEstado.NEUTRO
+    }

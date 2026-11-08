@@ -102,6 +102,17 @@ class ComponentesTest {
     }
 
     @Test
+    fun todosLosTiposDeChipLlevanTextoEIcono() {
+        mostrar {
+            androidx.compose.foundation.layout.Column {
+                TipoEstado.entries.forEach { ChipEstado("Estado ${it.name}", Icons.Filled.Check, it) }
+            }
+        }
+
+        TipoEstado.entries.forEach { composeTestRule.onNodeWithText("Estado ${it.name}").assertIsDisplayed() }
+    }
+
+    @Test
     fun laBarraSuperiorTieneVolverAccesibleDe48dp() {
         var atras = false
         mostrar { BarraSuperior("Crear cuenta", onAtras = { atras = true }) }

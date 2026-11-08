@@ -393,7 +393,7 @@
     <string name="polizas_qr_ayuda">Scan it to download the certificate. The code is renewed every time you open this screen.</string>
     <string name="polizas_coberturas">Coverage</string>
     <string name="polizas_sin_coberturas">Coverage details are not available for this policy.</string>
-    <string name="polizas_cobertura_deducible">Deductible %1$s</string>
+    <string name="polizas_deducible">Deductible</string>
     <string name="polizas_vigencia">Validity</string>
     <string name="polizas_prima_anual">Annual premium</string>
     <string name="polizas_prima_mensual">Monthly premium</string>

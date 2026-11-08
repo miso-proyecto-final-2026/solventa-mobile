@@ -17,6 +17,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -54,6 +57,7 @@ import com.solventa.mobile.ui.componentes.BotonPrimario
 import com.solventa.mobile.ui.componentes.BotonSecundario
 import com.solventa.mobile.ui.componentes.BotonTonal
 import com.solventa.mobile.ui.componentes.ChipEstado
+import com.solventa.mobile.ui.componentes.FilaDetalle
 import com.solventa.mobile.ui.componentes.ListaDetalle
 import com.solventa.mobile.ui.componentes.Tarjeta
 import com.solventa.mobile.ui.componentes.TarjetaDestacada
@@ -248,17 +252,40 @@ private fun Coberturas(poliza: PolizaResponse, locale: java.util.Locale) {
         )
         return
     }
-    ListaDetalle(
-        titulo = stringResource(R.string.polizas_coberturas),
-        filas = poliza.coberturas.map { c ->
-            val deducible = if (c.deducible > 0) {
-                " · " + stringResource(R.string.polizas_cobertura_deducible, FormatoCotizacion.moneda(c.deducible, poliza.moneda, locale))
-            } else {
-                ""
+    TarjetaCoberturas(poliza, locale)
+}
+
+/**
+ * Coberturas (F2). Cada una es una fila `tipo … monto`; si tiene deducible, va en su propia fila debajo, con sangría, para
+ * que ni el nombre de la cobertura ni el importe se compriman en una sola línea.
+ */
+@Composable
+private fun TarjetaCoberturas(poliza: PolizaResponse, locale: java.util.Locale) {
+    Card(
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        modifier = Modifier.fillMaxWidth().testTag("coberturas"),
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+            Text(
+                stringResource(R.string.polizas_coberturas),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+            )
+            poliza.coberturas.forEachIndexed { i, cobertura ->
+                if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                FilaDetalle(FormatoPolizas.tipoCobertura(cobertura.tipo), FormatoCotizacion.moneda(cobertura.monto, poliza.moneda, locale))
+                if (cobertura.deducible > 0) {
+                    FilaDetalle(
+                        etiqueta = stringResource(R.string.polizas_deducible),
+                        valor = FormatoCotizacion.moneda(cobertura.deducible, poliza.moneda, locale),
+                        modifier = Modifier.padding(start = 16.dp).testTag("deducible_${i}"),
+                    )
+                }
             }
-            (FormatoPolizas.tipoCobertura(c.tipo) + deducible) to FormatoCotizacion.moneda(c.monto, poliza.moneda, locale)
-        },
-    )
+        }
+    }
 }
 
 @Composable

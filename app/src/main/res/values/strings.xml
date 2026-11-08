@@ -393,7 +393,7 @@
     <string name="polizas_qr_ayuda">Escanéalo para descargar el certificado. El código se renueva cada vez que abres esta pantalla.</string>
     <string name="polizas_coberturas">Coberturas</string>
     <string name="polizas_sin_coberturas">El detalle de coberturas no está disponible para esta póliza.</string>
-    <string name="polizas_cobertura_deducible">Deducible %1$s</string>
+    <string name="polizas_deducible">Deducible</string>
     <string name="polizas_vigencia">Vigencia</string>
     <string name="polizas_prima_anual">Prima anual</string>
     <string name="polizas_prima_mensual">Prima mensual</string>

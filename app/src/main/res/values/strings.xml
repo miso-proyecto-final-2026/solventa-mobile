@@ -374,7 +374,9 @@
     <string name="polizas_estado_pendiente_firma">Firma pendiente</string>
     <string name="polizas_estado_anulada">Anulada</string>
     <string name="polizas_numero">Póliza %1$s</string>
-    <string name="polizas_emitida">Emitida el %1$s</string>
+    <string name="polizas_categoria_vida">VIDA</string>
+    <string name="polizas_categoria_dispositivos">DISPOSITIVOS</string>
+    <string name="polizas_categoria_otro">PÓLIZA</string>
     <string name="polizas_vigente_hasta">Vigente hasta %1$s</string>
     <string name="polizas_vencio">Venció el %1$s</string>
     <string name="polizas_abrir_detalle">Ver el detalle de %1$s, %2$s</string>

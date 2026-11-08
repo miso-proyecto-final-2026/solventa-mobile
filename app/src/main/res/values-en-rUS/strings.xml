@@ -374,7 +374,9 @@
     <string name="polizas_estado_pendiente_firma">Signature pending</string>
     <string name="polizas_estado_anulada">Cancelled</string>
     <string name="polizas_numero">Policy %1$s</string>
-    <string name="polizas_emitida">Issued on %1$s</string>
+    <string name="polizas_categoria_vida">LIFE</string>
+    <string name="polizas_categoria_dispositivos">DEVICES</string>
+    <string name="polizas_categoria_otro">POLICY</string>
     <string name="polizas_vigente_hasta">Valid until %1$s</string>
     <string name="polizas_vencio">Expired on %1$s</string>
     <string name="polizas_abrir_detalle">View details of %1$s, %2$s</string>

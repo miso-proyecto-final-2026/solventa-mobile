@@ -1,6 +1,5 @@
 package com.solventa.mobile.ui.componentes
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -64,9 +63,7 @@ fun ChipEstado(texto: String, icono: ImageVector, tipo: TipoEstado, modifier: Mo
         TipoEstado.ADVERTENCIA -> MaterialTheme.extra.advertenciaContenedor to MaterialTheme.extra.onAdvertencia
         TipoEstado.ERROR -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
     }
-    // El azul informativo es el mismo de la tarjeta de la credencial: con un contorno el chip no se pierde sobre ella.
-    val contorno = if (tipo == TipoEstado.INFO) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null
-    Surface(shape = MaterialTheme.shapes.small, color = contenedor, contentColor = contenido, border = contorno, modifier = modifier) {
+    Surface(shape = MaterialTheme.shapes.small, color = contenedor, contentColor = contenido, modifier = modifier) {
         Row(
             modifier = Modifier.height(32.dp).padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),

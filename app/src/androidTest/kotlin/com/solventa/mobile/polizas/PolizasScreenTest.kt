@@ -17,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.semantics.getOrNull
 import com.solventa.mobile.R
 import com.solventa.mobile.red.CoberturaPolizaResponse
 import com.solventa.mobile.red.PolizaResponse
@@ -86,10 +87,38 @@ class PolizasScreenTest(private val idioma: String) {
         mostrar { PolizasPantalla(lista(vigente, proxima, vencida, pendiente), PolizasAcciones()) }
 
         composeTestRule.onNodeWithText(texto(R.string.polizas_titulo)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(texto(R.string.polizas_numero, "SOL-s1")).assertIsDisplayed()
+        composeTestRule.onNodeWithText("SOL-s1").assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.polizas_estado_proxima)).assertIsDisplayed()
         composeTestRule.onNodeWithText(texto(R.string.polizas_estado_pendiente_firma)).assertIsDisplayed()
         composeTestRule.onNodeWithTag("poliza_s3").assertDoesNotExist() // la vencida está en la otra pestaña
+    }
+
+    @Test
+    fun la_tarjeta_muestra_solo_la_vigencia_y_no_la_fecha_de_emision() {
+        mostrar { PolizasPantalla(lista(vigente), PolizasAcciones()) }
+
+        composeTestRule.onNodeWithTag("poliza_s1").assertTextContains("2027", substring = true)
+        val textos = composeTestRule.onNodeWithTag("poliza_s1").fetchSemanticsNode().config
+            .getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text).orEmpty().joinToString(" ") { it.text }
+        // La póliza se emitió el 12 de junio de 2026: esa fecha no debe aparecer, solo el vencimiento.
+        assertEquals(false, textos.contains("2026"))
+    }
+
+    @Test
+    fun el_numero_de_la_poliza_no_se_toca_con_el_estado() {
+        // «Próxima a vencer» es el estado más largo; el número va en la fila de abajo, no junto al chip.
+        mostrar { PolizasPantalla(lista(proxima), PolizasAcciones()) }
+
+        val chip = composeTestRule.onNodeWithTag("estado_s2").fetchSemanticsNode().boundsInRoot
+        val numero = composeTestRule.onNodeWithTag("numero_s2").fetchSemanticsNode().boundsInRoot
+        assertEquals("el número debe quedar debajo del chip, sin solaparlo", true, numero.top >= chip.bottom)
+    }
+
+    @Test
+    fun la_tarjeta_lleva_la_categoria_del_producto() {
+        mostrar { PolizasPantalla(lista(vigente), PolizasAcciones()) }
+
+        composeTestRule.onNodeWithTag("poliza_s1").assertTextContains(texto(R.string.polizas_categoria_vida), substring = true)
     }
 
     @Test

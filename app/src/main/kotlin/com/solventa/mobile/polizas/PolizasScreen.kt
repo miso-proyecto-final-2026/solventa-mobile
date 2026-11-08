@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,6 +30,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.solventa.mobile.R
 import com.solventa.mobile.cotizacion.Catalogo
@@ -187,16 +189,42 @@ private fun TarjetaPoliza(poliza: PolizaResponse, estado: EstadoPoliza, acciones
             .clickable(onClickLabel = descripcion, role = Role.Button) { acciones.abrir(poliza) }
             .semantics(mergeDescendants = true) { },
     ) {
-        Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.polizas_numero, poliza.numeroPoliza), style = MaterialTheme.typography.labelMedium, modifier = Modifier.weight(1f))
-            ChipEstado(estadoTexto, estado.icono, estado.tipoChip)
+        // Diseño F1: categoría y estado arriba, el producto como título, y abajo la vigencia con el número de la póliza a la derecha.
+        // El número ya no comparte fila con el chip: así no se toca con él aunque el estado sea largo («Próxima a vencer»).
+        val categoria = categoriaDe(poliza.producto)
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f),
+            ) {
+                Icon(categoria.icono, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                Text(
+                    stringResource(categoria.etiqueta),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            ChipEstado(estadoTexto, estado.icono, estado.tipoChip, modifier = Modifier.testTag("estado_${poliza.suscripcionId}"))
         }
         Text(producto, style = MaterialTheme.typography.titleLarge)
-        Text(
-            fechasDe(poliza, estado, locale),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                fechasDe(poliza, estado, locale),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                poliza.numeroPoliza,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.testTag("numero_${poliza.suscripcionId}"),
+            )
+        }
         if (estado == EstadoPoliza.PENDIENTE_FIRMA) {
             BotonSecundario(
                 stringResource(R.string.polizas_retomar_firma),
@@ -207,16 +235,13 @@ private fun TarjetaPoliza(poliza: PolizaResponse, estado: EstadoPoliza, acciones
     }
 }
 
-/** La línea de la tarjeta: hasta cuándo vale, cuándo venció, o qué falta (firma pendiente, cobro devuelto). */
+/** La línea de la tarjeta: solo la vigencia (hasta cuándo vale o cuándo venció), o qué pasó si no hay póliza vigente (firma pendiente, cobro devuelto). */
 @Composable
 internal fun fechasDe(poliza: PolizaResponse, estado: EstadoPoliza, locale: java.util.Locale): String = when (estado) {
     EstadoPoliza.VENCIDA -> stringResource(R.string.polizas_vencio, FormatoPolizas.fecha(poliza.fechaVencimiento, locale))
     EstadoPoliza.PENDIENTE_FIRMA -> stringResource(R.string.polizas_firma_pendiente_mensaje)
     EstadoPoliza.ANULADA -> stringResource(R.string.polizas_anulada_mensaje)
-    else -> listOfNotNull(
-        poliza.fechaEmision?.let { stringResource(R.string.polizas_emitida, FormatoPolizas.fecha(it, locale)) },
-        stringResource(R.string.polizas_vigente_hasta, FormatoPolizas.fecha(poliza.fechaVencimiento, locale)),
-    ).joinToString(" · ")
+    else -> stringResource(R.string.polizas_vigente_hasta, FormatoPolizas.fecha(poliza.fechaVencimiento, locale))
 }
 
 internal val EstadoPoliza.etiqueta: Int

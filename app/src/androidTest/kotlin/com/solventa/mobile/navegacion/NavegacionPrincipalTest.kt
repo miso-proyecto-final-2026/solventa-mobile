@@ -8,7 +8,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -71,13 +71,21 @@ class NavegacionPrincipalTest(private val idioma: String) {
     }
 
     @Test
-    fun polizas_esta_deshabilitada_y_no_avisa_al_tocarla() {
+    fun polizas_esta_habilitada_y_avisa_al_tocarla() {
         val elegidas = mutableListOf<Seccion>()
         mostrar { BarraPrincipal(seleccion = Seccion.SEGUROS, alElegir = { elegidas += it }) }
 
-        composeTestRule.onNodeWithText(texto(R.string.nav_polizas)).assertIsNotEnabled().performClick()
+        composeTestRule.onNodeWithText(texto(R.string.nav_polizas)).assertIsEnabled().performClick()
 
-        assertEquals(emptyList<Seccion>(), elegidas)
+        assertEquals(listOf(Seccion.POLIZAS), elegidas)
+    }
+
+    @Test
+    fun la_seleccion_puede_ser_polizas() {
+        mostrar { BarraPrincipal(seleccion = Seccion.POLIZAS, alElegir = {}) }
+
+        composeTestRule.onNodeWithText(texto(R.string.nav_polizas)).assertIsSelected()
+        composeTestRule.onNodeWithText(texto(R.string.nav_seguros)).assertIsNotSelected()
     }
 
     @Test

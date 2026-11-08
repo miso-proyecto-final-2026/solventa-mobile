@@ -106,6 +106,8 @@ dependencies {
     implementation(libs.camerax.lifecycle)
     implementation(libs.camerax.view)
     implementation(libs.datastore.preferences)
+    // Genera la matriz del código QR de la credencial (HU35); no trae pantallas ni lectura de cámara.
+    implementation(libs.zxing.core)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     testImplementation(libs.junit)

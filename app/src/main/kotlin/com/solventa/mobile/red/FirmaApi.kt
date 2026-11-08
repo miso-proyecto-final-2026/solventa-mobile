@@ -104,6 +104,13 @@ interface FirmaApi {
         @Header("Authorization") autorizacion: String,
     ): Response<PolizaResponse>
 
+    // La póliza firmada en PDF (HU21), para descargarla desde «Mis pólizas» (HU35). Solo el titular.
+    @GET("v1/suscripciones/{id}/firma/documento")
+    suspend fun polizaFirmada(
+        @Path("id") id: String,
+        @Header("Authorization") autorizacion: String,
+    ): Response<ResponseBody>
+
     // El PDF del certificado de cobertura (HU22), en el idioma de `Accept-Language`. Solo lo descarga el titular.
     @GET("v1/suscripciones/{id}/certificado")
     suspend fun certificado(

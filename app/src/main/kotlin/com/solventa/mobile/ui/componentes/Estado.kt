@@ -33,14 +33,35 @@ import com.solventa.mobile.R
 import com.solventa.mobile.ui.tema.extra
 
 /** Estados que la lista, la tarjeta y el consentimiento comparten: color + ícono + texto, nunca solo color. */
-enum class TipoEstado { ACTIVO, NEUTRO }
+enum class TipoEstado {
+    /** Verde: activo, otorgado, vigente. */
+    ACTIVO,
 
-/** Chip de estado de 32 dp y radio 8 («Activo», «Revocado»). */
+    /** Gris: revocado, sin otorgar, anulado. */
+    NEUTRO,
+
+    /** Azul: informa algo que conviene saber sin ser un problema (por ejemplo, una póliza próxima a vencer). */
+    INFO,
+
+    /** Ámbar: queda algo por hacer (por ejemplo, la firma pendiente de una póliza). */
+    ADVERTENCIA,
+
+    /** Rojo: ya pasó algo que el cliente debe atender (por ejemplo, una póliza vencida). */
+    ERROR,
+}
+
+/**
+ * Chip de estado de 32 dp y radio 8 («Activo», «Revocado»). Los colores siguen los de los avisos de la app: verde (éxito),
+ * ámbar (advertencia), rojo (error) y azul (información). Nunca es el único indicador: lleva ícono y texto.
+ */
 @Composable
 fun ChipEstado(texto: String, icono: ImageVector, tipo: TipoEstado, modifier: Modifier = Modifier) {
     val (contenedor, contenido) = when (tipo) {
         TipoEstado.ACTIVO -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
         TipoEstado.NEUTRO -> MaterialTheme.extra.chipInactivo to MaterialTheme.colorScheme.onSurfaceVariant
+        TipoEstado.INFO -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
+        TipoEstado.ADVERTENCIA -> MaterialTheme.extra.advertenciaContenedor to MaterialTheme.extra.onAdvertencia
+        TipoEstado.ERROR -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
     }
     Surface(shape = MaterialTheme.shapes.small, color = contenedor, contentColor = contenido, modifier = modifier) {
         Row(

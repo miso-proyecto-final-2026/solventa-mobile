@@ -12,7 +12,7 @@ class PasoTest {
     fun `solo las secciones principales muestran la barra inferior`() {
         val conBarra = Paso.entries.filter { it.conBarra }.toSet()
 
-        assertEquals(setOf(Paso.INICIO, Paso.COMPRA, Paso.FIRMA, Paso.PERFIL), conBarra)
+        assertEquals(setOf(Paso.INICIO, Paso.COMPRA, Paso.FIRMA, Paso.POLIZAS, Paso.POLIZA_DETALLE, Paso.PERFIL), conBarra)
     }
 
     @Test
@@ -42,6 +42,21 @@ class PasoTest {
         assertEquals(Paso.INICIO, Paso.FIRMA.atras)
         assertFalse(reiniciaSeguros(desde = Paso.COMPRA, hacia = Paso.FIRMA))
         assertFalse(reiniciaSeguros(desde = Paso.FIRMA, hacia = Paso.INICIO))
+    }
+
+    @Test
+    fun `la lista y el detalle de polizas son la seccion polizas y atras sube un nivel`() {
+        assertEquals(Seccion.POLIZAS, Paso.POLIZAS.seccion)
+        assertEquals(Seccion.POLIZAS, Paso.POLIZA_DETALLE.seccion)
+        assertEquals(Paso.POLIZAS, Paso.POLIZA_DETALLE.atras)
+        assertEquals(Paso.INICIO, Paso.POLIZAS.atras)
+    }
+
+    @Test
+    fun `ir a polizas o abrir un detalle nunca reinicia la cotizacion`() {
+        assertFalse(reiniciaSeguros(desde = Paso.INICIO, hacia = Paso.POLIZAS))
+        assertFalse(reiniciaSeguros(desde = Paso.POLIZAS, hacia = Paso.INICIO))
+        assertFalse(reiniciaSeguros(desde = Paso.POLIZAS, hacia = Paso.POLIZA_DETALLE))
     }
 
     @Test

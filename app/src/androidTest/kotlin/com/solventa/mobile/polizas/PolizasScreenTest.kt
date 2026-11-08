@@ -10,6 +10,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -95,9 +96,9 @@ class PolizasScreenTest(private val idioma: String) {
     fun la_pestana_vencidas_muestra_las_vencidas() {
         mostrar { PolizasPantalla(lista(vigente, vencida) { copy(filtro = FiltroPolizas.VENCIDAS) }, PolizasAcciones()) }
 
-        composeTestRule.onNodeWithTag("poliza_s3").assertIsDisplayed()
+        // «Expired» también es el nombre de la pestaña en en-US: el estado se busca dentro de la tarjeta.
+        composeTestRule.onNodeWithTag("poliza_s3").assertIsDisplayed().assertTextContains(texto(R.string.polizas_estado_vencida), substring = true)
         composeTestRule.onNodeWithTag("poliza_s1").assertDoesNotExist()
-        composeTestRule.onNodeWithText(texto(R.string.polizas_estado_vencida)).assertIsDisplayed()
     }
 
     @Test

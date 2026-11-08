@@ -189,8 +189,7 @@ private fun TarjetaPoliza(poliza: PolizaResponse, estado: EstadoPoliza, acciones
             .clickable(onClickLabel = descripcion, role = Role.Button) { acciones.abrir(poliza) }
             .semantics(mergeDescendants = true) { },
     ) {
-        // Diseño F1: categoría y estado arriba, el producto como título, y abajo la vigencia con el número de la póliza a la derecha.
-        // El número ya no comparte fila con el chip: así no se toca con él aunque el estado sea largo («Próxima a vencer»).
+        // Diseño F1: categoría y estado arriba, el producto como título y, debajo, el número de la póliza y su vigencia.
         val categoria = categoriaDe(poliza.producto)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -210,19 +209,20 @@ private fun TarjetaPoliza(poliza: PolizaResponse, estado: EstadoPoliza, acciones
             ChipEstado(estadoTexto, estado.icono, estado.tipoChip, modifier = Modifier.testTag("estado_${poliza.suscripcionId}"))
         }
         Text(producto, style = MaterialTheme.typography.titleLarge)
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {
-            Text(
-                fechasDe(poliza, estado, locale),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-            )
+        // El número va solo en su renglón, encima de la vigencia (o del texto de firma pendiente): así ninguno de los dos se comprime.
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 poliza.numeroPoliza,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 modifier = Modifier.testTag("numero_${poliza.suscripcionId}"),
+            )
+            Text(
+                fechasDe(poliza, estado, locale),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.testTag("vigencia_${poliza.suscripcionId}"),
             )
         }
         if (estado == EstadoPoliza.PENDIENTE_FIRMA) {

@@ -115,6 +115,24 @@ class PolizasScreenTest(private val idioma: String) {
     }
 
     @Test
+    fun el_numero_va_en_su_propio_renglon_encima_de_la_vigencia() {
+        mostrar { PolizasPantalla(lista(vigente), PolizasAcciones()) }
+
+        val numero = composeTestRule.onNodeWithTag("numero_s1").fetchSemanticsNode().boundsInRoot
+        val vigencia = composeTestRule.onNodeWithTag("vigencia_s1").fetchSemanticsNode().boundsInRoot
+        assertEquals("el número debe quedar encima de la vigencia", true, numero.bottom <= vigencia.top)
+    }
+
+    @Test
+    fun el_numero_tampoco_comparte_renglon_con_el_texto_de_firma_pendiente() {
+        mostrar { PolizasPantalla(lista(pendiente), PolizasAcciones()) }
+
+        val numero = composeTestRule.onNodeWithTag("numero_s4").fetchSemanticsNode().boundsInRoot
+        val mensaje = composeTestRule.onNodeWithTag("vigencia_s4").fetchSemanticsNode().boundsInRoot
+        assertEquals("el número debe quedar encima del texto", true, numero.bottom <= mensaje.top)
+    }
+
+    @Test
     fun la_tarjeta_lleva_la_categoria_del_producto() {
         mostrar { PolizasPantalla(lista(vigente), PolizasAcciones()) }
 

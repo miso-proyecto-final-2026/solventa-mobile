@@ -280,7 +280,7 @@ private fun TarjetaCoberturas(poliza: PolizaResponse, locale: java.util.Locale) 
                     FilaDetalle(
                         etiqueta = stringResource(R.string.polizas_deducible),
                         valor = FormatoCotizacion.moneda(cobertura.deducible, poliza.moneda, locale),
-                        modifier = Modifier.padding(start = 16.dp).testTag("deducible_${i}"),
+                        modifier = Modifier.padding(start = 16.dp).semantics(mergeDescendants = true) { }.testTag("deducible_${i}"),
                     )
                 }
             }

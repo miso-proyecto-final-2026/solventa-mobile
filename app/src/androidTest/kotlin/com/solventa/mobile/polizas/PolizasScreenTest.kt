@@ -109,8 +109,8 @@ class PolizasScreenTest(private val idioma: String) {
         // «Próxima a vencer» es el estado más largo; el número va en la fila de abajo, no junto al chip.
         mostrar { PolizasPantalla(lista(proxima), PolizasAcciones()) }
 
-        val chip = composeTestRule.onNodeWithTag("estado_s2").fetchSemanticsNode().boundsInRoot
-        val numero = composeTestRule.onNodeWithTag("numero_s2").fetchSemanticsNode().boundsInRoot
+        val chip = composeTestRule.onNodeWithTag("estado_s2", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val numero = composeTestRule.onNodeWithTag("numero_s2", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         assertEquals("el número debe quedar debajo del chip, sin solaparlo", true, numero.top >= chip.bottom)
     }
 
@@ -118,8 +118,8 @@ class PolizasScreenTest(private val idioma: String) {
     fun el_numero_va_en_su_propio_renglon_encima_de_la_vigencia() {
         mostrar { PolizasPantalla(lista(vigente), PolizasAcciones()) }
 
-        val numero = composeTestRule.onNodeWithTag("numero_s1").fetchSemanticsNode().boundsInRoot
-        val vigencia = composeTestRule.onNodeWithTag("vigencia_s1").fetchSemanticsNode().boundsInRoot
+        val numero = composeTestRule.onNodeWithTag("numero_s1", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val vigencia = composeTestRule.onNodeWithTag("vigencia_s1", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         assertEquals("el número debe quedar encima de la vigencia", true, numero.bottom <= vigencia.top)
     }
 
@@ -127,8 +127,8 @@ class PolizasScreenTest(private val idioma: String) {
     fun el_numero_tampoco_comparte_renglon_con_el_texto_de_firma_pendiente() {
         mostrar { PolizasPantalla(lista(pendiente), PolizasAcciones()) }
 
-        val numero = composeTestRule.onNodeWithTag("numero_s4").fetchSemanticsNode().boundsInRoot
-        val mensaje = composeTestRule.onNodeWithTag("vigencia_s4").fetchSemanticsNode().boundsInRoot
+        val numero = composeTestRule.onNodeWithTag("numero_s4", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val mensaje = composeTestRule.onNodeWithTag("vigencia_s4", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         assertEquals("el número debe quedar encima del texto", true, numero.bottom <= mensaje.top)
     }
 

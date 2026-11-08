@@ -12,9 +12,8 @@ import com.solventa.mobile.R
 import com.solventa.mobile.ui.iconos.Iconos
 
 /**
- * Barra inferior con los tres destinos del diseño: Inicio (seguros), Pólizas y Perfil. «Pólizas» (HU35) aún no
- * existe y va deshabilitada, para que el diseño final ya esté en su sitio. Cada pestaña lleva texto, así que el icono
- * es decorativo para el lector de pantalla, que anuncia el nombre, si está seleccionada y si no está disponible.
+ * Barra inferior con los tres destinos del diseño: Inicio (seguros), Pólizas (HU35) y Perfil. Cada pestaña lleva texto,
+ * así que el icono es decorativo para el lector de pantalla, que anuncia el nombre y si está seleccionada.
  */
 @Composable
 fun BarraPrincipal(seleccion: Seccion, alElegir: (Seccion) -> Unit) {
@@ -34,9 +33,8 @@ fun BarraPrincipal(seleccion: Seccion, alElegir: (Seccion) -> Unit) {
             colors = colores,
         )
         NavigationBarItem(
-            selected = false,
-            onClick = {},
-            enabled = false,
+            selected = seleccion == Seccion.POLIZAS,
+            onClick = { alElegir(Seccion.POLIZAS) },
             icon = { Icon(Iconos.Escudo, contentDescription = null) },
             label = { Text(stringResource(R.string.nav_polizas)) },
             colors = colores,

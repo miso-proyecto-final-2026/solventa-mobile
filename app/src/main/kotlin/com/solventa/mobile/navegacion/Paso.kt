@@ -2,16 +2,18 @@ package com.solventa.mobile.navegacion
 
 /**
  * Registro (HU01) → consentimiento (HU06) → verificación (HU02) → resultado (HU03) → secciones principales:
- * seguros (cotización, HU37, compra de la oferta, HU17, y firma de la póliza, HU21) y perfil, que muestra los consentimientos (HU06, HU07).
+ * seguros (cotización, HU37, compra de la oferta, HU17, y firma de la póliza, HU21), pólizas («Mis pólizas» y su detalle, HU35) y
+ * perfil, que muestra los consentimientos (HU06, HU07).
  */
-enum class Paso { ARRANQUE, REGISTRO, CONSENTIMIENTO, VERIFICACION, RESULTADO, INICIO, COMPRA, FIRMA, PERFIL }
+enum class Paso { ARRANQUE, REGISTRO, CONSENTIMIENTO, VERIFICACION, RESULTADO, INICIO, COMPRA, FIRMA, POLIZAS, POLIZA_DETALLE, PERFIL }
 
 /** Pestañas de la barra inferior. */
-enum class Seccion { SEGUROS, PERFIL }
+enum class Seccion { SEGUROS, POLIZAS, PERFIL }
 
 val Paso.seccion: Seccion?
     get() = when (this) {
         Paso.INICIO, Paso.COMPRA, Paso.FIRMA -> Seccion.SEGUROS
+        Paso.POLIZAS, Paso.POLIZA_DETALLE -> Seccion.POLIZAS
         Paso.PERFIL -> Seccion.PERFIL
         else -> null
     }
@@ -23,8 +25,10 @@ val Paso.conBarra: Boolean get() = seccion != null
 val Paso.atras: Paso?
     get() = when (this) {
         Paso.COMPRA -> Paso.INICIO
-        // La firma queda pendiente en el servidor; hasta que exista «Mis pólizas» (HU35) no hay otra puerta para retomarla.
+        // La firma queda pendiente en el servidor; «Mis pólizas» (HU35) ofrece retomarla desde la póliza.
         Paso.FIRMA -> Paso.INICIO
+        Paso.POLIZA_DETALLE -> Paso.POLIZAS
+        Paso.POLIZAS -> Paso.INICIO
         Paso.PERFIL -> Paso.INICIO
         else -> null
     }

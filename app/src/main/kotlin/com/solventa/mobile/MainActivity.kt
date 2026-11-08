@@ -50,6 +50,9 @@ import com.solventa.mobile.navegacion.Paso
 import com.solventa.mobile.navegacion.Seccion
 import com.solventa.mobile.navegacion.atras
 import com.solventa.mobile.navegacion.conBarra
+import com.solventa.mobile.polizas.PolizaDetalleRoute
+import com.solventa.mobile.polizas.PolizasRoute
+import com.solventa.mobile.polizas.PolizasViewModel
 import com.solventa.mobile.navegacion.reiniciaSeguros
 import com.solventa.mobile.navegacion.seccion
 import com.solventa.mobile.registro.RegistroScreen
@@ -141,13 +144,15 @@ class MainActivity : ComponentActivity() {
                             pedirPermiso.launch(Manifest.permission.POST_NOTIFICATIONS)
                         }
                     }
-                    // Tocar la notificación abre el certificado de esa póliza.
+                    // «Mis pólizas» (HU35): una sola instancia para la lista y el detalle, propia de cada sesión.
+                    val polizasViewModel: PolizasViewModel = viewModel(key = "polizas-${SesionActual.clienteId}")
+                    // Tocar la notificación abre el detalle de esa póliza (HU35, criterio 7).
                     LaunchedEffect(suscripcionDeNotificacion, paso) {
                         val id = suscripcionDeNotificacion ?: return@LaunchedEffect
                         suscripcionDeNotificacion = null
                         if (SesionActual.activa) {
-                            suscripcionAFirmar = id
-                            navegar(Paso.FIRMA)
+                            polizasViewModel.abrirPorSuscripcion(id)
+                            navegar(Paso.POLIZA_DETALLE)
                         }
                     }
 
@@ -158,7 +163,11 @@ class MainActivity : ComponentActivity() {
                         bottomBar = {
                             paso.seccion?.let { seccion ->
                                 BarraPrincipal(seleccion = seccion) { elegida ->
-                                    val destino = if (elegida == Seccion.SEGUROS) Paso.INICIO else Paso.PERFIL
+                                    val destino = when (elegida) {
+                                        Seccion.SEGUROS -> Paso.INICIO
+                                        Seccion.POLIZAS -> Paso.POLIZAS
+                                        Seccion.PERFIL -> Paso.PERFIL
+                                    }
                                     if (destino != paso) navegar(destino)
                                 }
                             }
@@ -300,6 +309,35 @@ class MainActivity : ComponentActivity() {
                                         )
                                     }
                                 }
+
+                                Paso.POLIZAS -> PolizasRoute(
+                                    viewModel = polizasViewModel,
+                                    onCotizar = { navegar(Paso.INICIO) },
+                                    onAbrirDetalle = { navegar(Paso.POLIZA_DETALLE) },
+                                    onRetomarFirma = { id ->
+                                        suscripcionAFirmar = id
+                                        navegar(Paso.FIRMA)
+                                    },
+                                    onSesionVencida = {
+                                        SesionActual.cerrar()
+                                        alcance.launch { almacen.borrar() }
+                                        navegar(Paso.REGISTRO)
+                                    },
+                                )
+
+                                Paso.POLIZA_DETALLE -> PolizaDetalleRoute(
+                                    viewModel = polizasViewModel,
+                                    onVolver = { navegar(Paso.POLIZAS) },
+                                    onRetomarFirma = { id ->
+                                        suscripcionAFirmar = id
+                                        navegar(Paso.FIRMA)
+                                    },
+                                    onSesionVencida = {
+                                        SesionActual.cerrar()
+                                        alcance.launch { almacen.borrar() }
+                                        navegar(Paso.REGISTRO)
+                                    },
+                                )
 
                                 Paso.PERFIL -> {
                                     val viewModel: PrivacidadViewModel = viewModel(key = "privacidad-$visita")

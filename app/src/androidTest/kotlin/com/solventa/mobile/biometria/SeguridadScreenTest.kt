@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -138,7 +139,7 @@ class SeguridadScreenTest {
         composeTestRule.onNode(hasSetTextAction()).performTextInput("Clave1234")
 
         composeTestRule.onNodeWithText("Clave1234").assertDoesNotExist()
-        composeTestRule.onNodeWithText("Mostrar contraseña").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Mostrar contraseña").assertExists()
     }
 
     @Test

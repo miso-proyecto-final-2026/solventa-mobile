@@ -14,7 +14,7 @@ import com.solventa.mobile.notificaciones.IdiomaDelTelefono
 import com.solventa.mobile.notificaciones.NotificacionesRepository
 import com.solventa.mobile.notificaciones.SondeadorNotificaciones
 import kotlinx.coroutines.delay
-import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -34,6 +34,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.solventa.mobile.biometria.BiometriaViewModel
+import com.solventa.mobile.biometria.ClaveBiometricaKeystore
+import com.solventa.mobile.biometria.InvitacionRoute
+import com.solventa.mobile.biometria.VistaInvitacion
+import com.solventa.mobile.biometria.ProveedorCapacidadAndroid
+import com.solventa.mobile.biometria.SeguridadRoute
 import com.solventa.mobile.compra.CompraRoute
 import com.solventa.mobile.compra.CompraViewModel
 import com.solventa.mobile.consentimiento.ConsentimientoScreen
@@ -67,7 +73,7 @@ import com.solventa.mobile.verificacion.VerificacionRoute
 import com.solventa.mobile.verificacion.VerificacionViewModel
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     // Póliza cuyo certificado debe abrirse porque el cliente tocó la notificación (HU22). Lo recoge la composición.
     private var suscripcionDeNotificacion by mutableStateOf<String?>(null)
 
@@ -223,11 +229,11 @@ class MainActivity : ComponentActivity() {
                                                     navegar(Paso.CONSENTIMIENTO)
                                                 }
                                                 Destino.CONSENTIMIENTO_TRAS_APROBAR -> {
-                                                    pasoTrasConsentimiento = Paso.INICIO
+                                                    pasoTrasConsentimiento = Paso.INVITACION_BIOMETRICA
                                                     navegar(Paso.CONSENTIMIENTO)
                                                 }
                                                 Destino.VERIFICACION -> navegar(Paso.VERIFICACION)
-                                                Destino.INICIO -> navegar(Paso.INICIO)
+                                                Destino.INICIO -> navegar(Paso.INVITACION_BIOMETRICA)
                                             }
                                         },
                                         // En revisión o sin intentos: el usuario sale y al volver ve el estado vigente.
@@ -348,6 +354,45 @@ class MainActivity : ComponentActivity() {
                                             pasoTrasConsentimiento = Paso.PERFIL
                                             navegar(Paso.CONSENTIMIENTO)
                                         },
+                                        onSesionVencida = {
+                                            SesionActual.cerrar()
+                                            alcance.launch { almacen.borrar() }
+                                            navegar(Paso.REGISTRO)
+                                        },
+                                        onSeguridad = { navegar(Paso.SEGURIDAD) },
+                                    )
+                                }
+
+                                Paso.INVITACION_BIOMETRICA -> {
+                                    val contexto = applicationContext
+                                    val viewModel: BiometriaViewModel = viewModel(
+                                        key = "invitacion-$visita",
+                                        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                                            @Suppress("UNCHECKED_CAST")
+                                            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
+                                                BiometriaViewModel(ProveedorCapacidadAndroid(contexto), ClaveBiometricaKeystore()) as T
+                                        },
+                                    )
+                                    InvitacionRoute(
+                                        viewModel = viewModel,
+                                        vista = VistaInvitacion.crear(contexto),
+                                        onContinuar = { navegar(Paso.INICIO) },
+                                    )
+                                }
+
+                                Paso.SEGURIDAD -> {
+                                    val contexto = applicationContext
+                                    val viewModel: BiometriaViewModel = viewModel(
+                                        key = "biometria-$visita",
+                                        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                                            @Suppress("UNCHECKED_CAST")
+                                            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
+                                                BiometriaViewModel(ProveedorCapacidadAndroid(contexto), ClaveBiometricaKeystore()) as T
+                                        },
+                                    )
+                                    SeguridadRoute(
+                                        viewModel = viewModel,
+                                        onAtras = { navegar(Paso.PERFIL) },
                                         onSesionVencida = {
                                             SesionActual.cerrar()
                                             alcance.launch { almacen.borrar() }

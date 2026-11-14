@@ -1,5 +1,6 @@
 package com.solventa.mobile.privacidad
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -50,6 +52,7 @@ data class PrivacidadAcciones(
     val reintentar: () -> Unit = {},
     val compartirDatos: () -> Unit = {},
     val sesionVencida: () -> Unit = {},
+    val irASeguridad: (() -> Unit)? = null,
 )
 
 @Composable
@@ -57,6 +60,7 @@ fun PrivacidadRoute(
     viewModel: PrivacidadViewModel,
     onCompartirDatos: () -> Unit,
     onSesionVencida: () -> Unit,
+    onSeguridad: (() -> Unit)? = null,
 ) {
     val estado by viewModel.uiState.collectAsState()
     PrivacidadScreen(
@@ -68,6 +72,7 @@ fun PrivacidadRoute(
             reintentar = viewModel::reintentar,
             compartirDatos = onCompartirDatos,
             sesionVencida = onSesionVencida,
+            irASeguridad = onSeguridad,
         ),
     )
 }
@@ -97,6 +102,8 @@ fun PrivacidadScreen(estado: PrivacidadUiState, acciones: PrivacidadAcciones) {
                 FasePrivacidad.REVOCANDO -> Progreso(R.string.privacidad_revocando)
                 FasePrivacidad.ESTADO, FasePrivacidad.CONFIRMANDO -> Contenido(estado, acciones)
             }
+            // Seguridad (HU04): no depende de que el consentimiento haya cargado.
+            acciones.irASeguridad?.let { EntradaSeguridad(it) }
         }
     }
     if (estado.fase == FasePrivacidad.CONFIRMANDO) Confirmacion(acciones)
@@ -248,4 +255,22 @@ private fun Confirmacion(acciones: PrivacidadAcciones) {
             }
         },
     )
+}
+
+/** Entrada a Seguridad (HU04): una fila de 56 dp o más con ícono, título y lo que se gestiona ahí. */
+@Composable
+private fun EntradaSeguridad(onClick: () -> Unit) {
+    Tarjeta(modifier = Modifier.clickable(role = Role.Button, onClick = onClick)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Iconos.Huella, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+            Column(modifier = Modifier.weight(1f).heightIn(min = 56.dp), verticalArrangement = Arrangement.Center) {
+                Text(stringResource(R.string.perfil_seguridad_titulo), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.perfil_seguridad_texto),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
 }

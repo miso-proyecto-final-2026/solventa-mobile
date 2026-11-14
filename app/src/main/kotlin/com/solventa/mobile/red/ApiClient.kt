@@ -72,4 +72,6 @@ object ApiClient {
     val clienteApi: ClienteApi by lazy { retrofit.create(ClienteApi::class.java) }
 
     val consentimientoApi: ConsentimientoApi by lazy { retrofit.create(ConsentimientoApi::class.java) }
+
+    val biometriaApi: BiometriaApi by lazy { retrofit.create(BiometriaApi::class.java) }
 }

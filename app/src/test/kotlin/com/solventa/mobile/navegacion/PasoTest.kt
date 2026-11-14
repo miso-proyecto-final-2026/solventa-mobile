@@ -12,7 +12,7 @@ class PasoTest {
     fun `solo las secciones principales muestran la barra inferior`() {
         val conBarra = Paso.entries.filter { it.conBarra }.toSet()
 
-        assertEquals(setOf(Paso.INICIO, Paso.COMPRA, Paso.FIRMA, Paso.POLIZAS, Paso.POLIZA_DETALLE, Paso.PERFIL), conBarra)
+        assertEquals(setOf(Paso.INICIO, Paso.COMPRA, Paso.FIRMA, Paso.POLIZAS, Paso.POLIZA_DETALLE, Paso.PERFIL, Paso.SEGURIDAD), conBarra)
     }
 
     @Test
@@ -82,5 +82,20 @@ class PasoTest {
         assertEquals(Paso.INICIO, Paso.PERFIL.atras)
         assertNull("INICIO deja que el sistema cierre la app", Paso.INICIO.atras)
         assertNull(Paso.REGISTRO.atras)
+    }
+
+    @Test
+    fun `seguridad es parte de perfil y atras vuelve a perfil sin reiniciar la cotizacion`() {
+        assertEquals(Seccion.PERFIL, Paso.SEGURIDAD.seccion)
+        assertEquals(Paso.PERFIL, Paso.SEGURIDAD.atras)
+        assertFalse(reiniciaSeguros(desde = Paso.PERFIL, hacia = Paso.SEGURIDAD))
+    }
+
+    @Test
+    fun `la invitacion biometrica no muestra la barra y llega desde fuera de las secciones`() {
+        assertFalse(Paso.INVITACION_BIOMETRICA.conBarra)
+        assertNull(Paso.INVITACION_BIOMETRICA.atras)
+        // Al salir de la invitación hacia Inicio empieza una cotización nueva, igual que desde el resultado del KYC.
+        assertTrue(reiniciaSeguros(desde = Paso.INVITACION_BIOMETRICA, hacia = Paso.INICIO))
     }
 }

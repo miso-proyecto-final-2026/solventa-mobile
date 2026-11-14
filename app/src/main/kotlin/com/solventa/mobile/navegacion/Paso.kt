@@ -3,9 +3,9 @@ package com.solventa.mobile.navegacion
 /**
  * Registro (HU01) → consentimiento (HU06) → verificación (HU02) → resultado (HU03) → secciones principales:
  * seguros (cotización, HU37, compra de la oferta, HU17, y firma de la póliza, HU21), pólizas («Mis pólizas» y su detalle, HU35) y
- * perfil, que muestra los consentimientos (HU06, HU07).
+ * perfil, que muestra los consentimientos (HU06, HU07) y da paso a Seguridad (acceso biométrico, HU04).
  */
-enum class Paso { ARRANQUE, REGISTRO, CONSENTIMIENTO, VERIFICACION, RESULTADO, INICIO, COMPRA, FIRMA, POLIZAS, POLIZA_DETALLE, PERFIL }
+enum class Paso { ARRANQUE, REGISTRO, CONSENTIMIENTO, VERIFICACION, RESULTADO, INICIO, COMPRA, FIRMA, POLIZAS, POLIZA_DETALLE, PERFIL, SEGURIDAD }
 
 /** Pestañas de la barra inferior. */
 enum class Seccion { SEGUROS, POLIZAS, PERFIL }
@@ -14,7 +14,7 @@ val Paso.seccion: Seccion?
     get() = when (this) {
         Paso.INICIO, Paso.COMPRA, Paso.FIRMA -> Seccion.SEGUROS
         Paso.POLIZAS, Paso.POLIZA_DETALLE -> Seccion.POLIZAS
-        Paso.PERFIL -> Seccion.PERFIL
+        Paso.PERFIL, Paso.SEGURIDAD -> Seccion.PERFIL
         else -> null
     }
 
@@ -30,6 +30,7 @@ val Paso.atras: Paso?
         Paso.POLIZA_DETALLE -> Paso.POLIZAS
         Paso.POLIZAS -> Paso.INICIO
         Paso.PERFIL -> Paso.INICIO
+        Paso.SEGURIDAD -> Paso.PERFIL
         else -> null
     }
 

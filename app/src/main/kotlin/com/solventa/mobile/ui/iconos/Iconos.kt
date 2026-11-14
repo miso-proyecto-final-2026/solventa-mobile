@@ -64,6 +64,18 @@ object Iconos {
     /** Documento con renglones: sin reflejos ni sombras. */
     val Documento: ImageVector by lazy { trazo("Documento", "M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z", "M7 9h4M7 13h10") }
 
+    /** Huella digital (B1 del diseño): acceso biométrico. */
+    val Huella: ImageVector by lazy {
+        trazo(
+            "Huella",
+            "M12 11v4c0 2-.5 3.5-1.5 5",
+            "M8 14c0 3-.5 4.5-1.5 6",
+            "M16 11v3c0 2 .3 3.5 1 5",
+            "M5 10a7 7 0 0 1 14 0",
+            "M8.5 9a3.5 3.5 0 0 1 7 0v2",
+        )
+    }
+
     /** Candado: privacidad de la imagen. */
     val Candado: ImageVector by lazy {
         trazo("Candado", "M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z", "M8 11V8a4 4 0 0 1 8 0v3")

@@ -31,6 +31,9 @@ data class RegistroResponse(
 )
 
 @Serializable
+data class InicioSesionRequest(val email: String, val password: String)
+
+@Serializable
 data class ErrorResponse(val detail: String)
 
 interface ClienteApi {
@@ -39,4 +42,8 @@ interface ClienteApi {
         @Body solicitud: RegistroRequest,
         @Header("Idempotency-Key") idempotencyKey: String,
     ): Response<RegistroResponse>
+
+    /** Inicio de sesión de clientes (HU05); devuelve la misma forma que el registro, con un token nuevo. */
+    @POST("v1/clientes/sesion")
+    suspend fun iniciarSesion(@Body solicitud: InicioSesionRequest): Response<RegistroResponse>
 }

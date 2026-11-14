@@ -132,7 +132,7 @@ class BiometriaViewModel @JvmOverloads constructor(
             revertir(ErrorAcceso.AUTENTICACION)
             return
         }
-        when (autenticador.confirmar(cifrador)) {
+        when (autenticador.confirmar(cifrador) {}) {
             ResultadoAutenticacion.Exito -> _uiState.update {
                 it.copy(
                     fase = FaseBiometria.ESTADO,
@@ -143,7 +143,7 @@ class BiometriaViewModel @JvmOverloads constructor(
                 )
             }
             ResultadoAutenticacion.Cancelado -> revertir(ErrorAcceso.CANCELADO)
-            ResultadoAutenticacion.Error -> revertir(ErrorAcceso.AUTENTICACION)
+            ResultadoAutenticacion.Error, ResultadoAutenticacion.Agotado -> revertir(ErrorAcceso.AUTENTICACION)
         }
     }
 
@@ -204,6 +204,7 @@ class BiometriaViewModel @JvmOverloads constructor(
         when (respuesta) {
             BiometriaRepository.Resultado.SinSesion -> ErrorAcceso.SESION_VENCIDA
             BiometriaRepository.Resultado.TiempoAgotado -> ErrorAcceso.TIEMPO_AGOTADO
+            is BiometriaRepository.Resultado.Bloqueado -> ErrorAcceso.BLOQUEADO
             BiometriaRepository.Resultado.SinConexion -> ErrorAcceso.SIN_CONEXION
             else -> ErrorAcceso.SERVICIO
         }

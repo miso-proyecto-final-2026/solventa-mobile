@@ -6,6 +6,7 @@ import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import java.security.GeneralSecurityException
 import java.security.KeyStore
+import java.security.KeyStoreException
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -22,6 +23,12 @@ interface ClaveBiometrica {
 
     /** Crea una clave nueva (reemplaza la anterior) y devuelve el cifrador que se entrega al diálogo biométrico. */
     fun crearParaAutenticar(): Cipher
+
+    /**
+     * Cifrador de la clave que ya existe, para pedir la biometría al desbloquear (HU05). Lanza
+     * [KeyPermanentlyInvalidatedException] si las biometrías del dispositivo cambiaron.
+     */
+    fun cifradorExistente(): Cipher
 
     /** Idempotente: borra la clave si existe. */
     fun borrar()
@@ -63,6 +70,11 @@ class ClaveBiometricaKeystore(private val alias: String = "solventa_biometria") 
         val clave = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE)
             .apply { init(especificacion) }
             .generateKey()
+        return cifrador(clave)
+    }
+
+    override fun cifradorExistente(): Cipher {
+        val clave = almacen().getKey(alias, null) as? SecretKey ?: throw KeyStoreException("No hay clave biométrica")
         return cifrador(clave)
     }
 

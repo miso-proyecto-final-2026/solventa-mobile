@@ -110,4 +110,25 @@ class AlmacenSesionDataStoreTest {
 
         assertEquals(Credenciales("c1", "token-123", null), AlmacenSesionDataStore(datos, cifradorSelectivo).leer())
     }
+
+    @Test
+    fun `el correo se recupera al reabrir`() = runTest {
+        almacen.guardar(Credenciales("c1", "token-123", "Ana", "ana@example.com"))
+
+        assertEquals(Credenciales("c1", "token-123", "Ana", "ana@example.com"), almacen.leer())
+    }
+
+    @Test
+    fun `en disco tampoco queda el correo en claro`() = runTest {
+        almacen.guardar(Credenciales("c1", "token-123", "Ana", "secreto@example.com"))
+
+        assertFalse(String(archivo.readBytes(), Charsets.ISO_8859_1).contains("secreto@example.com"))
+    }
+
+    @Test
+    fun `una sesion guardada sin correo sigue siendo valida`() = runTest {
+        almacen.guardar(Credenciales("c1", "token-123", "Ana"))
+
+        assertEquals(Credenciales("c1", "token-123", "Ana", null), almacen.leer())
+    }
 }

@@ -208,5 +208,6 @@ private fun mensajeDe(error: ErrorAcceso): Int =
         ErrorAcceso.KYC_NO_APROBADO -> R.string.biometria_bloqueo_kyc
         ErrorAcceso.CANCELADO -> R.string.biometria_error_cancelado
         ErrorAcceso.AUTENTICACION -> R.string.biometria_error_autenticacion
+        ErrorAcceso.BLOQUEADO -> R.string.biometria_error_bloqueado
         else -> R.string.biometria_error_servicio
     }

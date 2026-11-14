@@ -59,7 +59,7 @@ class BiometriaViewModelTest {
 
     private fun crear() = BiometriaViewModel(proveedor, clave, repository, resultado)
 
-    private fun autenticador(respuesta: ResultadoAutenticacion) = Autenticador { respuesta }
+    private fun autenticador(respuesta: ResultadoAutenticacion) = Autenticador { _, _ -> respuesta }
 
     @Test
     fun `al abrir consulta el servidor y el dispositivo`() = runTest(dispatcher) {

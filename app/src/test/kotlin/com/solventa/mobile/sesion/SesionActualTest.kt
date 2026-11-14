@@ -48,4 +48,22 @@ class SesionActualTest {
         assertNull(primerNombre(""))
         assertNull(primerNombre("   "))
     }
+
+    @Test
+    fun `la sesion guarda el correo y lo entrega con las credenciales`() {
+        SesionActual.iniciar("c1", "token", "Ana", "ana@example.com")
+
+        assertEquals("ana@example.com", SesionActual.email)
+        assertEquals(Credenciales("c1", "token", "Ana", "ana@example.com"), SesionActual.credenciales())
+    }
+
+    @Test
+    fun `cerrar la sesion olvida el correo pero se recuerda el ultimo para prellenar el login`() {
+        SesionActual.iniciar("c1", "token", "Ana", "ana@example.com")
+
+        SesionActual.cerrar()
+
+        assertNull(SesionActual.email)
+        assertEquals("ana@example.com", SesionActual.ultimoEmail)
+    }
 }

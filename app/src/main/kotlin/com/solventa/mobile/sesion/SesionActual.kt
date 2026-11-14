@@ -18,16 +18,32 @@ object SesionActual {
     var nombre: String? = null
         private set
 
-    fun iniciar(clienteId: String, accessToken: String, nombre: String? = null) {
+    /** Correo con el que se registró o inició sesión el cliente; prellena el inicio de sesión (HU05). */
+    @Volatile
+    var email: String? = null
+        private set
+
+    /**
+     * Último correo conocido: sobrevive a [cerrar] para prellenar el inicio de sesión cuando la sesión venció. Solo en
+     * memoria; si el proceso muere, el cliente lo escribe de nuevo.
+     */
+    @Volatile
+    var ultimoEmail: String? = null
+        private set
+
+    fun iniciar(clienteId: String, accessToken: String, nombre: String? = null, email: String? = null) {
         this.clienteId = clienteId
         this.accessToken = accessToken
         this.nombre = nombre
+        this.email = email
+        if (email != null) ultimoEmail = email
     }
 
     fun cerrar() {
         clienteId = null
         accessToken = null
         nombre = null
+        email = null
     }
 
     val activa: Boolean get() = clienteId != null && accessToken != null
@@ -35,7 +51,7 @@ object SesionActual {
     fun credenciales(): Credenciales? {
         val id = clienteId ?: return null
         val token = accessToken ?: return null
-        return Credenciales(id, token, nombre)
+        return Credenciales(id, token, nombre, email)
     }
 }
 

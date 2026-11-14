@@ -116,4 +116,11 @@ class BiometriaRepositoryTest {
         assertNull(codigoDeError("no es json"))
         assertNull(codigoDeError(null))
     }
+
+    @Test
+    fun `un 429 es bloqueado`() = runTest {
+        coEvery { api.activar(any(), any(), any()) } returns error(429)
+
+        assertEquals(BiometriaRepository.Resultado.Bloqueado(0), repository.activar(MetodoBiometrico.HUELLA, "x"))
+    }
 }

@@ -237,6 +237,7 @@ private fun Falla(error: ErrorAcceso, pendiente: AccionAcceso?, acciones: Seguri
         ErrorAcceso.KYC_NO_APROBADO -> R.string.biometria_bloqueo_kyc
         ErrorAcceso.CANCELADO -> R.string.biometria_error_cancelado
         ErrorAcceso.AUTENTICACION -> R.string.biometria_error_autenticacion
+        ErrorAcceso.BLOQUEADO -> R.string.biometria_error_bloqueado
         else -> R.string.biometria_error_servicio
     }
     Surface(
@@ -278,7 +279,10 @@ internal fun Formulario(estado: BiometriaUiState, acciones: SeguridadAcciones) {
             ) {
                 estado.error?.takeIf {
                     it != ErrorAcceso.CONTRASENA_VACIA && it != ErrorAcceso.CONTRASENA_INCORRECTA
-                }?.let { Text(stringResource(R.string.biometria_error_servicio), color = MaterialTheme.colorScheme.error) }
+                }?.let {
+                    val mensaje = if (it == ErrorAcceso.BLOQUEADO) R.string.biometria_error_bloqueado else R.string.biometria_error_servicio
+                    Text(stringResource(mensaje), color = MaterialTheme.colorScheme.error)
+                }
                 Text(stringResource(R.string.biometria_metodo_pregunta), style = MaterialTheme.typography.titleSmall)
                 Column(modifier = Modifier.selectableGroup()) {
                     estado.capacidad.metodos.forEach { metodo ->

@@ -18,6 +18,9 @@ interface VistaInvitacion {
 
     suspend fun marcar(clienteId: String)
 
+    /** Vuelve a permitir la invitación: se usa cuando las biometrías del dispositivo cambiaron y hay que reactivar el acceso. */
+    suspend fun desmarcar(clienteId: String)
+
     companion object {
         fun crear(contexto: Context): VistaInvitacion = VistaInvitacionDataStore(contexto.applicationContext.datosInvitacion)
     }
@@ -37,6 +40,10 @@ class VistaInvitacionDataStore(private val datos: DataStore<Preferences>) : Vist
 
     override suspend fun marcar(clienteId: String) {
         datos.edit { it[clave(clienteId)] = true }
+    }
+
+    override suspend fun desmarcar(clienteId: String) {
+        datos.edit { it.remove(clave(clienteId)) }
     }
 
     private fun clave(clienteId: String) = booleanPreferencesKey("vista_$clienteId")

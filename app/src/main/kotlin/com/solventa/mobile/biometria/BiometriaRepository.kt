@@ -37,6 +37,9 @@ class BiometriaRepository(
         data object SinSesion : Resultado
         data object KycNoAprobado : Resultado
         data object ContrasenaIncorrecta : Resultado
+
+        /** Demasiados intentos de contraseña: el servidor bloquea por un tiempo (HU05). */
+        data class Bloqueado(val segundos: Int) : Resultado
         data object TiempoAgotado : Resultado
         data object SinConexion : Resultado
         data class ErrorServicio(val codigo: Int) : Resultado
@@ -69,6 +72,7 @@ class BiometriaRepository(
         when (val codigo = respuesta.code()) {
             200, 204 -> Resultado.Exito(respuesta.body() as? BiometriaResponse)
             401 -> Resultado.SinSesion
+            429 -> Resultado.Bloqueado(respuesta.headers()["Retry-After"]?.toIntOrNull() ?: 0)
             403 -> when (codigoDeError(respuesta.errorBody()?.string())) {
                 CODIGO_KYC_NO_APROBADO -> Resultado.KycNoAprobado
                 CODIGO_CONTRASENA_INCORRECTA -> Resultado.ContrasenaIncorrecta

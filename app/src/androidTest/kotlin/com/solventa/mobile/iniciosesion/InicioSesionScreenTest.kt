@@ -2,12 +2,13 @@ package com.solventa.mobile.iniciosesion
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -41,7 +42,8 @@ class InicioSesionScreenTest {
         composeTestRule.onNode(isHeading() and hasText("Qué bueno verte de nuevo")).assertIsDisplayed()
         composeTestRule.onNodeWithText("Correo electrónico").assertIsDisplayed()
         composeTestRule.onNodeWithText("Contraseña").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Iniciar sesión", ignoreCase = false).assertExists()
+        // El título de la barra y el botón principal.
+        composeTestRule.onAllNodesWithText("Iniciar sesión").assertCountEquals(2)
         composeTestRule.onNodeWithText("Crear una cuenta").assertHeightIsAtLeast(48.dp).assertIsDisplayed()
     }
 
@@ -58,8 +60,8 @@ class InicioSesionScreenTest {
         var clave = ""
         mostrar(acciones = InicioSesionAcciones(onEmailChange = { correo = it }, onPasswordChange = { clave = it }))
 
-        composeTestRule.onAllNodes(hasSetTextAction())[0].performTextInput("ana@example.com")
-        composeTestRule.onAllNodes(hasSetTextAction())[1].performTextInput("Clave1234")
+        composeTestRule.onNodeWithText("Correo electrónico").performTextInput("ana@example.com")
+        composeTestRule.onNodeWithText("Contraseña").performTextInput("Clave1234")
 
         assertEquals("ana@example.com", correo)
         assertEquals("Clave1234", clave)

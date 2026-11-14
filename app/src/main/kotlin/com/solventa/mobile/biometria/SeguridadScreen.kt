@@ -98,7 +98,7 @@ fun SeguridadRoute(viewModel: BiometriaViewModel, onAtras: () -> Unit, onSesionV
     )
 }
 
-private fun android.content.Context.buscarActividad(): FragmentActivity? {
+internal fun android.content.Context.buscarActividad(): FragmentActivity? {
     var actual: android.content.Context? = this
     while (actual is android.content.ContextWrapper) {
         if (actual is FragmentActivity) return actual
@@ -259,7 +259,7 @@ private fun Falla(error: ErrorAcceso, pendiente: AccionAcceso?, acciones: Seguri
 
 /** Elección del método (criterio 3) y confirmación con la contraseña actual (criterio 4). */
 @Composable
-private fun Formulario(estado: BiometriaUiState, acciones: SeguridadAcciones) {
+internal fun Formulario(estado: BiometriaUiState, acciones: SeguridadAcciones) {
     var contrasena by remember { mutableStateOf("") }
     var mostrar by remember { mutableStateOf(false) }
     val error = when (estado.error) {

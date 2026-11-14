@@ -460,6 +460,10 @@
     <string name="biometria_error_sin_conexion">No hay conexión. Verifica tu red e intenta de nuevo.</string>
     <string name="biometria_error_servicio">No pudimos completar la operación en este momento. Intenta de nuevo en unos minutos.</string>
     <string name="biometria_error_sesion">Tu sesión venció. Vuelve a iniciar para gestionar tu acceso biométrico.</string>
+    <string name="biometria_ahora_no">Ahora no</string>
+    <string name="biometria_invitacion_titulo">Entra más rápido y más seguro</string>
+    <string name="biometria_invitacion_texto">Usa tu huella o reconocimiento facial en vez de escribir tu contraseña cada vez.</string>
+    <string name="biometria_nota_contrasena_ajustes">Siempre puedes volver a usar tu contraseña desde Ajustes.</string>
     <string name="biometria_reintentar">Reintentar</string>
     <string name="biometria_iniciar_sesion">Iniciar sesión de nuevo</string>
 </resources>

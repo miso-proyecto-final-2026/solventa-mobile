@@ -36,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.solventa.mobile.biometria.BiometriaViewModel
 import com.solventa.mobile.biometria.ClaveBiometricaKeystore
+import com.solventa.mobile.biometria.InvitacionRoute
+import com.solventa.mobile.biometria.VistaInvitacion
 import com.solventa.mobile.biometria.ProveedorCapacidadAndroid
 import com.solventa.mobile.biometria.SeguridadRoute
 import com.solventa.mobile.compra.CompraRoute
@@ -227,11 +229,11 @@ class MainActivity : FragmentActivity() {
                                                     navegar(Paso.CONSENTIMIENTO)
                                                 }
                                                 Destino.CONSENTIMIENTO_TRAS_APROBAR -> {
-                                                    pasoTrasConsentimiento = Paso.INICIO
+                                                    pasoTrasConsentimiento = Paso.INVITACION_BIOMETRICA
                                                     navegar(Paso.CONSENTIMIENTO)
                                                 }
                                                 Destino.VERIFICACION -> navegar(Paso.VERIFICACION)
-                                                Destino.INICIO -> navegar(Paso.INICIO)
+                                                Destino.INICIO -> navegar(Paso.INVITACION_BIOMETRICA)
                                             }
                                         },
                                         // En revisión o sin intentos: el usuario sale y al volver ve el estado vigente.
@@ -358,6 +360,23 @@ class MainActivity : FragmentActivity() {
                                             navegar(Paso.REGISTRO)
                                         },
                                         onSeguridad = { navegar(Paso.SEGURIDAD) },
+                                    )
+                                }
+
+                                Paso.INVITACION_BIOMETRICA -> {
+                                    val contexto = applicationContext
+                                    val viewModel: BiometriaViewModel = viewModel(
+                                        key = "invitacion-$visita",
+                                        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                                            @Suppress("UNCHECKED_CAST")
+                                            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
+                                                BiometriaViewModel(ProveedorCapacidadAndroid(contexto), ClaveBiometricaKeystore()) as T
+                                        },
+                                    )
+                                    InvitacionRoute(
+                                        viewModel = viewModel,
+                                        vista = VistaInvitacion.crear(contexto),
+                                        onContinuar = { navegar(Paso.INICIO) },
                                     )
                                 }
 

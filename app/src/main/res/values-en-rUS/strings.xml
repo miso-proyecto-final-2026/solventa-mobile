@@ -460,6 +460,10 @@
     <string name="biometria_error_sin_conexion">No connection. Check your network and try again.</string>
     <string name="biometria_error_servicio">We could not complete the operation right now. Try again in a few minutes.</string>
     <string name="biometria_error_sesion">Your session expired. Sign in again to manage your biometric access.</string>
+    <string name="biometria_ahora_no">Not now</string>
+    <string name="biometria_invitacion_titulo">Sign in faster and more securely</string>
+    <string name="biometria_invitacion_texto">Use your fingerprint or face instead of typing your password every time.</string>
+    <string name="biometria_nota_contrasena_ajustes">You can always go back to using your password from Settings.</string>
     <string name="biometria_reintentar">Retry</string>
     <string name="biometria_iniciar_sesion">Sign in again</string>
 </resources>

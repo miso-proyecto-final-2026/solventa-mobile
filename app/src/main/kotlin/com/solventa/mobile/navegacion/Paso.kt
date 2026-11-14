@@ -3,9 +3,9 @@ package com.solventa.mobile.navegacion
 /**
  * Registro (HU01) → consentimiento (HU06) → verificación (HU02) → resultado (HU03) → secciones principales:
  * seguros (cotización, HU37, compra de la oferta, HU17, y firma de la póliza, HU21), pólizas («Mis pólizas» y su detalle, HU35) y
- * perfil, que muestra los consentimientos (HU06, HU07) y da paso a Seguridad (acceso biométrico, HU04).
+ * perfil, que muestra los consentimientos (HU06, HU07) y da paso a Seguridad (acceso biométrico, HU04). Tras aprobar el KYC, una sola vez, se invita a activarlo (INVITACION_BIOMETRICA).
  */
-enum class Paso { ARRANQUE, REGISTRO, CONSENTIMIENTO, VERIFICACION, RESULTADO, INICIO, COMPRA, FIRMA, POLIZAS, POLIZA_DETALLE, PERFIL, SEGURIDAD }
+enum class Paso { ARRANQUE, REGISTRO, CONSENTIMIENTO, VERIFICACION, RESULTADO, INICIO, COMPRA, FIRMA, POLIZAS, POLIZA_DETALLE, PERFIL, SEGURIDAD, INVITACION_BIOMETRICA }
 
 /** Pestañas de la barra inferior. */
 enum class Seccion { SEGUROS, POLIZAS, PERFIL }

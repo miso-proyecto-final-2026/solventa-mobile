@@ -90,4 +90,12 @@ class PasoTest {
         assertEquals(Paso.PERFIL, Paso.SEGURIDAD.atras)
         assertFalse(reiniciaSeguros(desde = Paso.PERFIL, hacia = Paso.SEGURIDAD))
     }
+
+    @Test
+    fun `la invitacion biometrica no muestra la barra y llega desde fuera de las secciones`() {
+        assertFalse(Paso.INVITACION_BIOMETRICA.conBarra)
+        assertNull(Paso.INVITACION_BIOMETRICA.atras)
+        // Al salir de la invitación hacia Inicio empieza una cotización nueva, igual que desde el resultado del KYC.
+        assertTrue(reiniciaSeguros(desde = Paso.INVITACION_BIOMETRICA, hacia = Paso.INICIO))
+    }
 }

@@ -2,6 +2,10 @@ package com.solventa.mobile.iniciosesion
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
@@ -58,11 +62,24 @@ class InicioSesionScreenTest {
     fun escribir_en_los_campos_avisa_al_flujo() {
         var correo = ""
         var clave = ""
-        mostrar(acciones = InicioSesionAcciones(onEmailChange = { correo = it }, onPasswordChange = { clave = it }))
+        // Con un estado que cambia, como el del ViewModel real: un valor fijo no refleja lo que se escribe.
+        composeTestRule.setContentEnEspanol {
+            SolventaTheme {
+                var estado by remember { mutableStateOf(InicioSesionUiState()) }
+                InicioSesionScreen(
+                    estado,
+                    InicioSesionAcciones(
+                        onEmailChange = { correo = it; estado = estado.copy(email = it) },
+                        onPasswordChange = { clave = it; estado = estado.copy(password = it) },
+                    ),
+                )
+            }
+        }
 
         composeTestRule.onNodeWithText("Correo electrónico").performTextInput("ana@example.com")
         composeTestRule.onNodeWithText("Contraseña").performTextInput("Clave1234")
 
+        composeTestRule.waitForIdle()
         assertEquals("ana@example.com", correo)
         assertEquals("Clave1234", clave)
     }

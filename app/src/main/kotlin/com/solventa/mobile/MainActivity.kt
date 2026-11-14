@@ -36,6 +36,18 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.solventa.mobile.biometria.BiometriaViewModel
 import com.solventa.mobile.biometria.ClaveBiometricaKeystore
+import com.solventa.mobile.biometria.EstadoClave
+import com.solventa.mobile.bloqueo.BloqueoRoute
+import com.solventa.mobile.bloqueo.BloqueoViewModel
+import com.solventa.mobile.bloqueo.MotivoContrasena
+import com.solventa.mobile.bloqueo.debeBloquearTrasSegundoPlano
+import com.solventa.mobile.iniciosesion.InicioSesionRoute
+import com.solventa.mobile.iniciosesion.InicioSesionViewModel
+import com.solventa.mobile.sesion.Credenciales
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.lifecycle.LifecycleEventObserver
+import android.os.SystemClock
 import com.solventa.mobile.biometria.InvitacionRoute
 import com.solventa.mobile.biometria.VistaInvitacion
 import com.solventa.mobile.biometria.ProveedorCapacidadAndroid
@@ -85,6 +97,8 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val almacen = AlmacenSesion.crear(this)
+        val claveBiometrica = ClaveBiometricaKeystore()
+        val vistaInvitacion = VistaInvitacion.crear(this)
         suscripcionDeNotificacion = intent?.getStringExtra(EXTRA_SUSCRIPCION)
         val avisos = AvisosAndroid(this)
         val sondeador = SondeadorNotificaciones(NotificacionesRepository(), avisos, IdentificadorDispositivoPreferencias(this))
@@ -104,6 +118,14 @@ class MainActivity : FragmentActivity() {
                     // Saga cuya póliza se va a firmar. Sobrevive a que el sistema mate el proceso: la firma queda pendiente 24 h.
                     var suscripcionAFirmar by rememberSaveable { mutableStateOf<String?>(null) }
                     var sesionRestaurada by remember { mutableStateOf(SesionActual.activa) }
+                    // Bloqueo biométrico (HU05). Las credenciales guardadas no pasan a `SesionActual` hasta desbloquear.
+                    var credencialesBloqueadas by remember { mutableStateOf<Credenciales?>(null) }
+                    var pasoTrasBloqueo by rememberSaveable { mutableStateOf(Paso.RESULTADO) }
+                    var bloqueoEnFrio by rememberSaveable { mutableStateOf(true) }
+                    var visitaBloqueo by rememberSaveable { mutableIntStateOf(0) }
+                    var salioEn by remember { mutableStateOf<Long?>(null) }
+                    var emailInicioSesion by remember { mutableStateOf<String?>(null) }
+                    var avisoInicioSesion by remember { mutableStateOf<Int?>(null) }
                     val alcance = rememberCoroutineScope()
 
                     fun navegar(destino: Paso) {
@@ -112,13 +134,54 @@ class MainActivity : FragmentActivity() {
                         paso = destino
                     }
 
-                    // Al reabrir la app (o tras morir el proceso) la sesión vuelve del almacén cifrado.
+                    // Con el acceso biométrico activo, la sesión guardada no se abre hasta autenticarse (HU05, criterio 1).
                     LaunchedEffect(Unit) {
-                        if (!SesionActual.activa) {
-                            almacen.leer()?.let { SesionActual.iniciar(it.clienteId, it.accessToken, it.nombre) }
+                        val guardadas = if (!SesionActual.activa) almacen.leer() else null
+                        if (guardadas != null && claveBiometrica.estado() != EstadoClave.AUSENTE) {
+                            credencialesBloqueadas = guardadas
+                            bloqueoEnFrio = true
+                            // Si el proceso murió con el bloqueo a medias, `paso` ya es BLOQUEO y el destino guardado se conserva.
+                            if (paso != Paso.BLOQUEO) pasoTrasBloqueo = if (paso == Paso.ARRANQUE) Paso.RESULTADO else paso
+                            visitaBloqueo++
+                            sesionRestaurada = true
+                            navegar(Paso.BLOQUEO)
+                            return@LaunchedEffect
                         }
+                        // Al reabrir la app (o tras morir el proceso) la sesión vuelve del almacén cifrado.
+                        guardadas?.let { SesionActual.iniciar(it.clienteId, it.accessToken, it.nombre, it.email) }
                         sesionRestaurada = true
                         if (paso == Paso.ARRANQUE) navegar(if (SesionActual.activa) Paso.RESULTADO else Paso.REGISTRO)
+                        else if (paso == Paso.BLOQUEO) navegar(if (SesionActual.activa) Paso.RESULTADO else Paso.REGISTRO)
+                    }
+
+                    // Vuelve a pedir la biometría tras 5 minutos en segundo plano (HU05, criterio 7). Reloj monótono.
+                    val pasoActual by rememberUpdatedState(paso)
+                    DisposableEffect(lifecycle) {
+                        val observador = LifecycleEventObserver { _, evento ->
+                            when (evento) {
+                                Lifecycle.Event.ON_STOP -> salioEn = SystemClock.elapsedRealtime()
+                                Lifecycle.Event.ON_START -> {
+                                    val salio = salioEn
+                                    salioEn = null
+                                    val protegido = pasoActual != Paso.BLOQUEO && pasoActual != Paso.INICIO_SESION &&
+                                        pasoActual != Paso.REGISTRO && pasoActual != Paso.ARRANQUE
+                                    if (protegido && SesionActual.activa &&
+                                        debeBloquearTrasSegundoPlano(salio, SystemClock.elapsedRealtime()) &&
+                                        claveBiometrica.estado() == EstadoClave.VALIDA
+                                    ) {
+                                        credencialesBloqueadas = null
+                                        bloqueoEnFrio = false
+                                        pasoTrasBloqueo = pasoActual
+                                        visitaBloqueo++
+                                        // Sin `navegar`: volver al mismo paso no debe perder lo que el cliente tenía a medias.
+                                        paso = Paso.BLOQUEO
+                                    }
+                                }
+                                else -> Unit
+                            }
+                        }
+                        lifecycle.addObserver(observador)
+                        onDispose { lifecycle.removeObserver(observador) }
                     }
 
                     if (!sesionRestaurada || paso == Paso.ARRANQUE) {
@@ -192,6 +255,62 @@ class MainActivity : FragmentActivity() {
                                             pasoTrasConsentimiento = Paso.VERIFICACION
                                             navegar(Paso.CONSENTIMIENTO)
                                         },
+                                        onYaTengoCuenta = {
+                                            emailInicioSesion = null
+                                            avisoInicioSesion = null
+                                            navegar(Paso.INICIO_SESION)
+                                        },
+                                    )
+                                }
+
+                                Paso.INICIO_SESION -> {
+                                    val correo = emailInicioSesion ?: SesionActual.ultimoEmail.orEmpty()
+                                    val viewModel: InicioSesionViewModel = viewModel(key = "iniciosesion-$visita") { InicioSesionViewModel(correo) }
+                                    InicioSesionRoute(
+                                        viewModel = viewModel,
+                                        aviso = avisoInicioSesion,
+                                        onSesionIniciada = {
+                                            SesionActual.credenciales()?.let { alcance.launch { almacen.guardar(it) } }
+                                            emailInicioSesion = null
+                                            avisoInicioSesion = null
+                                            navegar(Paso.RESULTADO)
+                                        },
+                                        onCrearCuenta = { navegar(Paso.REGISTRO) },
+                                        onAtras = { navegar(Paso.REGISTRO) },
+                                    )
+                                }
+
+                                Paso.BLOQUEO -> {
+                                    val viewModel: BloqueoViewModel = viewModel(key = "bloqueo-$visitaBloqueo") { BloqueoViewModel(claveBiometrica) }
+                                    BloqueoRoute(
+                                        viewModel = viewModel,
+                                        nombre = credencialesBloqueadas?.nombre ?: SesionActual.nombre,
+                                        onDesbloqueado = {
+                                            // Solo ahora la sesión guardada pasa a estar disponible.
+                                            credencialesBloqueadas?.let { SesionActual.iniciar(it.clienteId, it.accessToken, it.nombre, it.email) }
+                                            credencialesBloqueadas = null
+                                            if (bloqueoEnFrio) navegar(pasoTrasBloqueo) else paso = pasoTrasBloqueo
+                                        },
+                                        onUsarContrasena = { motivo ->
+                                            val clienteId = credencialesBloqueadas?.clienteId ?: SesionActual.clienteId
+                                            emailInicioSesion = credencialesBloqueadas?.email ?: SesionActual.email ?: SesionActual.ultimoEmail
+                                            avisoInicioSesion = when (motivo) {
+                                                MotivoContrasena.TRES_FALLOS -> R.string.iniciosesion_aviso_tres_fallos
+                                                MotivoContrasena.BIOMETRIA_CAMBIO -> R.string.iniciosesion_aviso_cambio
+                                                MotivoContrasena.ERROR -> R.string.iniciosesion_aviso_error
+                                                MotivoContrasena.ELEGIDA -> null
+                                            }
+                                            // El token guardado ya no se usa: la sesión nueva nace con la contraseña.
+                                            val cambio = viewModel.cambioDeBiometria
+                                            SesionActual.cerrar()
+                                            credencialesBloqueadas = null
+                                            alcance.launch {
+                                                almacen.borrar()
+                                                // Si cambiaron las biometrías, tras entrar se vuelve a invitar a activar el acceso.
+                                                if (cambio && clienteId != null) vistaInvitacion.desmarcar(clienteId)
+                                            }
+                                            navegar(Paso.INICIO_SESION)
+                                        },
                                     )
                                 }
 
@@ -223,7 +342,8 @@ class MainActivity : FragmentActivity() {
                                         viewModel = viewModel,
                                         onDestino = { destino ->
                                             when (destino) {
-                                                Destino.REGISTRO -> navegar(Paso.REGISTRO)
+                                                // La sesión guardada dejó de valer: se entra con la contraseña, no se vuelve a registrar.
+                                                Destino.REGISTRO -> navegar(Paso.INICIO_SESION)
                                                 Destino.CONSENTIMIENTO_ANTES_DE_VERIFICAR -> {
                                                     pasoTrasConsentimiento = Paso.VERIFICACION
                                                     navegar(Paso.CONSENTIMIENTO)
@@ -253,7 +373,7 @@ class MainActivity : FragmentActivity() {
                                         onSesionVencida = {
                                             SesionActual.cerrar()
                                             alcance.launch { almacen.borrar() }
-                                            navegar(Paso.REGISTRO)
+                                            navegar(Paso.INICIO_SESION)
                                         },
                                         onAceptarOferta = {
                                             ofertaAComprar = it
@@ -284,7 +404,7 @@ class MainActivity : FragmentActivity() {
                                             onSesionVencida = {
                                                 SesionActual.cerrar()
                                                 alcance.launch { almacen.borrar() }
-                                                navegar(Paso.REGISTRO)
+                                                navegar(Paso.INICIO_SESION)
                                             },
                                         )
                                     }
@@ -310,7 +430,7 @@ class MainActivity : FragmentActivity() {
                                             onSesionVencida = {
                                                 SesionActual.cerrar()
                                                 alcance.launch { almacen.borrar() }
-                                                navegar(Paso.REGISTRO)
+                                                navegar(Paso.INICIO_SESION)
                                             },
                                         )
                                     }
@@ -327,7 +447,7 @@ class MainActivity : FragmentActivity() {
                                     onSesionVencida = {
                                         SesionActual.cerrar()
                                         alcance.launch { almacen.borrar() }
-                                        navegar(Paso.REGISTRO)
+                                        navegar(Paso.INICIO_SESION)
                                     },
                                 )
 
@@ -341,7 +461,7 @@ class MainActivity : FragmentActivity() {
                                     onSesionVencida = {
                                         SesionActual.cerrar()
                                         alcance.launch { almacen.borrar() }
-                                        navegar(Paso.REGISTRO)
+                                        navegar(Paso.INICIO_SESION)
                                     },
                                 )
 
@@ -357,7 +477,7 @@ class MainActivity : FragmentActivity() {
                                         onSesionVencida = {
                                             SesionActual.cerrar()
                                             alcance.launch { almacen.borrar() }
-                                            navegar(Paso.REGISTRO)
+                                            navegar(Paso.INICIO_SESION)
                                         },
                                         onSeguridad = { navegar(Paso.SEGURIDAD) },
                                     )
@@ -375,7 +495,7 @@ class MainActivity : FragmentActivity() {
                                     )
                                     InvitacionRoute(
                                         viewModel = viewModel,
-                                        vista = VistaInvitacion.crear(contexto),
+                                        vista = vistaInvitacion,
                                         onContinuar = { navegar(Paso.INICIO) },
                                     )
                                 }
@@ -396,7 +516,7 @@ class MainActivity : FragmentActivity() {
                                         onSesionVencida = {
                                             SesionActual.cerrar()
                                             alcance.launch { almacen.borrar() }
-                                            navegar(Paso.REGISTRO)
+                                            navegar(Paso.INICIO_SESION)
                                         },
                                     )
                                 }

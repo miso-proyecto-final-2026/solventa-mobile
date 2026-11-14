@@ -464,6 +464,44 @@
     <string name="biometria_invitacion_titulo">Entra más rápido y más seguro</string>
     <string name="biometria_invitacion_texto">Usa tu huella o reconocimiento facial en vez de escribir tu contraseña cada vez.</string>
     <string name="biometria_nota_contrasena_ajustes">Siempre puedes volver a usar tu contraseña desde Ajustes.</string>
+    <string name="biometria_error_bloqueado">Demasiados intentos con la contraseña. Intenta de nuevo en unos minutos.</string>
     <string name="biometria_reintentar">Reintentar</string>
     <string name="biometria_iniciar_sesion">Iniciar sesión de nuevo</string>
+
+    <!-- Inicio de sesión y bloqueo biométrico (HU05) -->
+    <string name="registro_ya_tengo_cuenta">Ya tengo una cuenta</string>
+    <string name="iniciosesion_titulo">Iniciar sesión</string>
+    <string name="iniciosesion_encabezado">Qué bueno verte de nuevo</string>
+    <string name="iniciosesion_intro">Entra con el correo y la contraseña de tu cuenta.</string>
+    <string name="iniciosesion_correo">Correo electrónico</string>
+    <string name="iniciosesion_contrasena">Contraseña</string>
+    <string name="iniciosesion_boton">Iniciar sesión</string>
+    <string name="iniciosesion_cargando">Iniciando sesión…</string>
+    <string name="iniciosesion_crear_cuenta">Crear una cuenta</string>
+    <string name="iniciosesion_error_campos">Escribe tu correo y tu contraseña.</string>
+    <string name="iniciosesion_error_credenciales">Correo o contraseña incorrectos.</string>
+    <string name="iniciosesion_error_sin_conexion">No hay conexión. Verifica tu red e intenta de nuevo.</string>
+    <string name="iniciosesion_error_tiempo">La respuesta está tardando más de lo normal. Intenta de nuevo.</string>
+    <string name="iniciosesion_error_servicio">No pudimos iniciar tu sesión en este momento. Intenta de nuevo en unos minutos.</string>
+    <plurals name="iniciosesion_error_bloqueado">
+        <item quantity="one">Demasiados intentos. Intenta de nuevo en %d minuto.</item>
+        <item quantity="other">Demasiados intentos. Intenta de nuevo en %d minutos.</item>
+    </plurals>
+    <string name="iniciosesion_aviso_tres_fallos">No pudimos reconocer tu biometría tres veces. Por seguridad, entra con tu contraseña.</string>
+    <string name="iniciosesion_aviso_cambio">Las biometrías de tu teléfono cambiaron. Entra con tu contraseña y vuelve a activar el acceso biométrico.</string>
+    <string name="iniciosesion_aviso_error">No pudimos usar la biometría en este momento. Entra con tu contraseña.</string>
+    <string name="bloqueo_marca">Solventa</string>
+    <string name="bloqueo_saludo">Hola de nuevo, %1$s</string>
+    <string name="bloqueo_saludo_sin_nombre">Hola de nuevo</string>
+    <string name="bloqueo_texto">Confirma que eres tú para entrar.</string>
+    <string name="bloqueo_boton_biometria">Entrar con huella o rostro</string>
+    <string name="bloqueo_toca">Toca para usar tu huella o tu rostro</string>
+    <string name="bloqueo_cancelado">Cancelaste la confirmación. Toca el botón para intentarlo de nuevo o usa tu contraseña.</string>
+    <plurals name="bloqueo_fallidos">
+        <item quantity="one">No te reconocimos. Te queda %d intento antes de pedirte la contraseña.</item>
+        <item quantity="other">No te reconocimos. Te quedan %d intentos antes de pedirte la contraseña.</item>
+    </plurals>
+    <string name="bloqueo_usar_contrasena">Usar contraseña</string>
+    <string name="bloqueo_prompt_titulo">Inicia sesión en Solventa</string>
+    <string name="bloqueo_prompt_subtitulo">Confirma tu identidad con tu biometría</string>
 </resources>

@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.solventa.mobile.R
 import com.solventa.mobile.ui.componentes.BarraSuperior
 import com.solventa.mobile.ui.componentes.BotonPrimario
+import com.solventa.mobile.ui.componentes.BotonSecundario
 import com.solventa.mobile.ui.componentes.CampoTexto
 import com.solventa.mobile.ui.componentes.IndicadorPasos
 import com.solventa.mobile.ui.iconos.Iconos
@@ -59,6 +60,7 @@ private const val PREFIJO_CELULAR = "+57"
 fun RegistroScreen(
     viewModel: RegistroViewModel,
     onRegistroExitoso: () -> Unit,
+    onYaTengoCuenta: () -> Unit = {},
 ) {
     val estado by viewModel.uiState.collectAsState()
     var mostrarPassword by rememberSaveable { mutableStateOf(false) }
@@ -218,6 +220,7 @@ fun RegistroScreen(
                     ),
                     onClick = viewModel::enviar,
                 )
+                BotonSecundario(stringResource(R.string.registro_ya_tengo_cuenta), onClick = onYaTengoCuenta)
             }
         }
     }

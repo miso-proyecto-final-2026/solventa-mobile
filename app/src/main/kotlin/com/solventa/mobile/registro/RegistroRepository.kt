@@ -51,7 +51,7 @@ class RegistroRepository(
         when (respuesta.code()) {
             201 -> respuesta.body()?.let {
                 // El token de la cuenta recién creada abre la sesión para los pasos siguientes (HU06).
-                sesion.iniciar(it.id, it.accessToken, it.nombre)
+                sesion.iniciar(it.id, it.accessToken, it.nombre, it.email)
                 Resultado.Exito(it)
             } ?: Resultado.ErrorRed("Respuesta inesperada del servidor")
             409 -> Resultado.Duplicado(leerDetalle(respuesta) ?: "No fue posible completar el registro")

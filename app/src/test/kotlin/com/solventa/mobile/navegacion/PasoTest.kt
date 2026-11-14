@@ -98,4 +98,12 @@ class PasoTest {
         // Al salir de la invitación hacia Inicio empieza una cotización nueva, igual que desde el resultado del KYC.
         assertTrue(reiniciaSeguros(desde = Paso.INVITACION_BIOMETRICA, hacia = Paso.INICIO))
     }
+
+    @Test
+    fun `el inicio de sesion y el bloqueo no muestran la barra y atras del login vuelve al registro`() {
+        assertFalse(Paso.INICIO_SESION.conBarra)
+        assertFalse(Paso.BLOQUEO.conBarra)
+        assertEquals(Paso.REGISTRO, Paso.INICIO_SESION.atras)
+        assertNull(Paso.BLOQUEO.atras) // atrás en el bloqueo no deja entrar: sale de la app
+    }
 }

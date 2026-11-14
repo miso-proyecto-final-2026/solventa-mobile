@@ -76,4 +76,15 @@ class VistaInvitacionTest {
         assertFalse(debeInvitar(BiometriaUiState(fase = FaseBiometria.CARGANDO), yaVista = false))
         assertFalse(debeInvitar(BiometriaUiState(fase = FaseBiometria.ESTADO), yaVista = false)) // sin capacidad: no puede
     }
+
+    @Test
+    fun `desmarcarla permite volver a invitar solo a ese cliente`() = runTest {
+        vista.marcar("c1")
+        vista.marcar("c2")
+
+        vista.desmarcar("c1")
+
+        assertFalse(vista.vista("c1"))
+        assertTrue(vista.vista("c2"))
+    }
 }

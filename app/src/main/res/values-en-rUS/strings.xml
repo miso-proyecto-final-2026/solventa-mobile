@@ -464,6 +464,44 @@
     <string name="biometria_invitacion_titulo">Sign in faster and more securely</string>
     <string name="biometria_invitacion_texto">Use your fingerprint or face instead of typing your password every time.</string>
     <string name="biometria_nota_contrasena_ajustes">You can always go back to using your password from Settings.</string>
+    <string name="biometria_error_bloqueado">Too many password attempts. Try again in a few minutes.</string>
     <string name="biometria_reintentar">Retry</string>
     <string name="biometria_iniciar_sesion">Sign in again</string>
+
+    <!-- Sign-in and biometric lock (HU05) -->
+    <string name="registro_ya_tengo_cuenta">I already have an account</string>
+    <string name="iniciosesion_titulo">Sign in</string>
+    <string name="iniciosesion_encabezado">Good to see you again</string>
+    <string name="iniciosesion_intro">Sign in with your account email and password.</string>
+    <string name="iniciosesion_correo">Email</string>
+    <string name="iniciosesion_contrasena">Password</string>
+    <string name="iniciosesion_boton">Sign in</string>
+    <string name="iniciosesion_cargando">Signing in…</string>
+    <string name="iniciosesion_crear_cuenta">Create an account</string>
+    <string name="iniciosesion_error_campos">Enter your email and password.</string>
+    <string name="iniciosesion_error_credenciales">Incorrect email or password.</string>
+    <string name="iniciosesion_error_sin_conexion">No connection. Check your network and try again.</string>
+    <string name="iniciosesion_error_tiempo">The response is taking longer than usual. Try again.</string>
+    <string name="iniciosesion_error_servicio">We could not sign you in right now. Try again in a few minutes.</string>
+    <plurals name="iniciosesion_error_bloqueado">
+        <item quantity="one">Too many attempts. Try again in %d minute.</item>
+        <item quantity="other">Too many attempts. Try again in %d minutes.</item>
+    </plurals>
+    <string name="iniciosesion_aviso_tres_fallos">We could not recognize your biometrics three times. For your security, sign in with your password.</string>
+    <string name="iniciosesion_aviso_cambio">Your phone biometrics changed. Sign in with your password and turn biometric access on again.</string>
+    <string name="iniciosesion_aviso_error">We could not use biometrics right now. Sign in with your password.</string>
+    <string name="bloqueo_marca">Solventa</string>
+    <string name="bloqueo_saludo">Welcome back, %1$s</string>
+    <string name="bloqueo_saludo_sin_nombre">Welcome back</string>
+    <string name="bloqueo_texto">Confirm it is you to continue.</string>
+    <string name="bloqueo_boton_biometria">Sign in with fingerprint or face</string>
+    <string name="bloqueo_toca">Tap to use your fingerprint or face</string>
+    <string name="bloqueo_cancelado">You cancelled the confirmation. Tap the button to try again or use your password.</string>
+    <plurals name="bloqueo_fallidos">
+        <item quantity="one">We did not recognize you. You have %d attempt left before we ask for your password.</item>
+        <item quantity="other">We did not recognize you. You have %d attempts left before we ask for your password.</item>
+    </plurals>
+    <string name="bloqueo_usar_contrasena">Use password</string>
+    <string name="bloqueo_prompt_titulo">Sign in to Solventa</string>
+    <string name="bloqueo_prompt_subtitulo">Confirm your identity with your biometrics</string>
 </resources>

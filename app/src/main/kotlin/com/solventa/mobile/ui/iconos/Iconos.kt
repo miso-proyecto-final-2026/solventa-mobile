@@ -64,6 +64,11 @@ object Iconos {
     /** Documento con renglones: sin reflejos ni sombras. */
     val Documento: ImageVector by lazy { trazo("Documento", "M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z", "M7 9h4M7 13h10") }
 
+    /** Escudo con visto (B2 del diseño): marca de Solventa en el bloqueo. */
+    val EscudoVisto: ImageVector by lazy {
+        trazo("EscudoVisto", "M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z", "M9 12l2 2 4-4")
+    }
+
     /** Huella digital (B1 del diseño): acceso biométrico. */
     val Huella: ImageVector by lazy {
         trazo(

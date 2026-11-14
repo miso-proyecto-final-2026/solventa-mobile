@@ -1,5 +1,6 @@
 package com.solventa.mobile.biometria
 
+import android.content.res.Configuration
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
@@ -16,6 +17,8 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.unit.dp
 import com.solventa.mobile.setContentEnEspanol
 import com.solventa.mobile.ui.tema.SolventaTheme
+import java.util.Locale
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -32,7 +35,30 @@ class SeguridadScreenTest {
 
     private val disponible = Capacidad(Disponibilidad.DISPONIBLE, listOf(MetodoBiometrico.HUELLA, MetodoBiometrico.FACIAL))
 
+    private var configuracionOriginal: Configuration? = null
+
+    /**
+     * Los diálogos son otra ventana y no heredan el contexto que `setContentEnEspanol` sobrescribe: usan los recursos de
+     * la actividad. Se fija es-CO ahí (el emulador del CI está en en-US) y se restaura al terminar.
+     */
+    @Suppress("DEPRECATION")
+    private fun fijarEspanolEnLaActividad() {
+        val recursos = composeTestRule.activity.resources
+        if (configuracionOriginal == null) configuracionOriginal = Configuration(recursos.configuration)
+        val espanol = Configuration(recursos.configuration).apply { setLocale(Locale.forLanguageTag("es-CO")) }
+        recursos.updateConfiguration(espanol, recursos.displayMetrics)
+    }
+
+    @After
+    @Suppress("DEPRECATION")
+    fun restaurarIdioma() {
+        val original = configuracionOriginal ?: return
+        val recursos = composeTestRule.activity.resources
+        recursos.updateConfiguration(original, recursos.displayMetrics)
+    }
+
     private fun mostrar(estado: BiometriaUiState, acciones: SeguridadAcciones = SeguridadAcciones()) {
+        fijarEspanolEnLaActividad()
         composeTestRule.setContentEnEspanol { SolventaTheme { SeguridadScreen(estado, acciones) } }
     }
 

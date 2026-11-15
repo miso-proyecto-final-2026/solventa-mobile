@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
@@ -44,6 +45,7 @@ import com.solventa.mobile.sesion.SesionActual
 import com.solventa.mobile.sesion.primerNombre
 import com.solventa.mobile.ui.componentes.BloqueResultado
 import com.solventa.mobile.ui.componentes.BotonPrimario
+import com.solventa.mobile.ui.componentes.BotonSecundario
 import com.solventa.mobile.ui.componentes.Tarjeta
 import com.solventa.mobile.ui.iconos.Iconos
 import com.solventa.mobile.ui.tema.SolventaColorScheme
@@ -51,7 +53,13 @@ import com.solventa.mobile.ui.tema.extra
 
 /** Consulta el estado cada vez que la pantalla vuelve a primer plano (criterios 4 y 5). */
 @Composable
-fun ResultadoRoute(viewModel: ResultadoViewModel, onDestino: (Destino) -> Unit, onSalir: () -> Unit) {
+fun ResultadoRoute(
+    viewModel: ResultadoViewModel,
+    onDestino: (Destino) -> Unit,
+    onSalir: () -> Unit,
+    /** Hay copia de las pólizas en el teléfono: sin conexión se puede entrar a verlas (HU36, criterio 1). */
+    onVerPolizasGuardadas: (() -> Unit)? = null,
+) {
     val ciclo = LocalLifecycleOwner.current
     DisposableEffect(ciclo) {
         val observador = LifecycleEventObserver { _, evento ->
@@ -60,7 +68,7 @@ fun ResultadoRoute(viewModel: ResultadoViewModel, onDestino: (Destino) -> Unit, 
         ciclo.lifecycle.addObserver(observador)
         onDispose { ciclo.lifecycle.removeObserver(observador) }
     }
-    ResultadoScreen(viewModel = viewModel, onDestino = onDestino, onSalir = onSalir)
+    ResultadoScreen(viewModel = viewModel, onDestino = onDestino, onSalir = onSalir, onVerPolizasGuardadas = onVerPolizasGuardadas)
 }
 
 /**
@@ -74,6 +82,7 @@ fun ResultadoScreen(
     onSalir: () -> Unit,
     /** Nombre con el que se registró el cliente, para el saludo de la verificación aprobada. */
     nombre: String? = SesionActual.nombre,
+    onVerPolizasGuardadas: (() -> Unit)? = null,
 ) {
     val estado by viewModel.uiState.collectAsState()
     val destino by viewModel.destino.collectAsState()
@@ -106,7 +115,17 @@ fun ResultadoScreen(
                     )
                     Text(stringResource(textoError(actual.error)), textAlign = TextAlign.Center)
                 }
-                Pie { BotonPrimario(stringResource(R.string.resultado_reintentar_consulta), onClick = viewModel::actualizar) }
+                Pie {
+                    BotonPrimario(stringResource(R.string.resultado_reintentar_consulta), onClick = viewModel::actualizar)
+                    // Al abrir la app sin red el resultado no se puede consultar, pero las pólizas guardadas sí se pueden ver.
+                    if (actual.error == ErrorConsulta.SIN_CONEXION && onVerPolizasGuardadas != null) {
+                        BotonSecundario(
+                            stringResource(R.string.resultado_ver_polizas_guardadas),
+                            onClick = onVerPolizasGuardadas,
+                            modifier = Modifier.testTag("ver_polizas_guardadas"),
+                        )
+                    }
+                }
             }
             is ResultadoUiState.Mostrando -> Resultado(actual, viewModel, onSalir, primerNombre(nombre))
         }

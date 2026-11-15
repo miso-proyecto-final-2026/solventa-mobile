@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.solventa.mobile.BuildConfig
 import com.solventa.mobile.firma.ContenidoPdf
 import com.solventa.mobile.red.PolizaResponse
+import com.solventa.mobile.sesion.SesionActual
 import java.time.Instant
 import java.util.Locale
 import kotlinx.coroutines.Job
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * «Mis pólizas» (HU35, diseño F1 y F2): la billetera, el detalle de una póliza con su credencial y los documentos.
@@ -25,10 +28,16 @@ class PolizasViewModel @JvmOverloads constructor(
     /** Idioma del teléfono (`es-CO`, `en-US`): el certificado y su enlace salen en él. */
     private val idioma: () -> String = { Locale.getDefault().toLanguageTag() },
     private val baseUrl: String = BuildConfig.BASE_URL,
+    /** Copia local para verlas sin conexión (HU36). */
+    private val almacen: AlmacenPolizas = AlmacenPolizas.Ninguno,
+    private val clienteId: () -> String? = { SesionActual.clienteId },
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PolizasUiState())
     val uiState: StateFlow<PolizasUiState> = _uiState.asStateFlow()
+
+    /** Ordena las escrituras de la copia y su reflejo en pantalla (HU36): la pantalla queda como el disco. */
+    private val escrituras = Mutex()
 
     private var cargando: Job? = null
     private var enlace: Job? = null
@@ -53,23 +62,91 @@ class PolizasViewModel @JvmOverloads constructor(
         cargar(silencioso = false)
     }
 
+    /**
+     * Sincroniza la copia local sin que el cliente haga nada (HU36, criterio 4): la app lo llama cada vez que pasa a
+     * primer plano con sesión, esté o no en «Mis pólizas». Sin conexión no muestra error.
+     */
+    fun sincronizar() = cargar(silencioso = true)
+
     private fun cargar(silencioso: Boolean) {
         cargando?.cancel()
         cargando = viewModelScope.launch {
             when (val resultado = repository.billetera()) {
                 is PolizasRepository.Resultado.Exito -> {
-                    _uiState.update { it.copy(fase = FasePolizas.LISTA, polizas = resultado.valor, ahora = reloj(), error = null) }
+                    val momento = reloj()
+                    // La copia y la pantalla se actualizan juntas: los documentos que se muestran son los de la copia
+                    // que quedó guardada, también si un PDF se guardó mientras llegaba la respuesta.
+                    escrituras.withLock {
+                        val copia = guardarCopia(resultado.valor, momento)
+                        _uiState.update {
+                            it.copy(
+                                fase = FasePolizas.LISTA,
+                                polizas = resultado.valor,
+                                ahora = momento,
+                                error = null,
+                                sinConexion = false,
+                                sincronizadoEn = momento,
+                                documentosGuardados = copia?.documentos ?: it.documentosGuardados,
+                            )
+                        }
+                    }
                     pendienteDeAbrir?.let { id ->
                         pendienteDeAbrir = null
                         abrirPorSuscripcion(id)
                     }
                 }
 
-                PolizasRepository.Resultado.SinSesion -> fallar(ErrorPolizas.SESION_VENCIDA)
+                PolizasRepository.Resultado.SinSesion -> {
+                    // La sesión dejó de valer: la copia no debe sobrevivirla (criterio 7).
+                    almacen.borrar()
+                    fallar(ErrorPolizas.SESION_VENCIDA)
+                }
+
+                PolizasRepository.Resultado.SinConexion -> mostrarSinConexion(silencioso)
                 // Un refresco silencioso que falla deja la lista que ya se tenía.
-                PolizasRepository.Resultado.SinConexion -> if (!silencioso) fallar(ErrorPolizas.SIN_CONEXION)
                 else -> if (!silencioso) fallar(ErrorPolizas.SERVICIO)
             }
+        }
+    }
+
+    /**
+     * Lo del servidor reemplaza a la copia local (criterio 8), conservando los documentos descargados. Se lee y se
+     * escribe en una sola transacción: si no, un PDF guardado entre la lectura y la escritura se perdía.
+     */
+    private suspend fun guardarCopia(polizas: List<PolizaResponse>, momento: Instant): CopiaPolizas? {
+        val cliente = clienteId() ?: return null
+        return almacen.actualizar(cliente) { anterior -> CopiasPolizas.desde(cliente, polizas, momento, anterior) }
+    }
+
+    /**
+     * Sin conexión (criterios 1, 5 y 6): si la lista ya está en pantalla se conserva, marcada como copia; si no, se
+     * muestra la copia guardada. Los estados se recalculan con la hora actual, así que una póliza que venció sin red se
+     * ve vencida.
+     */
+    private suspend fun mostrarSinConexion(silencioso: Boolean) {
+        if (_uiState.value.fase == FasePolizas.LISTA) {
+            _uiState.update { it.copy(sinConexion = true, ahora = reloj()) }
+            return
+        }
+        val copia = clienteId()?.let { almacen.leer(it) }
+        if (copia == null) {
+            if (!silencioso) fallar(ErrorPolizas.SIN_CONEXION)
+            return
+        }
+        _uiState.update {
+            it.copy(
+                fase = FasePolizas.LISTA,
+                polizas = copia.polizas.map(PolizaGuardada::aRespuesta),
+                ahora = reloj(),
+                error = null,
+                sinConexion = true,
+                sincronizadoEn = runCatching { Instant.parse(copia.sincronizadoEn) }.getOrNull(),
+                documentosGuardados = copia.documentos,
+            )
+        }
+        pendienteDeAbrir?.let { id ->
+            pendienteDeAbrir = null
+            abrirPorSuscripcion(id)
         }
     }
 
@@ -94,7 +171,8 @@ class PolizasViewModel @JvmOverloads constructor(
         _uiState.update {
             it.copy(seleccionada = poliza, qr = EnlaceQr.NoAplica, documento = null, descarga = EstadoDescarga.INACTIVO, pdf = null)
         }
-        if (_uiState.value.estadoDe(poliza).conQr) pedirEnlace(poliza)
+        if (!_uiState.value.estadoDe(poliza).conQr) return
+        if (_uiState.value.sinConexion) _uiState.update { it.copy(qr = EnlaceQr.RequiereConexion) } else pedirEnlace(poliza)
     }
 
     fun cerrarDetalle() {
@@ -142,6 +220,23 @@ class PolizasViewModel @JvmOverloads constructor(
                 PolizasRepository.Resultado.SinSesion -> fallar(ErrorPolizas.SESION_VENCIDA)
                 PolizasRepository.Resultado.NoDisponible -> _uiState.update { it.copy(descarga = EstadoDescarga.NO_DISPONIBLE) }
                 else -> _uiState.update { it.copy(descarga = EstadoDescarga.ERROR) }
+            }
+        }
+    }
+
+    /**
+     * El cliente guardó el documento de la póliza abierta en [uri] (HU36, criterio 2): se recuerda en la copia local para
+     * abrirlo sin conexión. Si el cliente luego lo mueve o lo borra, la pantalla pide descargarlo de nuevo.
+     */
+    fun documentoGuardado(documento: DocumentoPoliza, uri: String) {
+        val poliza = _uiState.value.seleccionada ?: return
+        val clave = claveDocumento(poliza.suscripcionId, documento)
+        _uiState.update { it.copy(documentosGuardados = it.documentosGuardados + (clave to uri)) }
+        viewModelScope.launch {
+            val cliente = clienteId() ?: return@launch
+            escrituras.withLock {
+                val copia = almacen.actualizar(cliente) { it?.conDocumento(clave, uri) } ?: return@withLock
+                _uiState.update { it.copy(documentosGuardados = copia.documentos) }
             }
         }
     }

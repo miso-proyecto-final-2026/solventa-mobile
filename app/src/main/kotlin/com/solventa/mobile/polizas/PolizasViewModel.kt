@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * «Mis pólizas» (HU35, diseño F1 y F2): la billetera, el detalle de una póliza con su credencial y los documentos.
@@ -33,6 +35,9 @@ class PolizasViewModel @JvmOverloads constructor(
 
     private val _uiState = MutableStateFlow(PolizasUiState())
     val uiState: StateFlow<PolizasUiState> = _uiState.asStateFlow()
+
+    /** Ordena las escrituras de la copia y su reflejo en pantalla (HU36): la pantalla queda como el disco. */
+    private val escrituras = Mutex()
 
     private var cargando: Job? = null
     private var enlace: Job? = null
@@ -69,17 +74,21 @@ class PolizasViewModel @JvmOverloads constructor(
             when (val resultado = repository.billetera()) {
                 is PolizasRepository.Resultado.Exito -> {
                     val momento = reloj()
-                    val copia = guardarCopia(resultado.valor, momento)
-                    _uiState.update {
-                        it.copy(
-                            fase = FasePolizas.LISTA,
-                            polizas = resultado.valor,
-                            ahora = momento,
-                            error = null,
-                            sinConexion = false,
-                            sincronizadoEn = momento,
-                            documentosGuardados = copia?.documentos ?: it.documentosGuardados,
-                        )
+                    // La copia y la pantalla se actualizan juntas: los documentos que se muestran son los de la copia
+                    // que quedó guardada, también si un PDF se guardó mientras llegaba la respuesta.
+                    escrituras.withLock {
+                        val copia = guardarCopia(resultado.valor, momento)
+                        _uiState.update {
+                            it.copy(
+                                fase = FasePolizas.LISTA,
+                                polizas = resultado.valor,
+                                ahora = momento,
+                                error = null,
+                                sinConexion = false,
+                                sincronizadoEn = momento,
+                                documentosGuardados = copia?.documentos ?: it.documentosGuardados,
+                            )
+                        }
                     }
                     pendienteDeAbrir?.let { id ->
                         pendienteDeAbrir = null
@@ -100,12 +109,13 @@ class PolizasViewModel @JvmOverloads constructor(
         }
     }
 
-    /** Lo del servidor reemplaza a la copia local (criterio 8). */
+    /**
+     * Lo del servidor reemplaza a la copia local (criterio 8), conservando los documentos descargados. Se lee y se
+     * escribe en una sola transacción: si no, un PDF guardado entre la lectura y la escritura se perdía.
+     */
     private suspend fun guardarCopia(polizas: List<PolizaResponse>, momento: Instant): CopiaPolizas? {
         val cliente = clienteId() ?: return null
-        val copia = CopiasPolizas.desde(cliente, polizas, momento, almacen.leer(cliente))
-        almacen.guardar(copia)
-        return copia
+        return almacen.actualizar(cliente) { anterior -> CopiasPolizas.desde(cliente, polizas, momento, anterior) }
     }
 
     /**
@@ -224,8 +234,10 @@ class PolizasViewModel @JvmOverloads constructor(
         _uiState.update { it.copy(documentosGuardados = it.documentosGuardados + (clave to uri)) }
         viewModelScope.launch {
             val cliente = clienteId() ?: return@launch
-            val copia = almacen.leer(cliente) ?: return@launch
-            almacen.guardar(copia.conDocumento(clave, uri))
+            escrituras.withLock {
+                val copia = almacen.actualizar(cliente) { it?.conDocumento(clave, uri) } ?: return@withLock
+                _uiState.update { it.copy(documentosGuardados = copia.documentos) }
+            }
         }
     }
 

@@ -7,8 +7,11 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import java.time.Instant
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -33,10 +36,25 @@ class PolizasSinConexionTest {
     /** Almacén en memoria: lo que la app guardaría cifrado en el teléfono. */
     private class AlmacenEnMemoria(var copia: CopiaPolizas? = null) : AlmacenPolizas {
         var borrados = 0
-        override suspend fun leer(clienteId: String) = copia?.takeIf { it.clienteId == clienteId }
+        private val transaccion = Mutex()
+
+        /** Si no es `null`, la próxima lectura espera aquí antes de devolver: así se fuerza el cruce de dos escrituras. */
+        var pausaTrasLeer: CompletableDeferred<Unit>? = null
+
+        override suspend fun leer(clienteId: String): CopiaPolizas? {
+            val leida = copia?.takeIf { it.clienteId == clienteId }
+            pausaTrasLeer?.let { pausaTrasLeer = null; it.await() }
+            return leida
+        }
         override suspend fun guardar(copia: CopiaPolizas) {
             this.copia = copia
         }
+
+        /** Igual que `updateData` de DataStore: una transacción a la vez. */
+        override suspend fun actualizar(clienteId: String, cambio: suspend (CopiaPolizas?) -> CopiaPolizas?) =
+            transaccion.withLock {
+                cambio(leer(clienteId))?.also { copia = it }
+            }
 
         override suspend fun borrar() {
             copia = null
@@ -243,6 +261,32 @@ class PolizasSinConexionTest {
         val poliza = sinRed.uiState.value.polizas.single()
         assertEquals("content://docs/certificado-s1", sinRed.uiState.value.documentoGuardado(poliza, DocumentoPoliza.CERTIFICADO))
         assertNull(sinRed.uiState.value.documentoGuardado(poliza, DocumentoPoliza.POLIZA_FIRMADA))
+    }
+
+    /**
+     * El cruce que se vio en el emulador: al volver del selector de archivos la app pasa a primer plano y sincroniza
+     * mientras se guarda el URI del PDF. Antes, la sincronización leía la copia, el URI se escribía y la sincronización
+     * escribía encima su copia vieja: el PDF quedaba olvidado y sin conexión se pedía descargarlo otra vez.
+     */
+    @Test
+    fun `un documento guardado mientras se sincroniza no se pierde`() = runTest(dispatcher) {
+        billetera(poliza("s1"))
+        coEvery { repository.enlaceCertificado(any(), any()) } returns
+            PolizasRepository.Resultado.Exito(EnlaceCertificadoResponse("/v1/certificados/abc", "2026-11-15T12:00:00Z"))
+        val vm = viewModel()
+        vm.iniciar(); advanceUntilIdle()
+        vm.abrir(vm.uiState.value.polizas.single()); advanceUntilIdle()
+
+        // La sincronización lee la copia (sin el documento) y se queda a mitad de su transacción.
+        val pausa = CompletableDeferred<Unit>()
+        almacen.pausaTrasLeer = pausa
+        vm.sincronizar(); advanceUntilIdle()
+        // En ese momento el cliente termina de guardar el PDF.
+        vm.documentoGuardado(DocumentoPoliza.CERTIFICADO, "content://docs/certificado-s1"); advanceUntilIdle()
+        pausa.complete(Unit); advanceUntilIdle()
+
+        assertEquals(mapOf("s1/CERTIFICADO" to "content://docs/certificado-s1"), almacen.copia!!.documentos)
+        assertEquals(mapOf("s1/CERTIFICADO" to "content://docs/certificado-s1"), vm.uiState.value.documentosGuardados)
     }
 
     @Test

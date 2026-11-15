@@ -25,6 +25,14 @@ interface AlmacenPolizas {
 
     suspend fun guardar(copia: CopiaPolizas)
 
+    /**
+     * Lee, cambia y escribe la copia del cliente en **una sola transacción**: dos cambios a la vez (la sincronización al
+     * volver a primer plano y el URI de un PDF recién guardado) no se pisan. [cambio] recibe la copia actual (o `null` si
+     * no hay, es ilegible o de otro cliente) y devuelve la nueva; `null` deja todo como estaba. Devuelve la copia que
+     * quedó guardada, o `null` si no se escribió nada.
+     */
+    suspend fun actualizar(clienteId: String, cambio: suspend (CopiaPolizas?) -> CopiaPolizas?): CopiaPolizas?
+
     /** Borra la copia y olvida los documentos descargados (el archivo del cliente no se toca: es suyo). */
     suspend fun borrar()
 
@@ -38,6 +46,7 @@ interface AlmacenPolizas {
         val Ninguno: AlmacenPolizas = object : AlmacenPolizas {
             override suspend fun leer(clienteId: String): CopiaPolizas? = null
             override suspend fun guardar(copia: CopiaPolizas) = Unit
+            override suspend fun actualizar(clienteId: String, cambio: suspend (CopiaPolizas?) -> CopiaPolizas?) = null
             override suspend fun borrar() = Unit
         }
 
@@ -73,15 +82,7 @@ class AlmacenPolizasDataStore(
         } catch (e: IOException) {
             return null
         } ?: return null
-        val copia = cifrador.descifrar(cifrada)?.let { texto ->
-            try {
-                json.decodeFromString(CopiaPolizas.serializer(), texto)
-            } catch (e: SerializationException) {
-                null
-            } catch (e: IllegalArgumentException) {
-                null
-            }
-        }
+        val copia = descifrar(cifrada)
         // Ilegible (por ejemplo, tras restaurar en otro teléfono) o de otro cliente: no se muestra y se descarta.
         if (copia == null || copia.clienteId != clienteId) {
             borrar()
@@ -91,8 +92,36 @@ class AlmacenPolizasDataStore(
     }
 
     override suspend fun guardar(copia: CopiaPolizas) {
-        val cifrada = cifrador.cifrar(json.encodeToString(CopiaPolizas.serializer(), copia))
+        val cifrada = cifrar(copia)
         datos.edit { it[COPIA] = cifrada }
+    }
+
+    /** `updateData` de DataStore serializa las transacciones: la que llega segunda ve lo que escribió la primera. */
+    override suspend fun actualizar(clienteId: String, cambio: suspend (CopiaPolizas?) -> CopiaPolizas?): CopiaPolizas? {
+        var guardada: CopiaPolizas? = null
+        try {
+            datos.edit { preferencias ->
+                val actual = preferencias[COPIA]?.let(::descifrar)?.takeIf { it.clienteId == clienteId }
+                val nueva = cambio(actual) ?: return@edit
+                preferencias[COPIA] = cifrar(nueva)
+                guardada = nueva
+            }
+        } catch (e: IOException) {
+            return null
+        }
+        return guardada
+    }
+
+    private fun cifrar(copia: CopiaPolizas): String = cifrador.cifrar(json.encodeToString(CopiaPolizas.serializer(), copia))
+
+    private fun descifrar(cifrada: String): CopiaPolizas? = cifrador.descifrar(cifrada)?.let { texto ->
+        try {
+            json.decodeFromString(CopiaPolizas.serializer(), texto)
+        } catch (e: SerializationException) {
+            null
+        } catch (e: IllegalArgumentException) {
+            null
+        }
     }
 
     override suspend fun borrar() {

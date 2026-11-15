@@ -6,9 +6,11 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.solventa.mobile.sesion.Cifrador
 import java.io.File
 import java.nio.file.Files
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -52,6 +54,47 @@ class AlmacenPolizasDataStoreTest {
     fun limpiar() {
         alcance.cancel()
         carpeta.deleteRecursively()
+    }
+
+    @Test
+    fun `dos actualizaciones que se cruzan no se pisan`() = runTest {
+        almacen.guardar(copia.copy(documentos = emptyMap()))
+        val leyo = CompletableDeferred<Unit>()
+        val seguir = CompletableDeferred<Unit>()
+
+        // La sincronización lee la copia y se detiene antes de escribir...
+        val sincronizacion = async(Dispatchers.IO) {
+            almacen.actualizar("c1") { anterior ->
+                leyo.complete(Unit)
+                seguir.await()
+                anterior!!.copy(sincronizadoEn = "2026-11-15T16:00:00Z")
+            }
+        }
+        leyo.await()
+        // ...mientras se guarda el URI de un PDF. Debe esperar a que la sincronización termine y partir de su resultado.
+        val documento = async(Dispatchers.IO) {
+            almacen.actualizar("c1") { it?.conDocumento("s1/CERTIFICADO", "content://docs/certificado") }
+        }
+        seguir.complete(Unit)
+        sincronizacion.await()
+        documento.await()
+
+        val final = almacen.leer("c1")!!
+        assertEquals("2026-11-15T16:00:00Z", final.sincronizadoEn)
+        assertEquals(mapOf("s1/CERTIFICADO" to "content://docs/certificado"), final.documentos)
+    }
+
+    @Test
+    fun `actualizar sin copia del cliente recibe null y devolver null no escribe nada`() = runTest {
+        almacen.guardar(copia.copy(clienteId = "otro"))
+
+        val resultado = almacen.actualizar("c1") { anterior ->
+            assertNull(anterior)
+            null
+        }
+
+        assertNull(resultado)
+        assertEquals("otro", almacen.leer("otro")!!.clienteId)
     }
 
     @Test

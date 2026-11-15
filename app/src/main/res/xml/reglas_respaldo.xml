@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Respaldo en Android 11 o anterior: la copia de las pólizas sin conexión (HU36) no sale del teléfono. -->
+<full-backup-content>
+    <exclude domain="file" path="datastore/polizas_sin_conexion.preferences_pb" />
+</full-backup-content>

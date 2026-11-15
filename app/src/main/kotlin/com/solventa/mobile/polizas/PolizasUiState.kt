@@ -33,6 +33,9 @@ sealed interface EnlaceQr {
     data object Cargando : EnlaceQr
     data class Listo(val url: String) : EnlaceQr
     data object Fallido : EnlaceQr
+
+    /** Se está viendo la copia sin conexión (HU36): el enlace se pide al servidor y vence, así que no hay QR. */
+    data object RequiereConexion : EnlaceQr
 }
 
 data class PolizasUiState(
@@ -49,8 +52,17 @@ data class PolizasUiState(
     /** El PDF ya descargado, a la espera de que el cliente elija dónde guardarlo. */
     val pdf: ContenidoPdf? = null,
     val error: ErrorPolizas? = null,
+    /** Lo que se ve es la copia guardada en el teléfono porque no hay conexión (HU36, criterio 5). */
+    val sinConexion: Boolean = false,
+    /** Última sincronización con el servidor; `null` si aún no hubo ninguna. */
+    val sincronizadoEn: Instant? = null,
+    /** URI de los documentos descargados, por [claveDocumento] (HU36, criterio 2). */
+    val documentosGuardados: Map<String, String> = emptyMap(),
 ) {
     fun estadoDe(poliza: PolizaResponse): EstadoPoliza = EstadosPoliza.de(poliza, ahora)
+
+    fun documentoGuardado(poliza: PolizaResponse, documento: DocumentoPoliza): String? =
+        documentosGuardados[claveDocumento(poliza.suscripcionId, documento)]
 
     /** Las pólizas de la pestaña elegida. */
     val visibles: List<PolizaResponse>

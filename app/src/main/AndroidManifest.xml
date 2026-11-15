@@ -2,6 +2,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Saber si hay Internet para avisar qué requiere conexión (HU36). Permiso normal: no se le pregunta al cliente. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Android 13 o superior: la app pide el permiso al llegar a la firma, para avisar cuando la póliza esté activa (HU22). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -10,6 +12,8 @@
 
     <application
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/reglas_extraccion"
+        android:fullBackupContent="@xml/reglas_respaldo"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"

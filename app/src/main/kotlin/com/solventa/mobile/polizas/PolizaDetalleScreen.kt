@@ -50,6 +50,8 @@ import com.solventa.mobile.R
 import com.solventa.mobile.cotizacion.Catalogo
 import com.solventa.mobile.cotizacion.FormatoCotizacion
 import com.solventa.mobile.firma.abrirPdf
+import com.solventa.mobile.firma.conservarAcceso
+import com.solventa.mobile.firma.documentoDisponible
 import com.solventa.mobile.firma.guardarEnArchivo
 import com.solventa.mobile.red.PolizaResponse
 import com.solventa.mobile.ui.componentes.BarraSuperior
@@ -72,6 +74,8 @@ data class PolizaDetalleAcciones(
     val abrirGuardado: () -> Unit = {},
     val reintentarQr: () -> Unit = {},
     val retomarFirma: (PolizaResponse) -> Unit = {},
+    /** Abre sin conexión un documento que el cliente ya había descargado (HU36, criterio 2). */
+    val abrirDocumento: (DocumentoPoliza) -> Unit = {},
 )
 
 @Composable
@@ -99,20 +103,38 @@ fun PolizaDetalleRoute(
         }
         return
     }
+    // Sin conexión solo se ofrecen los documentos descargados que siguen donde el cliente los dejó (HU36, criterio 2).
+    val disponibles = remember(estado.documentosGuardados, poliza.suscripcionId, estado.sinConexion) {
+        if (!estado.sinConexion) {
+            emptySet()
+        } else {
+            DocumentoPoliza.entries.filter { documento ->
+                estado.documentoGuardado(poliza, documento)?.let { documentoDisponible(contexto, Uri.parse(it)) } == true
+            }.toSet()
+        }
+    }
     PolizaDetallePantalla(
         estado = estado,
         poliza = poliza,
+        documentosDisponibles = disponibles,
         acciones = PolizaDetalleAcciones(
             volver = { viewModel.cerrarDetalle(); onVolver() },
             descargar = { guardadoEn = null; viewModel.descargar(it) },
             guardar = { destino ->
                 val pdf = estado.pdf
+                val documento = estado.documento
                 if (destino == null || pdf == null) {
                     viewModel.descargaGuardada(null)
                 } else {
                     alcance.launch {
                         val exito = guardarEnArchivo(contexto, destino, pdf.bytes)
-                        if (exito) guardadoEn = destino
+                        if (exito) {
+                            guardadoEn = destino
+                            // Permiso persistente de lectura para abrirlo después sin conexión; se suelta al cerrar sesión.
+                            if (documento != null && conservarAcceso(contexto, destino)) {
+                                viewModel.documentoGuardado(documento, destino.toString())
+                            }
+                        }
                         viewModel.descargaGuardada(exito)
                     }
                 }
@@ -120,13 +142,19 @@ fun PolizaDetalleRoute(
             abrirGuardado = { guardadoEn?.let { abrirPdf(contexto, it) } },
             reintentarQr = viewModel::reintentarQr,
             retomarFirma = { onRetomarFirma(it.suscripcionId) },
+            abrirDocumento = { documento -> estado.documentoGuardado(poliza, documento)?.let { abrirPdf(contexto, Uri.parse(it)) } },
         ),
     )
 }
 
 /** Detalle de una póliza (F2): credencial con QR, coberturas, vigencia y prima, y los documentos. */
 @Composable
-fun PolizaDetallePantalla(estado: PolizasUiState, poliza: PolizaResponse, acciones: PolizaDetalleAcciones) {
+fun PolizaDetallePantalla(
+    estado: PolizasUiState,
+    poliza: PolizaResponse,
+    acciones: PolizaDetalleAcciones,
+    documentosDisponibles: Set<DocumentoPoliza> = emptySet(),
+) {
     val locale = LocalConfiguration.current.locales[0]
     val situacion = estado.estadoDe(poliza)
     val producto = Catalogo.porId(poliza.producto)?.let { stringResource(it.nombre) } ?: poliza.producto
@@ -144,19 +172,28 @@ fun PolizaDetallePantalla(estado: PolizasUiState, poliza: PolizaResponse, accion
             modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            if (estado.sinConexion) AvisoCopia(estado.sincronizadoEn)
             Credencial(estado, poliza, situacion, acciones)
-            if (situacion == EstadoPoliza.PENDIENTE_FIRMA) FirmaPendiente(poliza, acciones)
+            if (situacion == EstadoPoliza.PENDIENTE_FIRMA) FirmaPendiente(poliza, acciones, estado.sinConexion)
             Coberturas(poliza, locale)
+            val vigencia = stringResource(R.string.polizas_vigencia) to
+                "${FormatoPolizas.fecha(poliza.vigenciaDesde, locale)} – ${FormatoPolizas.fecha(poliza.fechaVencimiento, locale)}"
             ListaDetalle(
                 titulo = stringResource(R.string.polizas_vigencia),
-                filas = listOf(
-                    stringResource(R.string.polizas_vigencia) to
-                        "${FormatoPolizas.fecha(poliza.vigenciaDesde, locale)} – ${FormatoPolizas.fecha(poliza.fechaVencimiento, locale)}",
-                    stringResource(R.string.polizas_prima_anual) to FormatoCotizacion.moneda(poliza.primaAnual, poliza.moneda, locale),
-                    stringResource(R.string.polizas_prima_mensual) to FormatoCotizacion.moneda(poliza.primaMensual, poliza.moneda, locale),
-                ),
+                // La copia sin conexión no guarda la prima (HU36, criterio 7): sin red solo se muestra la vigencia.
+                filas = if (estado.sinConexion) {
+                    listOf(vigencia)
+                } else {
+                    listOf(
+                        vigencia,
+                        stringResource(R.string.polizas_prima_anual) to FormatoCotizacion.moneda(poliza.primaAnual, poliza.moneda, locale),
+                        stringResource(R.string.polizas_prima_mensual) to FormatoCotizacion.moneda(poliza.primaMensual, poliza.moneda, locale),
+                    )
+                },
             )
-            if (situacion.tieneDocumentos) Documentos(estado, nombreArchivo, acciones)
+            if (situacion.tieneDocumentos) {
+                if (estado.sinConexion) DocumentosSinConexion(documentosDisponibles, acciones) else Documentos(estado, nombreArchivo, acciones)
+            }
         }
     }
 }
@@ -187,6 +224,13 @@ private fun Credencial(estado: PolizasUiState, poliza: PolizaResponse, situacion
                             modifier = Modifier.padding(top = 8.dp),
                         )
                     }
+
+                    EnlaceQr.RequiereConexion -> Text(
+                        stringResource(R.string.polizas_qr_requiere_conexion),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.testTag("qr_requiere_conexion"),
+                    )
 
                     EnlaceQr.Fallido -> Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.testTag("qr_error")) {
                         Text(stringResource(R.string.polizas_qr_error), style = MaterialTheme.typography.bodyMedium)
@@ -231,14 +275,22 @@ private fun QrCredencial(contenido: String, descripcion: String) {
 }
 
 @Composable
-private fun FirmaPendiente(poliza: PolizaResponse, acciones: PolizaDetalleAcciones) = Tarjeta(modifier = Modifier.testTag("firma_pendiente")) {
+private fun FirmaPendiente(poliza: PolizaResponse, acciones: PolizaDetalleAcciones, sinConexion: Boolean) = Tarjeta(
+    modifier = Modifier.testTag("firma_pendiente"),
+) {
     Text(stringResource(R.string.polizas_firma_pendiente_titulo), style = MaterialTheme.typography.titleMedium)
     Text(
         stringResource(R.string.polizas_firma_pendiente_mensaje),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    BotonPrimario(stringResource(R.string.polizas_retomar_firma), onClick = { acciones.retomarFirma(poliza) }, modifier = Modifier.testTag("retomar_firma"))
+    BotonPrimario(
+        stringResource(R.string.polizas_retomar_firma),
+        onClick = { acciones.retomarFirma(poliza) },
+        modifier = Modifier.testTag("retomar_firma"),
+        habilitado = !sinConexion,
+    )
+    if (sinConexion) RequiereConexion()
 }
 
 @Composable
@@ -308,6 +360,43 @@ private fun Documentos(estado: PolizasUiState, nombreArchivo: String, acciones: 
             modifier = Modifier.testTag("descargar_certificado"),
         )
         Estado(estado.descarga, nombreArchivo, acciones)
+    }
+}
+
+/**
+ * Documentos sin conexión (HU36, criterio 2): se abre el que el cliente descargó antes y sigue donde lo dejó; del resto se
+ * explica que hay que descargarlo con conexión.
+ */
+@Composable
+private fun DocumentosSinConexion(disponibles: Set<DocumentoPoliza>, acciones: PolizaDetalleAcciones) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag("documentos")) {
+        Text(
+            stringResource(R.string.polizas_documentos),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.semantics { heading() },
+        )
+        DocumentoPoliza.entries.forEach { documento ->
+            val etiqueta = documento.name.lowercase()
+            val firmada = documento == DocumentoPoliza.POLIZA_FIRMADA
+            if (documento in disponibles) {
+                BotonTonal(
+                    stringResource(if (firmada) R.string.polizas_abrir_firmada else R.string.polizas_abrir_certificado),
+                    onClick = { acciones.abrirDocumento(documento) },
+                    modifier = Modifier.testTag("abrir_$etiqueta"),
+                )
+            } else {
+                Text(
+                    stringResource(
+                        R.string.polizas_documento_sin_descargar,
+                        stringResource(if (firmada) R.string.polizas_doc_firmada else R.string.polizas_doc_certificado),
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.testTag("sin_descargar_$etiqueta"),
+                )
+            }
+        }
     }
 }
 

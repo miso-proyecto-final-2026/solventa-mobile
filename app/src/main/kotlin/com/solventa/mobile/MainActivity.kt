@@ -24,6 +24,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +34,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.solventa.mobile.biometria.BiometriaViewModel
 import com.solventa.mobile.biometria.ClaveBiometricaKeystore
@@ -61,6 +65,7 @@ import com.solventa.mobile.cotizacion.CotizacionViewModel
 import com.solventa.mobile.firma.FirmaRoute
 import com.solventa.mobile.firma.FirmaViewModel
 import com.solventa.mobile.red.CotizacionResponse
+import com.solventa.mobile.red.conexionDisponible
 import com.solventa.mobile.privacidad.PrivacidadRoute
 import com.solventa.mobile.privacidad.PrivacidadViewModel
 import com.solventa.mobile.navegacion.BarraPrincipal
@@ -68,6 +73,7 @@ import com.solventa.mobile.navegacion.Paso
 import com.solventa.mobile.navegacion.Seccion
 import com.solventa.mobile.navegacion.atras
 import com.solventa.mobile.navegacion.conBarra
+import com.solventa.mobile.polizas.AlmacenPolizas
 import com.solventa.mobile.polizas.PolizaDetalleRoute
 import com.solventa.mobile.polizas.PolizasRoute
 import com.solventa.mobile.polizas.PolizasViewModel
@@ -80,6 +86,8 @@ import com.solventa.mobile.resultado.ResultadoRoute
 import com.solventa.mobile.resultado.ResultadoViewModel
 import com.solventa.mobile.sesion.AlmacenSesion
 import com.solventa.mobile.sesion.SesionActual
+import com.solventa.mobile.ui.componentes.AvisoAdvertencia
+import com.solventa.mobile.ui.iconos.Iconos
 import com.solventa.mobile.ui.tema.SolventaTheme
 import com.solventa.mobile.verificacion.VerificacionRoute
 import com.solventa.mobile.verificacion.VerificacionViewModel
@@ -97,6 +105,9 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val almacen = AlmacenSesion.crear(this)
+        // Copia de «Mis pólizas» para verlas sin conexión (HU36).
+        val almacenPolizas = AlmacenPolizas.crear(this)
+        val redDisponible = conexionDisponible(applicationContext)
         val claveBiometrica = ClaveBiometricaKeystore()
         val vistaInvitacion = VistaInvitacion.crear(this)
         suscripcionDeNotificacion = intent?.getStringExtra(EXTRA_SUSCRIPCION)
@@ -127,6 +138,18 @@ class MainActivity : FragmentActivity() {
                     var emailInicioSesion by remember { mutableStateOf<String?>(null) }
                     var avisoInicioSesion by remember { mutableStateOf<Int?>(null) }
                     val alcance = rememberCoroutineScope()
+
+                    // Todo lo que la sesión deja en el teléfono (HU36, criterio 7): las credenciales y la copia de las pólizas.
+                    suspend fun borrarDatosDeSesion() {
+                        almacen.borrar()
+                        almacenPolizas.borrar()
+                    }
+
+                    /** Cierre de sesión único: por sesión vencida, por «usar contraseña» o con el botón de Perfil. */
+                    fun cerrarSesion() {
+                        SesionActual.cerrar()
+                        alcance.launch { borrarDatosDeSesion() }
+                    }
 
                     fun navegar(destino: Paso) {
                         visita++
@@ -214,7 +237,20 @@ class MainActivity : FragmentActivity() {
                         }
                     }
                     // «Mis pólizas» (HU35): una sola instancia para la lista y el detalle, propia de cada sesión.
-                    val polizasViewModel: PolizasViewModel = viewModel(key = "polizas-${SesionActual.clienteId}")
+                    val polizasViewModel: PolizasViewModel = viewModel(key = "polizas-${SesionActual.clienteId}") {
+                        PolizasViewModel(almacen = almacenPolizas)
+                    }
+                    // La copia sin conexión se sincroniza cada vez que la app pasa a primer plano con sesión, sin que el cliente
+                    // haga nada (HU36, criterio 4). Con el bloqueo biométrico, después de desbloquear.
+                    val clienteSesion = SesionActual.clienteId
+                    var hayCopiaPolizas by remember { mutableStateOf(false) }
+                    LaunchedEffect(clienteSesion) {
+                        if (clienteSesion == null) return@LaunchedEffect
+                        hayCopiaPolizas = almacenPolizas.leer(clienteSesion) != null
+                        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { polizasViewModel.sincronizar() }
+                    }
+                    // Sin conexión, la sección de seguros avisa que cotizar y comprar requieren Internet (HU36, criterio 3).
+                    val hayRed by redDisponible.collectAsState(initial = true)
                     // Tocar la notificación abre el detalle de esa póliza (HU35, criterio 7).
                     LaunchedEffect(suscripcionDeNotificacion, paso) {
                         val id = suscripcionDeNotificacion ?: return@LaunchedEffect
@@ -229,6 +265,15 @@ class MainActivity : FragmentActivity() {
                     BackHandler(enabled = paso.atras != null) { paso.atras?.let(::navegar) }
 
                     Scaffold(
+                        topBar = {
+                            if (paso.seccion == Seccion.SEGUROS && !hayRed) {
+                                AvisoAdvertencia(
+                                    texto = stringResource(R.string.seguros_requiere_conexion),
+                                    icono = Iconos.Informacion,
+                                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp).testTag("aviso_seguros_sin_conexion"),
+                                )
+                            }
+                        },
                         bottomBar = {
                             paso.seccion?.let { seccion ->
                                 BarraPrincipal(seleccion = seccion) { elegida ->
@@ -305,7 +350,7 @@ class MainActivity : FragmentActivity() {
                                             SesionActual.cerrar()
                                             credencialesBloqueadas = null
                                             alcance.launch {
-                                                almacen.borrar()
+                                                borrarDatosDeSesion()
                                                 // Si cambiaron las biometrías, tras entrar se vuelve a invitar a activar el acceso.
                                                 if (cambio && clienteId != null) vistaInvitacion.desmarcar(clienteId)
                                             }
@@ -335,7 +380,7 @@ class MainActivity : FragmentActivity() {
                                     val viewModel: ResultadoViewModel = viewModel(key = "resultado-$visita") {
                                         ResultadoViewModel(alPerderSesion = {
                                             SesionActual.cerrar()
-                                            almacen.borrar()
+                                            borrarDatosDeSesion()
                                         })
                                     }
                                     ResultadoRoute(
@@ -358,6 +403,7 @@ class MainActivity : FragmentActivity() {
                                         },
                                         // En revisión o sin intentos: el usuario sale y al volver ve el estado vigente.
                                         onSalir = { finish() },
+                                        onVerPolizasGuardadas = if (hayCopiaPolizas) ({ navegar(Paso.POLIZAS) }) else null,
                                     )
                                 }
 
@@ -371,8 +417,7 @@ class MainActivity : FragmentActivity() {
                                             navegar(Paso.CONSENTIMIENTO)
                                         },
                                         onSesionVencida = {
-                                            SesionActual.cerrar()
-                                            alcance.launch { almacen.borrar() }
+                                            cerrarSesion()
                                             navegar(Paso.INICIO_SESION)
                                         },
                                         onAceptarOferta = {
@@ -402,8 +447,7 @@ class MainActivity : FragmentActivity() {
                                                 navegar(Paso.FIRMA)
                                             },
                                             onSesionVencida = {
-                                                SesionActual.cerrar()
-                                                alcance.launch { almacen.borrar() }
+                                                cerrarSesion()
                                                 navegar(Paso.INICIO_SESION)
                                             },
                                         )
@@ -428,8 +472,7 @@ class MainActivity : FragmentActivity() {
                                             onCotizarDeNuevo = { visitaSeguros++; navegar(Paso.INICIO) },
                                             onVolver = { navegar(Paso.INICIO) },
                                             onSesionVencida = {
-                                                SesionActual.cerrar()
-                                                alcance.launch { almacen.borrar() }
+                                                cerrarSesion()
                                                 navegar(Paso.INICIO_SESION)
                                             },
                                         )
@@ -445,8 +488,7 @@ class MainActivity : FragmentActivity() {
                                         navegar(Paso.FIRMA)
                                     },
                                     onSesionVencida = {
-                                        SesionActual.cerrar()
-                                        alcance.launch { almacen.borrar() }
+                                        cerrarSesion()
                                         navegar(Paso.INICIO_SESION)
                                     },
                                 )
@@ -459,8 +501,7 @@ class MainActivity : FragmentActivity() {
                                         navegar(Paso.FIRMA)
                                     },
                                     onSesionVencida = {
-                                        SesionActual.cerrar()
-                                        alcance.launch { almacen.borrar() }
+                                        cerrarSesion()
                                         navegar(Paso.INICIO_SESION)
                                     },
                                 )
@@ -475,11 +516,16 @@ class MainActivity : FragmentActivity() {
                                             navegar(Paso.CONSENTIMIENTO)
                                         },
                                         onSesionVencida = {
-                                            SesionActual.cerrar()
-                                            alcance.launch { almacen.borrar() }
+                                            cerrarSesion()
                                             navegar(Paso.INICIO_SESION)
                                         },
                                         onSeguridad = { navegar(Paso.SEGURIDAD) },
+                                        onCerrarSesion = {
+                                            cerrarSesion()
+                                            navegar(Paso.INICIO_SESION)
+                                        },
+                                        // Revocar borra la copia una vez; la próxima sincronización con conexión la vuelve a crear.
+                                        onConsentimientoRevocado = { alcance.launch { almacenPolizas.borrar() } },
                                     )
                                 }
 
@@ -514,8 +560,7 @@ class MainActivity : FragmentActivity() {
                                         viewModel = viewModel,
                                         onAtras = { navegar(Paso.PERFIL) },
                                         onSesionVencida = {
-                                            SesionActual.cerrar()
-                                            alcance.launch { almacen.borrar() }
+                                            cerrarSesion()
                                             navegar(Paso.INICIO_SESION)
                                         },
                                     )

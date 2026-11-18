@@ -74,6 +74,7 @@ class AvisosAndroid(private val contexto: Context) : AvisosSistema {
         val intent = Intent(contexto, MainActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             .putExtra(MainActivity.EXTRA_SUSCRIPCION, notificacion.suscripcionId)
+            .putExtra(MainActivity.EXTRA_POLIZA, notificacion.polizaId)
         return PendingIntent.getActivity(
             contexto, notificacion.id.hashCode(), intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )

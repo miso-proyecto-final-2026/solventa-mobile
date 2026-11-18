@@ -267,6 +267,29 @@ class PolizasViewModelTest {
     }
 
     @Test
+    fun `la notificacion de una indemnizacion pagada abre la poliza por su id aunque la lista aun no haya llegado`() = runTest(dispatcher) {
+        billetera(vigente, proxima)
+        enlace()
+        val vm = viewModel()
+
+        vm.abrirPorPoliza("p-s2")
+        assertNull(vm.uiState.value.seleccionada)
+        advanceUntilIdle()
+
+        assertEquals("p-s2", vm.uiState.value.seleccionada?.id)
+    }
+
+    @Test
+    fun `la notificacion de una indemnizacion de una poliza ajena no abre nada`() = runTest(dispatcher) {
+        billetera(vigente)
+        val vm = viewModel()
+        vm.abrirPorPoliza("p-ajena")
+        advanceUntilIdle()
+
+        assertNull(vm.uiState.value.seleccionada)
+    }
+
+    @Test
     fun `una notificacion de una poliza que no esta en la lista no abre nada ni se queda pendiente`() = runTest(dispatcher) {
         billetera(vigente)
         val vm = viewModel()

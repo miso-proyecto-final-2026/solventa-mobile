@@ -346,7 +346,7 @@
 
     <!-- Certificate and notifications (HU22) -->
     <string name="notificaciones_canal_nombre">Your policy</string>
-    <string name="notificaciones_canal_descripcion">Alerts that your policy is now active.</string>
+    <string name="notificaciones_canal_descripcion">Alerts that your policy is now active and that your indemnity was paid.</string>
     <string name="certificado_titulo">Your coverage is active</string>
     <string name="certificado_mensaje">Your policy is signed and active. We also emailed you the certificate.</string>
     <string name="certificado_encabezado">CERTIFICATE OF COVERAGE</string>

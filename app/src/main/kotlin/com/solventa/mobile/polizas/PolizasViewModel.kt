@@ -34,8 +34,8 @@ class PolizasViewModel @JvmOverloads constructor(
     private var enlace: Job? = null
     private var descargando: Job? = null
 
-    /** Suscripción cuyo detalle se pidió antes de que llegara la lista (por ejemplo, desde una notificación). */
-    private var pendienteDeAbrir: String? = null
+    /** Póliza cuyo detalle se pidió antes de que llegara la lista (por ejemplo, desde una notificación). */
+    private var pendienteDeAbrir: ((PolizaResponse) -> Boolean)? = null
     private var iniciado = false
 
     /**
@@ -59,9 +59,9 @@ class PolizasViewModel @JvmOverloads constructor(
             when (val resultado = repository.billetera()) {
                 is PolizasRepository.Resultado.Exito -> {
                     _uiState.update { it.copy(fase = FasePolizas.LISTA, polizas = resultado.valor, ahora = reloj(), error = null) }
-                    pendienteDeAbrir?.let { id ->
+                    pendienteDeAbrir?.let { esLaPedida ->
                         pendienteDeAbrir = null
-                        abrirPorSuscripcion(id)
+                        abrirLaQue(esLaPedida)
                     }
                 }
 
@@ -78,13 +78,18 @@ class PolizasViewModel @JvmOverloads constructor(
     fun elegirFiltro(filtro: FiltroPolizas) = _uiState.update { it.copy(filtro = filtro) }
 
     /** Abre el detalle de la póliza de una suscripción; si la lista aún no llegó, lo hace cuando llegue. */
-    fun abrirPorSuscripcion(suscripcionId: String) {
-        val poliza = _uiState.value.polizas.firstOrNull { it.suscripcionId == suscripcionId }
+    fun abrirPorSuscripcion(suscripcionId: String) = abrirLaQue { it.suscripcionId == suscripcionId }
+
+    /** Abre el detalle de una póliza por su id: lo que trae la notificación de una indemnización pagada (HU30). */
+    fun abrirPorPoliza(polizaId: String) = abrirLaQue { it.id == polizaId }
+
+    private fun abrirLaQue(esLaPedida: (PolizaResponse) -> Boolean) {
+        val poliza = _uiState.value.polizas.firstOrNull(esLaPedida)
         if (poliza != null) {
             abrir(poliza)
         } else if (_uiState.value.fase != FasePolizas.LISTA) {
             // La lista aún no llegó (o falló): se abre cuando llegue. Si ya llegó y la póliza no está, no hay nada que abrir.
-            pendienteDeAbrir = suscripcionId
+            pendienteDeAbrir = esLaPedida
             if (_uiState.value.fase == FasePolizas.ERROR) recargar() else iniciar()
         }
     }

@@ -8,6 +8,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Respuestas con la forma real de MS Notificaciones y MS Suscripción (HU22): la app las entiende y tolera lo que no conoce. */
@@ -27,6 +29,20 @@ class ContratoNotificacionesTest {
         assertEquals("Solventa", n.tituloPublico)
         assertEquals("Tienes una notificación nueva.", n.textoPublico)
         assertFalse(n.recibida)
+    }
+
+    @Test
+    fun `la indemnizacion pagada trae la poliza, no la suscripcion, y su version publica no lleva el monto`() {
+        val (n) = json.decodeFromString<List<NotificacionResponse>>(cargar("notificacion_indemnizacion.json"))
+
+        assertEquals("Indemnización pagada", n.titulo)
+        assertEquals("ALTA", n.prioridad)
+        assertEquals("90d7708a-1f26-4e2e-9c2d-722dca46c475", n.polizaId)
+        assertNull(n.suscripcionId)
+        assertTrue(n.texto.contains("1.500.000"))
+        for (texto in listOf(n.tituloPublico, n.textoPublico)) {
+            assertFalse(texto, texto.any(Char::isDigit))
+        }
     }
 
     @Test

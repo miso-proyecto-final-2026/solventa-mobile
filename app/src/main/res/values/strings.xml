@@ -346,7 +346,7 @@
 
     <!-- Certificado y notificaciones (HU22) -->
     <string name="notificaciones_canal_nombre">Tu póliza</string>
-    <string name="notificaciones_canal_descripcion">Avisos de que tu póliza quedó activa.</string>
+    <string name="notificaciones_canal_descripcion">Avisos de que tu póliza quedó activa y de que se pagó tu indemnización.</string>
     <string name="certificado_titulo">Tu cobertura está activa</string>
     <string name="certificado_mensaje">Tu póliza quedó firmada y activa. También te enviamos el certificado por correo.</string>
     <string name="certificado_encabezado">CERTIFICADO DE COBERTURA</string>

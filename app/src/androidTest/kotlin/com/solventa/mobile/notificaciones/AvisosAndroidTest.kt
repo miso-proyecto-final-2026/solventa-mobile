@@ -71,6 +71,26 @@ class AvisosAndroidTest {
     }
 
     @Test
+    fun elPagoDeUnaIndemnizacionSeMuestraConPrioridadAltaYSinElMontoEnLaVersionPublica() {
+        val avisos = AvisosAndroid(contexto)
+        assumeTrue("las notificaciones están desactivadas en este dispositivo", avisos.puedeMostrar())
+        val pago = notificacion.copy(
+            id = "prueba-hu30", tipo = "INDEMNIZACION_PAGADA", titulo = "Indemnización pagada",
+            texto = "Te pagamos \$ 1.500.000 COP de tu indemnización. Toca para ver tu póliza.",
+            suscripcionId = null, polizaId = "p1",
+        )
+
+        avisos.mostrar(pago)
+
+        val publicada = manager.activeNotifications.single { it.id == pago.id.hashCode() }.notification
+        assertEquals("Indemnización pagada", publicada.extras.getString(Notification.EXTRA_TITLE))
+        assertEquals(Notification.PRIORITY_HIGH, publicada.priority)
+        val publica = checkNotNull(publicada.publicVersion)
+        assertTrue(publica.extras.getString(Notification.EXTRA_TEXT)!!.none(Char::isDigit))
+        assertNotNull(publicada.contentIntent)
+    }
+
+    @Test
     fun mostrarDosVecesLaMismaNotificacionLaReemplazaEnVezDeDuplicarla() {
         val avisos = AvisosAndroid(contexto)
         assumeTrue(avisos.puedeMostrar())

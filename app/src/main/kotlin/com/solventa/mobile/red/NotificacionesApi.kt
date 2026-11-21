@@ -37,9 +37,11 @@ data class NotificacionResponse(
     @SerialName("texto_publico") val textoPublico: String,
     val prioridad: String = "NORMAL",
     val idioma: String = "es-CO",
-    @SerialName("suscripcion_id") val suscripcionId: String,
+    // La emisión de una póliza trae la suscripción; el pago de una indemnización, la póliza (HU30).
+    @SerialName("suscripcion_id") val suscripcionId: String? = null,
     @SerialName("creada_en") val creadaEn: String,
     val recibida: Boolean = false,
+    @SerialName("poliza_id") val polizaId: String? = null,
 )
 
 interface NotificacionesApi {

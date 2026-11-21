@@ -96,10 +96,13 @@ import kotlinx.coroutines.launch
 class MainActivity : FragmentActivity() {
     // Póliza cuyo certificado debe abrirse porque el cliente tocó la notificación (HU22). Lo recoge la composición.
     private var suscripcionDeNotificacion by mutableStateOf<String?>(null)
+    // Lo mismo para el pago de una indemnización (HU30): trae la póliza, no la suscripción.
+    private var polizaDeNotificacion by mutableStateOf<String?>(null)
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         suscripcionDeNotificacion = intent.getStringExtra(EXTRA_SUSCRIPCION)
+        polizaDeNotificacion = intent.getStringExtra(EXTRA_POLIZA)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,6 +114,7 @@ class MainActivity : FragmentActivity() {
         val claveBiometrica = ClaveBiometricaKeystore()
         val vistaInvitacion = VistaInvitacion.crear(this)
         suscripcionDeNotificacion = intent?.getStringExtra(EXTRA_SUSCRIPCION)
+        polizaDeNotificacion = intent?.getStringExtra(EXTRA_POLIZA)
         val avisos = AvisosAndroid(this)
         val sondeador = SondeadorNotificaciones(NotificacionesRepository(), avisos, IdentificadorDispositivoPreferencias(this))
         setContent {
@@ -257,6 +261,15 @@ class MainActivity : FragmentActivity() {
                         suscripcionDeNotificacion = null
                         if (SesionActual.activa) {
                             polizasViewModel.abrirPorSuscripcion(id)
+                            navegar(Paso.POLIZA_DETALLE)
+                        }
+                    }
+
+                    LaunchedEffect(polizaDeNotificacion, paso) {
+                        val id = polizaDeNotificacion ?: return@LaunchedEffect
+                        polizaDeNotificacion = null
+                        if (SesionActual.activa) {
+                            polizasViewModel.abrirPorPoliza(id)
                             navegar(Paso.POLIZA_DETALLE)
                         }
                     }
@@ -576,6 +589,7 @@ class MainActivity : FragmentActivity() {
     companion object {
         /** Identificador de la suscripción cuyo certificado abre la notificación (HU22). */
         const val EXTRA_SUSCRIPCION = "suscripcion_id"
+        const val EXTRA_POLIZA = "poliza_id"
 
         /** Cada cuánto se consulta la bandeja mientras la app está visible. */
         private const val INTERVALO_SONDEO_MS = 10_000L

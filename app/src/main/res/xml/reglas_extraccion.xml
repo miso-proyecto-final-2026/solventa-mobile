@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Respaldo en la nube y traspaso a otro teléfono en Android 12 o superior: la copia de las pólizas sin conexión (HU36)
+    no sale del teléfono. Aunque saliera, va cifrada con una clave del Keystore que no viaja y se descartaría al leerla.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="datastore/polizas_sin_conexion.preferences_pb" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="datastore/polizas_sin_conexion.preferences_pb" />
+    </device-transfer>
+</data-extraction-rules>

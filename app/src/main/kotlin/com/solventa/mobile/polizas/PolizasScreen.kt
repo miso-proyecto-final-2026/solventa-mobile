@@ -34,7 +34,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.solventa.mobile.R
 import com.solventa.mobile.cotizacion.Catalogo
+import com.solventa.mobile.privacidad.FormatoFecha
 import com.solventa.mobile.red.PolizaResponse
+import com.solventa.mobile.ui.componentes.AvisoAdvertencia
 import com.solventa.mobile.ui.componentes.BotonPrimario
 import com.solventa.mobile.ui.componentes.BotonSecundario
 import com.solventa.mobile.ui.componentes.ChipEstado
@@ -42,6 +44,7 @@ import com.solventa.mobile.ui.componentes.FormaChipSeleccion
 import com.solventa.mobile.ui.componentes.Tarjeta
 import com.solventa.mobile.ui.componentes.TipoEstado
 import com.solventa.mobile.ui.iconos.Iconos
+import java.time.Instant
 
 /** Lo que la lista puede pedirle al flujo; separado del ViewModel para probar la pantalla con estados fijos. */
 data class PolizasAcciones(
@@ -87,7 +90,10 @@ fun PolizasPantalla(estado: PolizasUiState, acciones: PolizasAcciones) {
         when (estado.fase) {
             FasePolizas.CARGANDO -> Cargando()
             FasePolizas.ERROR -> Fallo(estado.error, acciones.reintentar)
-            FasePolizas.LISTA -> if (!estado.hayPolizas) VacioTotal(acciones.cotizar) else Lista(estado, acciones)
+            FasePolizas.LISTA -> {
+                if (estado.sinConexion) AvisoCopia(estado.sincronizadoEn, Modifier.padding(start = 24.dp, end = 24.dp, bottom = 12.dp))
+                if (!estado.hayPolizas) VacioTotal(acciones.cotizar, estado.sinConexion) else Lista(estado, acciones)
+            }
         }
     }
 }
@@ -120,9 +126,9 @@ private fun Fallo(error: ErrorPolizas?, reintentar: () -> Unit) = Column(
     BotonPrimario(stringResource(R.string.polizas_reintentar), onClick = reintentar, modifier = Modifier.testTag("polizas_reintentar"))
 }
 
-/** El cliente aún no tiene ninguna póliza (criterio 5): estado vacío con acceso a cotizar. */
+/** El cliente aún no tiene ninguna póliza (criterio 5): estado vacío con acceso a cotizar, que sin conexión no se puede (HU36, criterio 3). */
 @Composable
-private fun VacioTotal(cotizar: () -> Unit) = Column(
+private fun VacioTotal(cotizar: () -> Unit, sinConexion: Boolean) = Column(
     modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp).testTag("polizas_vacio"),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
@@ -135,7 +141,8 @@ private fun VacioTotal(cotizar: () -> Unit) = Column(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
     )
-    BotonPrimario(stringResource(R.string.polizas_cotizar), onClick = cotizar, modifier = Modifier.testTag("polizas_cotizar"))
+    BotonPrimario(stringResource(R.string.polizas_cotizar), onClick = cotizar, modifier = Modifier.testTag("polizas_cotizar"), habilitado = !sinConexion)
+    if (sinConexion) RequiereConexion()
 }
 
 @Composable
@@ -171,14 +178,14 @@ private fun Lista(estado: PolizasUiState, acciones: PolizasAcciones) {
                 modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                visibles.forEach { poliza -> TarjetaPoliza(poliza, estado.estadoDe(poliza), acciones) }
+                visibles.forEach { poliza -> TarjetaPoliza(poliza, estado.estadoDe(poliza), acciones, estado.sinConexion) }
             }
         }
     }
 }
 
 @Composable
-private fun TarjetaPoliza(poliza: PolizaResponse, estado: EstadoPoliza, acciones: PolizasAcciones) {
+private fun TarjetaPoliza(poliza: PolizaResponse, estado: EstadoPoliza, acciones: PolizasAcciones, sinConexion: Boolean) {
     val locale = LocalConfiguration.current.locales[0]
     val producto = Catalogo.porId(poliza.producto)?.let { stringResource(it.nombre) } ?: poliza.producto
     val estadoTexto = stringResource(estado.etiqueta)
@@ -230,10 +237,40 @@ private fun TarjetaPoliza(poliza: PolizaResponse, estado: EstadoPoliza, acciones
                 stringResource(R.string.polizas_retomar_firma),
                 onClick = { acciones.retomarFirma(poliza) },
                 modifier = Modifier.testTag("retomar_${poliza.suscripcionId}"),
+                habilitado = !sinConexion,
             )
+            if (sinConexion) RequiereConexion()
         }
     }
 }
+
+/**
+ * Aviso de que lo que se ve es la copia guardada y de cuándo se sincronizó por última vez (HU36, criterio 5). El lector de
+ * pantalla lo anuncia al aparecer.
+ */
+@Composable
+internal fun AvisoCopia(sincronizadoEn: Instant?, modifier: Modifier = Modifier) {
+    val locale = LocalConfiguration.current.locales[0]
+    val texto = buildString {
+        append(stringResource(R.string.polizas_copia_aviso))
+        sincronizadoEn?.let { append(' ').append(stringResource(R.string.polizas_copia_sincronizado, FormatoFecha.fechaHora(it.toString(), locale))) }
+    }
+    AvisoAdvertencia(
+        texto = texto,
+        icono = Iconos.Informacion,
+        // Un solo nodo: el lector de pantalla lee el aviso y la fecha juntos.
+        modifier = modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }.testTag("aviso_copia"),
+    )
+}
+
+/** Lo que no se puede hacer sin conexión lo dice en texto, no solo con el botón deshabilitado (HU36, criterio 3). */
+@Composable
+internal fun RequiereConexion(modifier: Modifier = Modifier) = Text(
+    stringResource(R.string.polizas_requiere_conexion),
+    style = MaterialTheme.typography.bodySmall,
+    color = MaterialTheme.colorScheme.onSurfaceVariant,
+    modifier = modifier.testTag("requiere_conexion"),
+)
 
 /** La línea de la tarjeta: solo la vigencia (hasta cuándo vale o cuándo venció), o qué pasó si no hay póliza vigente (firma pendiente, cobro devuelto). */
 @Composable

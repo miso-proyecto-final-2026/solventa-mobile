@@ -18,11 +18,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -37,6 +42,7 @@ import com.solventa.mobile.ui.componentes.BarraSuperior
 import com.solventa.mobile.ui.componentes.BotonDestructivo
 import com.solventa.mobile.ui.componentes.BotonDestructivoContorno
 import com.solventa.mobile.ui.componentes.BotonPrimario
+import com.solventa.mobile.ui.componentes.BotonSecundario
 import com.solventa.mobile.ui.componentes.BotonTonal
 import com.solventa.mobile.ui.componentes.ChipEstado
 import com.solventa.mobile.ui.componentes.Tarjeta
@@ -53,6 +59,8 @@ data class PrivacidadAcciones(
     val compartirDatos: () -> Unit = {},
     val sesionVencida: () -> Unit = {},
     val irASeguridad: (() -> Unit)? = null,
+    /** «Cerrar sesión» al final de Perfil (HU36, criterio 7); `null` lo oculta. */
+    val cerrarSesion: (() -> Unit)? = null,
 )
 
 @Composable
@@ -61,8 +69,12 @@ fun PrivacidadRoute(
     onCompartirDatos: () -> Unit,
     onSesionVencida: () -> Unit,
     onSeguridad: (() -> Unit)? = null,
+    onCerrarSesion: (() -> Unit)? = null,
+    /** El servidor confirmó la revocación: la app borra la copia de las pólizas sin conexión (HU36, criterio 7). */
+    onConsentimientoRevocado: () -> Unit = {},
 ) {
     val estado by viewModel.uiState.collectAsState()
+    LaunchedEffect(estado.recienRevocado) { if (estado.recienRevocado) onConsentimientoRevocado() }
     PrivacidadScreen(
         estado = estado,
         acciones = PrivacidadAcciones(
@@ -73,6 +85,7 @@ fun PrivacidadRoute(
             compartirDatos = onCompartirDatos,
             sesionVencida = onSesionVencida,
             irASeguridad = onSeguridad,
+            cerrarSesion = onCerrarSesion,
         ),
     )
 }
@@ -104,6 +117,7 @@ fun PrivacidadScreen(estado: PrivacidadUiState, acciones: PrivacidadAcciones) {
             }
             // Seguridad (HU04): no depende de que el consentimiento haya cargado.
             acciones.irASeguridad?.let { EntradaSeguridad(it) }
+            acciones.cerrarSesion?.let { CerrarSesion(it) }
         }
     }
     if (estado.fase == FasePrivacidad.CONFIRMANDO) Confirmacion(acciones)
@@ -252,6 +266,46 @@ private fun Confirmacion(acciones: PrivacidadAcciones) {
         dismissButton = {
             TextButton(onClick = acciones.cancelar, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.privacidad_confirmar_no), style = MaterialTheme.typography.labelLarge)
+            }
+        },
+    )
+}
+
+/** «Cerrar sesión» con confirmación: dice qué se borra del teléfono (la sesión y la copia de las pólizas, HU36). */
+@Composable
+private fun CerrarSesion(cerrarSesion: () -> Unit) {
+    var confirmando by rememberSaveable { mutableStateOf(false) }
+    BotonSecundario(
+        stringResource(R.string.perfil_cerrar_sesion),
+        onClick = { confirmando = true },
+        modifier = Modifier.testTag("cerrar_sesion"),
+    )
+    if (!confirmando) return
+    AlertDialog(
+        onDismissRequest = { confirmando = false },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        title = { Text(stringResource(R.string.perfil_cerrar_sesion_titulo)) },
+        text = {
+            Text(
+                stringResource(R.string.perfil_cerrar_sesion_texto),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            )
+        },
+        confirmButton = {
+            BotonPrimario(
+                stringResource(R.string.perfil_cerrar_sesion),
+                onClick = {
+                    confirmando = false
+                    cerrarSesion()
+                },
+                modifier = Modifier.testTag("confirmar_cerrar_sesion"),
+            )
+        },
+        dismissButton = {
+            TextButton(onClick = { confirmando = false }, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.perfil_cerrar_sesion_no), style = MaterialTheme.typography.labelLarge)
             }
         },
     )

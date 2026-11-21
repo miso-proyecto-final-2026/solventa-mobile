@@ -12,6 +12,7 @@ import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -240,5 +241,31 @@ class PrivacidadScreenTest(private val idioma: String) {
         mostrar(estado())
 
         composeTestRule.onNodeWithText(texto(R.string.privacidad_revocar)).assertHeightIsAtLeast(48.dp)
+    }
+
+    // --- Cerrar sesión (HU36, criterio 7) -----------------------------------------------------------------------------
+
+    @Test
+    fun cerrar_sesion_pide_confirmacion_y_dice_que_se_borra_la_copia_de_las_polizas() {
+        var cierres = 0
+        mostrar(estado(), PrivacidadAcciones(cerrarSesion = { cierres++ }))
+
+        composeTestRule.onNodeWithText(texto(R.string.perfil_cerrar_sesion)).performScrollTo().performClick()
+        composeTestRule.onNodeWithText(texto(R.string.perfil_cerrar_sesion_texto)).assertIsDisplayed()
+        assertEquals(0, cierres)
+
+        composeTestRule.onNodeWithText(texto(R.string.perfil_cerrar_sesion_no)).performClick()
+        assertEquals(0, cierres)
+
+        composeTestRule.onNodeWithText(texto(R.string.perfil_cerrar_sesion)).performScrollTo().performClick()
+        composeTestRule.onNode(hasText(texto(R.string.perfil_cerrar_sesion)) and hasTestTag("confirmar_cerrar_sesion")).performClick()
+        assertEquals(1, cierres)
+    }
+
+    @Test
+    fun sin_accion_de_cerrar_sesion_no_se_muestra_el_boton() {
+        mostrar(estado())
+
+        composeTestRule.onAllNodesWithText(texto(R.string.perfil_cerrar_sesion)).assertCountEquals(0)
     }
 }

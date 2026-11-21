@@ -414,6 +414,20 @@
     <string name="polizas_firma_pendiente_mensaje">Ya recibimos tu pago. Firma la póliza para activar tu cobertura.</string>
     <string name="polizas_retomar_firma">Retomar firma</string>
     <string name="polizas_anulada_mensaje">La firma no se completó y el cobro se devolvió.</string>
+    <!-- Pólizas sin conexión (HU36) -->
+    <string name="polizas_copia_aviso">Sin conexión. Estás viendo la copia guardada en este teléfono.</string>
+    <string name="polizas_copia_sincronizado">Última sincronización: %1$s</string>
+    <string name="polizas_requiere_conexion">Requiere conexión a Internet.</string>
+    <string name="polizas_qr_requiere_conexion">El código QR necesita conexión. Mientras tanto, usa el número de la póliza.</string>
+    <string name="polizas_abrir_firmada">Abrir póliza firmada</string>
+    <string name="polizas_abrir_certificado">Abrir certificado</string>
+    <string name="polizas_documento_sin_descargar">%1$s: descárgalo cuando tengas conexión para verlo sin Internet.</string>
+    <string name="seguros_requiere_conexion">Sin conexión. Cotizar y comprar requieren Internet; tus pólizas guardadas siguen en «Pólizas».</string>
+    <string name="resultado_ver_polizas_guardadas">Ver mis pólizas guardadas</string>
+    <string name="perfil_cerrar_sesion">Cerrar sesión</string>
+    <string name="perfil_cerrar_sesion_titulo">¿Cerrar sesión?</string>
+    <string name="perfil_cerrar_sesion_texto">Borraremos de este teléfono tu sesión y la copia de tus pólizas. Para volver a entrar necesitarás tu correo y tu contraseña.</string>
+    <string name="perfil_cerrar_sesion_no">Cancelar</string>
 
     <!-- Acceso biométrico (HU04) -->
     <string name="perfil_seguridad_titulo">Seguridad</string>

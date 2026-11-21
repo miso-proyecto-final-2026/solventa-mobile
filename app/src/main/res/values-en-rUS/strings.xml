@@ -414,6 +414,20 @@
     <string name="polizas_firma_pendiente_mensaje">We received your payment. Sign the policy to activate your coverage.</string>
     <string name="polizas_retomar_firma">Resume signing</string>
     <string name="polizas_anulada_mensaje">The signature was not completed and the charge was refunded.</string>
+    <!-- Policies offline (HU36) -->
+    <string name="polizas_copia_aviso">You are offline. This is the copy saved on this phone.</string>
+    <string name="polizas_copia_sincronizado">Last synced: %1$s</string>
+    <string name="polizas_requiere_conexion">Requires an Internet connection.</string>
+    <string name="polizas_qr_requiere_conexion">The QR code needs a connection. Meanwhile, use the policy number.</string>
+    <string name="polizas_abrir_firmada">Open signed policy</string>
+    <string name="polizas_abrir_certificado">Open certificate</string>
+    <string name="polizas_documento_sin_descargar">%1$s: download it when you are online to see it without Internet.</string>
+    <string name="seguros_requiere_conexion">You are offline. Quoting and buying require Internet; your saved policies are still in “Policies”.</string>
+    <string name="resultado_ver_polizas_guardadas">See my saved policies</string>
+    <string name="perfil_cerrar_sesion">Log out</string>
+    <string name="perfil_cerrar_sesion_titulo">Log out?</string>
+    <string name="perfil_cerrar_sesion_texto">We will delete your session and the copy of your policies from this phone. To sign in again you will need your email and password.</string>
+    <string name="perfil_cerrar_sesion_no">Cancel</string>
 
     <!-- Biometric access (HU04) -->
     <string name="perfil_seguridad_titulo">Security</string>
